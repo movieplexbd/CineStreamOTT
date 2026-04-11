@@ -10,6 +10,7 @@ import com.ottapp.moviestream.data.model.DownloadedMovie
 import com.ottapp.moviestream.data.repository.DownloadRepository
 import com.ottapp.moviestream.util.Constants
 import kotlinx.coroutines.*
+import kotlin.coroutines.coroutineContext
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
