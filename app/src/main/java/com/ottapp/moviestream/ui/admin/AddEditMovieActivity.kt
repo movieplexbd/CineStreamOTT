@@ -2,6 +2,7 @@ package com.ottapp.moviestream.ui.admin
 
   import android.os.Bundle
   import android.view.View
+  import android.widget.ArrayAdapter
   import androidx.appcompat.app.AppCompatActivity
   import androidx.lifecycle.lifecycleScope
   import com.ottapp.moviestream.data.model.Movie
@@ -15,7 +16,8 @@ package com.ottapp.moviestream.ui.admin
       private lateinit var binding: ActivityAddEditMovieBinding
       private val repo = MovieRepository()
       private var movieId: String? = null
-      private var existingMovie: Movie? = null
+
+      private val categories = listOf("Bangla Dubbed", "Hindi Dubbed", "English")
 
       override fun onCreate(savedInstanceState: Bundle?) {
           super.onCreate(savedInstanceState)
@@ -24,6 +26,10 @@ package com.ottapp.moviestream.ui.admin
 
           setSupportActionBar(binding.toolbar)
           supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+          val spinnerAdapter = ArrayAdapter(this, android.R.layout.simple_spinner_item, categories)
+          spinnerAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+          binding.spinnerCategory.adapter = spinnerAdapter
 
           movieId = intent.getStringExtra("movie_id")
 
@@ -41,8 +47,8 @@ package com.ottapp.moviestream.ui.admin
           binding.progressBar.visibility = View.VISIBLE
           lifecycleScope.launch {
               try {
-                  existingMovie = repo.getMovieById(id)
-                  existingMovie?.let { populateForm(it) }
+                  val movie = repo.getMovieById(id)
+                  movie?.let { populateForm(it) }
               } catch (e: Exception) {
                   toast("লোড করতে সমস্যা হয়েছে")
               } finally {
@@ -59,12 +65,11 @@ package com.ottapp.moviestream.ui.admin
           binding.etDownloadUrl.setText(movie.downloadUrl)
           binding.etYear.setText(if (movie.year > 0) movie.year.toString() else "")
           binding.etDuration.setText(movie.duration)
-          binding.etRating.setText(movie.imdbRating.toString())
-          
-          val cats = listOf("Bangla Dubbed", "Hindi Dubbed", "English")
-          val idx  = cats.indexOf(movie.category)
+          binding.etRating.setText(if (movie.imdbRating > 0) movie.imdbRating.toString() else "")
+
+          val idx = categories.indexOf(movie.category)
           if (idx >= 0) binding.spinnerCategory.setSelection(idx)
-          
+
           binding.switchTrending.isChecked = movie.trending
           binding.switchFree.isChecked     = movie.testMovie
       }
@@ -75,26 +80,29 @@ package com.ottapp.moviestream.ui.admin
               binding.etTitle.error = "শিরোনাম দিন"
               return
           }
+          val videoUrl = binding.etVideoUrl.text.toString().trim()
+          if (videoUrl.isEmpty()) {
+              binding.etVideoUrl.error = "ভিডিও URL দিন"
+              return
+          }
 
-          val cats = listOf("Bangla Dubbed", "Hindi Dubbed", "English")
-          val category = cats.getOrElse(binding.spinnerCategory.selectedItemPosition) { "" }
-
-          val rating = binding.etRating.text.toString().toDoubleOrNull() ?: 0.0
-          val year   = binding.etYear.text.toString().toIntOrNull() ?: 0
+          val category = categories.getOrElse(binding.spinnerCategory.selectedItemPosition) { "" }
+          val rating   = binding.etRating.text.toString().toDoubleOrNull() ?: 0.0
+          val year     = binding.etYear.text.toString().toIntOrNull() ?: 0
 
           val movie = Movie(
-              id              = movieId ?: "",
-              title           = title,
-              description     = binding.etDescription.text.toString().trim(),
-              bannerImageUrl  = binding.etBannerUrl.text.toString().trim(),
-              videoStreamUrl  = binding.etVideoUrl.text.toString().trim(),
-              downloadUrl     = binding.etDownloadUrl.text.toString().trim(),
-              category        = category,
-              imdbRating      = rating,
-              year            = year,
-              duration        = binding.etDuration.text.toString().trim(),
-              trending        = binding.switchTrending.isChecked,
-              testMovie       = binding.switchFree.isChecked
+              id             = movieId ?: "",
+              title          = title,
+              description    = binding.etDescription.text.toString().trim(),
+              bannerImageUrl = binding.etBannerUrl.text.toString().trim(),
+              videoStreamUrl = videoUrl,
+              downloadUrl    = binding.etDownloadUrl.text.toString().trim(),
+              category       = category,
+              imdbRating     = rating,
+              year           = year,
+              duration       = binding.etDuration.text.toString().trim(),
+              trending       = binding.switchTrending.isChecked,
+              testMovie      = binding.switchFree.isChecked
           )
 
           binding.btnSave.isEnabled = false
