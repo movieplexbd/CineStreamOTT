@@ -68,8 +68,13 @@ class MoviesFragment : Fragment() {
     }
 
     private fun openDetail(movie: Movie) {
-        val bundle = bundleOf(Constants.EXTRA_MOVIE_ID to movie.id)
-        findNavController().navigate(R.id.action_movies_to_detail, bundle)
+        if (!isAdded || _binding == null) return
+        try {
+            val bundle = bundleOf(Constants.EXTRA_MOVIE_ID to movie.id)
+            findNavController().navigate(R.id.action_movies_to_detail, bundle)
+        } catch (e: Exception) {
+            // Prevent duplicate navigation crash
+        }
     }
 
     override fun onDestroyView() { _binding = null; super.onDestroyView() }
