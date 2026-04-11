@@ -28,6 +28,8 @@ class MoviesViewModel : ViewModel() {
                 val movies = repo.getAllMovies()
                 _allMovies.value = movies
                 applyFilter()
+            } catch (e: Exception) {
+                _filteredMovies.value = emptyList()
             } finally {
                 _loading.value = false
             }
@@ -44,7 +46,7 @@ class MoviesViewModel : ViewModel() {
         _filteredMovies.value = when (selectedCategory) {
             Constants.CAT_ALL      -> all
             Constants.CAT_TRENDING -> all.filter { it.trending }
-            else                   -> all.filter { it.category == selectedCategory }
+            else                   -> all.filter { it.category.orEmpty() == selectedCategory }
         }
     }
 }
