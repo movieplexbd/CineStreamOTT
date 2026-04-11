@@ -1,11 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/bg">
-
-    <!-- Search box -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="52dp"
@@ -14,14 +13,12 @@
         android:gravity="center_vertical"
         android:background="@drawable/bg_search_box"
         android:paddingHorizontal="14dp">
-
         <ImageView
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:src="@drawable/ic_search"
-            android:imageTintList="@color/t3_color"
+            app:tint="@color/t3"
             android:layout_marginEnd="8dp" />
-
         <EditText
             android:id="@+id/et_search"
             android:layout_width="0dp"
@@ -35,19 +32,15 @@
             android:singleLine="true"
             android:imeOptions="actionSearch"
             android:inputType="text" />
-
         <ImageView
             android:id="@+id/iv_clear"
             android:layout_width="20dp"
             android:layout_height="20dp"
             android:src="@drawable/ic_close"
-            android:imageTintList="@color/t3_color"
+            app:tint="@color/t3"
             android:visibility="gone"
             android:padding="2dp" />
-
     </LinearLayout>
-
-    <!-- Filter chips -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -55,45 +48,37 @@
         android:overScrollMode="never"
         android:paddingHorizontal="8dp"
         android:layout_marginBottom="8dp">
-
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="36dp"
             android:orientation="horizontal"
             android:gravity="center_vertical">
-
             <Button android:id="@+id/chip_all"
                 style="@style/CategoryChip"
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
                 android:text="@string/cat_all"
                 android:layout_marginHorizontal="4dp" />
-
             <Button android:id="@+id/chip_bangla"
                 style="@style/CategoryChip"
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
                 android:text="@string/cat_bangla"
                 android:layout_marginHorizontal="4dp" />
-
             <Button android:id="@+id/chip_hindi"
                 style="@style/CategoryChip"
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
                 android:text="@string/cat_hindi"
                 android:layout_marginHorizontal="4dp" />
-
             <Button android:id="@+id/chip_trending"
                 style="@style/CategoryChip"
                 android:layout_width="wrap_content"
                 android:layout_height="30dp"
                 android:text="@string/cat_trending"
                 android:layout_marginHorizontal="4dp" />
-
         </LinearLayout>
     </HorizontalScrollView>
-
-    <!-- Progress -->
     <ProgressBar
         android:id="@+id/progress_search"
         android:layout_width="32dp"
@@ -102,8 +87,6 @@
         android:indeterminateTint="@color/red"
         android:visibility="gone"
         android:layout_marginBottom="8dp" />
-
-    <!-- Search hint -->
     <LinearLayout
         android:id="@+id/layout_search_hint"
         android:layout_width="match_parent"
@@ -124,8 +107,6 @@
             android:textColor="@color/t2"
             android:layout_marginTop="12dp" />
     </LinearLayout>
-
-    <!-- Empty result -->
     <LinearLayout
         android:id="@+id/layout_empty"
         android:layout_width="match_parent"
@@ -156,8 +137,6 @@
             android:textColor="@color/t3"
             android:layout_marginTop="6dp" />
     </LinearLayout>
-
-    <!-- Results grid -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_results"
         android:layout_width="match_parent"
@@ -167,5 +146,4 @@
         android:clipToPadding="false"
         android:overScrollMode="never"
         android:scrollbars="none" />
-
 </LinearLayout>
