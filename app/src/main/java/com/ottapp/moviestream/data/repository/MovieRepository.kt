@@ -1,88 +1,111 @@
 package com.ottapp.moviestream.data.repository
 
-  import com.google.firebase.database.FirebaseDatabase
-  import com.ottapp.moviestream.data.model.Movie
-  import kotlinx.coroutines.tasks.await
+import com.google.firebase.database.FirebaseDatabase
+import com.ottapp.moviestream.data.model.Movie
+import kotlinx.coroutines.tasks.await
 
-  class MovieRepository {
+class MovieRepository {
 
-      private val db = FirebaseDatabase.getInstance("https://movies-bee24-default-rtdb.firebaseio.com").reference
-      private val moviesRef = db.child("movies")
+    private val db = FirebaseDatabase.getInstance("https://movies-bee24-default-rtdb.firebaseio.com").reference
+    private val moviesRef = db.child("movies")
 
-      // Firebase snapshot থেকে Movie ম্যানুয়ালি parse করা
-      // কারণ: Firebase-এ year String হিসেবে সেভ হলে automatic mapping crash করে
-      @Suppress("UNCHECKED_CAST")
-      private fun snapshotToMovie(snapshot: com.google.firebase.database.DataSnapshot): Movie? {
-          return try {
-              val data = snapshot.value as? Map<*, *> ?: return null
-              Movie(
-                  id             = snapshot.key ?: "",
-                  title          = data["title"]?.toString() ?: "",
-                  description    = data["description"]?.toString() ?: "",
-                  bannerImageUrl = data["bannerImageUrl"]?.toString()
-                      ?: data["imageUrl"]?.toString()
-                      ?: data["banner"]?.toString() ?: "",
-                  videoStreamUrl = data["videoStreamUrl"]?.toString()
-                      ?: data["streamUrl"]?.toString()
-                      ?: data["videoUrl"]?.toString() ?: "",
-                  downloadUrl    = data["downloadUrl"]?.toString() ?: "",
-                  category       = data["category"]?.toString() ?: "",
-                  imdbRating     = data["imdbRating"]?.toString()?.toDoubleOrNull()
-                      ?: data["rating"]?.toString()?.toDoubleOrNull() ?: 0.0,
-                  year           = data["year"]?.toString()?.toIntOrNull() ?: 0,
-                  duration       = data["duration"]?.toString() ?: "",
-                  trending       = data["trending"]?.toString()?.toBoolean()
-                      ?: (data["trending"] as? Boolean) ?: false,
-                  testMovie      = data["testMovie"]?.toString()?.toBoolean()
-                      ?: (data["testMovie"] as? Boolean)
-                      ?: data["isFree"]?.toString()?.toBoolean() ?: false
-              )
-          } catch (e: Exception) {
-              null // parse হলে null return করো, পুরো list crash করবে না
-          }
-      }
+    // Manually parse Firebase snapshot to Movie
+    // This avoids crash when Firebase stores year as String instead of Int
+    @Suppress("UNCHECKED_CAST")
+    private fun snapshotToMovie(snapshot: com.google.firebase.database.DataSnapshot): Movie? {
+        return try {
+            // Support both Map<String,*> and direct Movie mapping
+            val rawValue = snapshot.value ?: return null
 
-      suspend fun getAllMovies(): List<Movie> {
-          val snapshot = moviesRef.get().await()
-          return snapshot.children.mapNotNull { child -> snapshotToMovie(child) }
-      }
+            val data: Map<*, *> = when (rawValue) {
+                is Map<*, *> -> rawValue
+                else -> return null
+            }
 
-      suspend fun getMovieById(id: String): Movie? {
-          val snapshot = moviesRef.child(id).get().await()
-          return snapshotToMovie(snapshot)
-      }
+            Movie(
+                id             = snapshot.key ?: "",
+                title          = data["title"]?.toString() ?: "",
+                description    = data["description"]?.toString() ?: "",
+                bannerImageUrl = data["bannerImageUrl"]?.toString()
+                    ?: data["imageUrl"]?.toString()
+                    ?: data["banner"]?.toString() ?: "",
+                videoStreamUrl = data["videoStreamUrl"]?.toString()
+                    ?: data["streamUrl"]?.toString()
+                    ?: data["videoUrl"]?.toString() ?: "",
+                downloadUrl    = data["downloadUrl"]?.toString() ?: "",
+                category       = data["category"]?.toString() ?: "",
+                imdbRating     = when (val r = data["imdbRating"] ?: data["rating"]) {
+                    is Double -> r
+                    is Long   -> r.toDouble()
+                    is Int    -> r.toDouble()
+                    is String -> r.toDoubleOrNull() ?: 0.0
+                    else      -> 0.0
+                },
+                year           = when (val y = data["year"]) {
+                    is Long   -> y.toInt()
+                    is Int    -> y
+                    is Double -> y.toInt()
+                    is String -> y.toIntOrNull() ?: 0
+                    else      -> 0
+                },
+                duration       = data["duration"]?.toString() ?: "",
+                trending       = when (val t = data["trending"]) {
+                    is Boolean -> t
+                    is String  -> t.equals("true", ignoreCase = true)
+                    else       -> false
+                },
+                testMovie      = when (val f = data["testMovie"] ?: data["isFree"]) {
+                    is Boolean -> f
+                    is String  -> f.equals("true", ignoreCase = true)
+                    else       -> false
+                }
+            )
+        } catch (e: Exception) {
+            null // Return null on parse error so one bad entry doesn't crash the whole list
+        }
+    }
 
-      suspend fun addMovie(movie: Movie): String {
-          val newRef = moviesRef.push()
-          val id = newRef.key ?: throw Exception("ID তৈরি হয়নি")
-          val movieWithId = movie.copy(id = id)
-          newRef.setValue(movieToMap(movieWithId)).await()
-          return id
-      }
+    suspend fun getAllMovies(): List<Movie> {
+        val snapshot = moviesRef.get().await()
+        return snapshot.children.mapNotNull { child -> snapshotToMovie(child) }
+    }
 
-      suspend fun updateMovie(movie: Movie) {
-          if (movie.id.isEmpty()) throw Exception("Movie ID নেই")
-          moviesRef.child(movie.id).updateChildren(movieToMap(movie)).await()
-      }
+    suspend fun getMovieById(id: String): Movie? {
+        if (id.isEmpty()) return null
+        val snapshot = moviesRef.child(id).get().await()
+        return snapshotToMovie(snapshot)
+    }
 
-      suspend fun deleteMovie(id: String) {
-          if (id.isEmpty()) throw Exception("Movie ID নেই")
-          moviesRef.child(id).removeValue().await()
-      }
+    suspend fun addMovie(movie: Movie): String {
+        val newRef = moviesRef.push()
+        val id = newRef.key ?: throw Exception("ID তৈরি হয়নি")
+        val movieWithId = movie.copy(id = id)
+        newRef.setValue(movieToMap(movieWithId)).await()
+        return id
+    }
 
-      // Movie object → Firebase-compatible Map
-      private fun movieToMap(movie: Movie): Map<String, Any?> = mapOf(
-          "title"          to movie.title,
-          "description"    to movie.description,
-          "bannerImageUrl" to movie.bannerImageUrl,
-          "videoStreamUrl" to movie.videoStreamUrl,
-          "downloadUrl"    to movie.downloadUrl,
-          "category"       to movie.category,
-          "imdbRating"     to movie.imdbRating,
-          "year"           to movie.year,
-          "duration"       to movie.duration,
-          "trending"       to movie.trending,
-          "testMovie"      to movie.testMovie
-      )
-  }
-  
+    suspend fun updateMovie(movie: Movie) {
+        if (movie.id.isEmpty()) throw Exception("Movie ID নেই")
+        moviesRef.child(movie.id).updateChildren(movieToMap(movie)).await()
+    }
+
+    suspend fun deleteMovie(id: String) {
+        if (id.isEmpty()) throw Exception("Movie ID নেই")
+        moviesRef.child(id).removeValue().await()
+    }
+
+    // Convert Movie object to Firebase-compatible Map
+    private fun movieToMap(movie: Movie): Map<String, Any?> = mapOf(
+        "title"          to movie.title,
+        "description"    to movie.description,
+        "bannerImageUrl" to movie.bannerImageUrl,
+        "videoStreamUrl" to movie.videoStreamUrl,
+        "downloadUrl"    to movie.downloadUrl,
+        "category"       to movie.category,
+        "imdbRating"     to movie.imdbRating,
+        "year"           to movie.year,
+        "duration"       to movie.duration,
+        "trending"       to movie.trending,
+        "testMovie"      to movie.testMovie
+    )
+}

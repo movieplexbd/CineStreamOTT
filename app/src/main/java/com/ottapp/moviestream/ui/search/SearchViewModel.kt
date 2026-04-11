@@ -12,7 +12,7 @@ class SearchViewModel : ViewModel() {
 
     private val repo = MovieRepository()
 
-    private val _results = MutableLiveData<List<Movie>>()
+    private val _results = MutableLiveData<List<Movie>>(emptyList())
     val results: LiveData<List<Movie>> = _results
 
     private val _loading = MutableLiveData(false)
@@ -21,13 +21,22 @@ class SearchViewModel : ViewModel() {
     private val _activeFilter = MutableLiveData(Constants.CAT_ALL)
     val activeFilter: LiveData<String> = _activeFilter
 
+    private val _error = MutableLiveData<String?>()
+    val error: LiveData<String?> = _error
+
     private var allMovies: List<Movie> = emptyList()
     private var currentQuery = ""
     private var searchJob: Job? = null
 
     init {
+        // Preload movies so search is instant
         viewModelScope.launch {
-            allMovies = repo.getAllMovies()
+            try {
+                allMovies = repo.getAllMovies()
+            } catch (e: Exception) {
+                _error.value = e.message
+                allMovies = emptyList()
+            }
         }
     }
 
@@ -36,19 +45,25 @@ class SearchViewModel : ViewModel() {
         searchJob?.cancel()
         if (query.isBlank()) {
             _results.value = emptyList()
+            _loading.value = false
             return
         }
         searchJob = viewModelScope.launch {
             _loading.value = true
-            delay(300)
-            val q = query.lowercase()
-            val filtered = allMovies.filter {
-                it.title.orEmpty().lowercase().contains(q) ||
-                it.description.orEmpty().lowercase().contains(q) ||
-                it.category.orEmpty().lowercase().contains(q)
+            try {
+                delay(300)
+                val q = query.lowercase()
+                val filtered = allMovies.filter {
+                    it.title.orEmpty().lowercase().contains(q) ||
+                    it.description.orEmpty().lowercase().contains(q) ||
+                    it.category.orEmpty().lowercase().contains(q)
+                }
+                applyFilter(filtered)
+            } catch (e: Exception) {
+                _results.value = emptyList()
+            } finally {
+                _loading.value = false
             }
-            applyFilter(filtered)
-            _loading.value = false
         }
     }
 
@@ -69,7 +84,11 @@ class SearchViewModel : ViewModel() {
         _results.value = when (cat) {
             Constants.CAT_ALL      -> list
             Constants.CAT_TRENDING -> list.filter { it.trending }
-            else                   -> list.filter { it.category.orEmpty() == cat }
+            else                   -> list.filter { movie ->
+                val c = movie.category.orEmpty().lowercase().trim()
+                val s = cat.lowercase().trim()
+                c == s || c.contains(s) || s.contains(c)
+            }
         }
     }
 }

@@ -10,12 +10,15 @@ class MoviesViewModel : ViewModel() {
 
     private val repo = MovieRepository()
 
-    private val _allMovies = MutableLiveData<List<Movie>>()
-    private val _filteredMovies = MutableLiveData<List<Movie>>()
+    private val _allMovies = MutableLiveData<List<Movie>>(emptyList())
+    private val _filteredMovies = MutableLiveData<List<Movie>>(emptyList())
     val filteredMovies: LiveData<List<Movie>> = _filteredMovies
 
     private val _loading = MutableLiveData(true)
     val loading: LiveData<Boolean> = _loading
+
+    private val _error = MutableLiveData<String?>()
+    val error: LiveData<String?> = _error
 
     private var selectedCategory = Constants.CAT_ALL
 
@@ -24,11 +27,13 @@ class MoviesViewModel : ViewModel() {
     fun loadMovies() {
         viewModelScope.launch {
             _loading.value = true
+            _error.value = null
             try {
                 val movies = repo.getAllMovies()
                 _allMovies.value = movies
-                applyFilter()
+                applyFilter(movies)
             } catch (e: Exception) {
+                _error.value = e.message
                 _filteredMovies.value = emptyList()
             } finally {
                 _loading.value = false
@@ -38,15 +43,18 @@ class MoviesViewModel : ViewModel() {
 
     fun setCategory(cat: String) {
         selectedCategory = cat
-        applyFilter()
+        applyFilter(_allMovies.value ?: emptyList())
     }
 
-    private fun applyFilter() {
-        val all = _allMovies.value ?: return
+    private fun applyFilter(all: List<Movie>) {
         _filteredMovies.value = when (selectedCategory) {
             Constants.CAT_ALL      -> all
             Constants.CAT_TRENDING -> all.filter { it.trending }
-            else                   -> all.filter { it.category.orEmpty() == selectedCategory }
+            else                   -> all.filter { movie ->
+                val cat = movie.category.lowercase().trim()
+                val sel = selectedCategory.lowercase().trim()
+                cat == sel || cat.contains(sel) || sel.contains(cat)
+            }
         }
     }
 }

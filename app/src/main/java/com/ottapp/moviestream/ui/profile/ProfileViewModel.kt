@@ -2,13 +2,10 @@ package com.ottapp.moviestream.ui.profile
 
 import android.app.Application
 import androidx.lifecycle.*
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.ottapp.moviestream.data.model.User
 import com.ottapp.moviestream.data.repository.AuthRepository
 import com.ottapp.moviestream.data.repository.DownloadRepository
 import com.ottapp.moviestream.data.repository.UserRepository
-import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.toReadableSize
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
@@ -39,10 +36,8 @@ class ProfileViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun signOut() = viewModelScope.launch {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(Constants.WEB_CLIENT_ID).requestEmail().build()
-        val client = GoogleSignIn.getClient(getApplication<Application>(), gso)
-        authRepo.signOut(client)
+        // Pass null — Google sign-out not required (email/password only)
+        authRepo.signOut(null)
         _signedOut.value = true
     }
 }

@@ -3,18 +3,10 @@ package com.ottapp.moviestream
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
-import android.widget.*
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.common.api.ApiException
-import com.google.android.material.button.MaterialButton
-import com.google.android.material.textfield.TextInputEditText
 import com.ottapp.moviestream.data.repository.AuthRepository
 import com.ottapp.moviestream.databinding.ActivityLoginBinding
-import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.hide
 import com.ottapp.moviestream.util.show
 import com.ottapp.moviestream.util.toast
@@ -24,23 +16,8 @@ class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private lateinit var authRepository: AuthRepository
-    private lateinit var googleSignInClient: GoogleSignInClient
 
     private var isSignUpMode = false
-
-    private val signInLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-        try {
-            val account = task.getResult(ApiException::class.java)
-            account.idToken?.let { token ->
-                firebaseGoogleSignIn(token)
-            } ?: showError("Google Sign-In ব্যর্থ হয়েছে")
-        } catch (e: ApiException) {
-            showError("Google Error: ${e.statusCode}")
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,17 +25,14 @@ class LoginActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         authRepository = AuthRepository(this)
-        googleSignInClient = authRepository.getGoogleSignInClient(Constants.WEB_CLIENT_ID)
+
+        // Hide Google Sign-In button — only email/password login supported
+        binding.btnGoogleSignIn.hide()
 
         setupClickListeners()
     }
 
     private fun setupClickListeners() {
-        binding.btnGoogleSignIn.setOnClickListener {
-            setLoading(true)
-            signInLauncher.launch(googleSignInClient.signInIntent)
-        }
-
         binding.btnEmailAction.setOnClickListener {
             handleEmailAuth()
         }
@@ -129,19 +103,6 @@ class LoginActivity : AppCompatActivity() {
         }
     }
 
-    private fun firebaseGoogleSignIn(idToken: String) {
-        lifecycleScope.launch {
-            val result = authRepository.signInWithGoogle(idToken)
-            result.fold(
-                onSuccess = { goToMain() },
-                onFailure = { e ->
-                    setLoading(false)
-                    showError("Google Login ব্যর্থ: ${e.message}")
-                }
-            )
-        }
-    }
-
     private fun goToMain() {
         startActivity(Intent(this, MainActivity::class.java))
         finish()
@@ -162,7 +123,6 @@ class LoginActivity : AppCompatActivity() {
     private fun setLoading(loading: Boolean) {
         binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
         binding.btnEmailAction.isEnabled = !loading
-        binding.btnGoogleSignIn.isEnabled = !loading
     }
 
     private fun showError(msg: String) {
