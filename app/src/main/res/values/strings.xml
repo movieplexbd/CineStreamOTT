@@ -1,0 +1,52 @@
+<resources>
+    <string name="app_name">CineStream</string>
+
+    <!-- Bottom Nav -->
+    <string name="nav_home">হোম</string>
+    <string name="nav_movies">মুভি</string>
+    <string name="nav_search">খোঁজো</string>
+    <string name="nav_download">ডাউনলোড</string>
+    <string name="nav_profile">প্রোফাইল</string>
+
+    <!-- Login -->
+    <string name="login_title">স্বাগতম</string>
+    <string name="login_subtitle">আপনার গুগল অ্যাকাউন্ট দিয়ে লগইন করুন</string>
+    <string name="btn_google_signin">Google দিয়ে লগইন</string>
+
+    <!-- Home -->
+    <string name="section_trending">ট্রেন্ডিং</string>
+    <string name="section_bangla">বাংলা ডাবড</string>
+    <string name="section_hindi">হিন্দি ডাবড</string>
+    <string name="see_all">সব দেখো</string>
+
+    <!-- Categories -->
+    <string name="cat_all">সব</string>
+    <string name="cat_bangla">বাংলা ডাবড</string>
+    <string name="cat_hindi">হিন্দি ডাবড</string>
+    <string name="cat_trending">ট্রেন্ডিং</string>
+
+    <!-- Search -->
+    <string name="search_hint">মুভি খুঁজুন...</string>
+    <string name="search_empty_title">কিছু পাওয়া যায়নি</string>
+    <string name="search_empty_sub">অন্য কিছু খোঁজার চেষ্টা করুন</string>
+    <string name="search_hint_title">মুভি খোঁজা শুরু করুন</string>
+
+    <!-- Download -->
+    <string name="download_empty_title">কোনো ডাউনলোড নেই</string>
+    <string name="download_empty_sub">মুভি ডাউনলোড করুন অফলাইনে দেখার জন্য</string>
+
+    <!-- Profile -->
+    <string name="plan_free">ফ্রি প্ল্যান</string>
+    <string name="plan_premium">প্রিমিয়াম সদস্য</string>
+    <string name="btn_signout">লগআউট</string>
+
+    <!-- Movie Detail -->
+    <string name="btn_watch">দেখুন</string>
+    <string name="btn_download">ডাউনলোড</string>
+    <string name="free_badge">বিনামূল্যে</string>
+    <string name="locked_title">শুধু প্রিমিয়াম সদস্যদের জন্য</string>
+    <string name="locked_sub">এই মুভিটি দেখতে প্রিমিয়াম সাবস্ক্রিপশন প্রয়োজন। অ্যাডমিনের সাথে যোগাযোগ করুন।</string>
+
+    <!-- Player -->
+    <string name="speed_label">স্পিড</string>
+</resources>
