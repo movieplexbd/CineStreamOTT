@@ -1,6 +1,7 @@
 package com.ottapp.moviestream.adapter
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -16,12 +17,13 @@ class MovieGridAdapter(
 
     inner class VH(private val b: ItemMovieCardBinding) : RecyclerView.ViewHolder(b.root) {
         fun bind(movie: Movie) {
-            b.ivThumb.loadImage(movie.bannerImageUrl.orEmpty(), R.color.surface2)
-            b.tvTitle.text = movie.title.orEmpty()
+            b.ivThumb.loadImage(movie.bannerImageUrl, R.color.surface2)
+            b.tvTitle.text = movie.title.ifEmpty { "Unknown" }
             b.tvRating.text = "★ ${movie.imdbRating}"
-            b.tvCategory.text = movie.category.orEmpty()
+            b.tvCategory.text = movie.category
 
-            b.ivLock.visibility = if (movie.testMovie) android.view.View.GONE else android.view.View.VISIBLE
+            // Show lock icon for premium-only movies; hide for free/test movies
+            b.ivLock.visibility = if (movie.testMovie) View.GONE else View.VISIBLE
 
             b.root.setOnClickListener { onClick(movie) }
         }
