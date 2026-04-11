@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg">
+
+    <!-- Header -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="মুভি"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        android:textColor="@color/t1"
+        android:fontFamily="serif"
+        android:paddingHorizontal="14dp"
+        android:paddingTop="16dp"
+        android:paddingBottom="8dp" />
+
+    <!-- Category Tab Bar -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:overScrollMode="never"
+        android:background="@color/surface"
+        android:paddingHorizontal="8dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="46dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:divider="@drawable/divider_space"
+            android:showDividers="middle">
+
+            <Button android:id="@+id/tab_all"
+                style="@style/CategoryChip"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="@string/cat_all" />
+
+            <Button android:id="@+id/tab_bangla"
+                style="@style/CategoryChip"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="@string/cat_bangla" />
+
+            <Button android:id="@+id/tab_hindi"
+                style="@style/CategoryChip"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="@string/cat_hindi" />
+
+            <Button android:id="@+id/tab_trending"
+                style="@style/CategoryChip"
+                android:layout_width="wrap_content"
+                android:layout_height="32dp"
+                android:text="@string/cat_trending" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- Separator -->
+    <View android:layout_width="match_parent" android:layout_height="1dp"
+        android:background="@color/border" />
+
+    <!-- Shimmer -->
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmer"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:visibility="visible">
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+    </com.facebook.shimmer.ShimmerFrameLayout>
+
+    <!-- Movies Grid -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_movies"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="9dp"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:scrollbars="none"
+        android:visibility="visible" />
+
+    <!-- Empty state -->
+    <TextView
+        android:id="@+id/tv_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="এই ক্যাটাগরিতে কোনো মুভি নেই"
+        android:gravity="center"
+        android:textColor="@color/t3"
+        android:textSize="14sp"
+        android:padding="40dp"
+        android:visibility="gone" />
+
+</LinearLayout>
