@@ -9,15 +9,12 @@
     app:cardCornerRadius="13dp"
     app:cardElevation="1dp"
     app:cardBackgroundColor="@color/surface">
-
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
         android:padding="12dp">
-
-        <!-- Thumbnail -->
         <ImageView
             android:id="@+id/iv_thumb"
             android:layout_width="70dp"
@@ -25,14 +22,11 @@
             android:scaleType="centerCrop"
             android:background="@color/surface2"
             android:layout_marginEnd="12dp" />
-
-        <!-- Info -->
         <LinearLayout
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:orientation="vertical">
-
             <TextView
                 android:id="@+id/tv_title"
                 android:layout_width="match_parent"
@@ -42,7 +36,6 @@
                 android:textColor="@color/t1"
                 android:maxLines="2"
                 android:ellipsize="end" />
-
             <TextView
                 android:id="@+id/tv_category"
                 android:layout_width="wrap_content"
@@ -50,14 +43,12 @@
                 android:textSize="11sp"
                 android:textColor="@color/t2"
                 android:layout_marginTop="3dp" />
-
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
                 android:gravity="center_vertical"
                 android:layout_marginTop="4dp">
-
                 <TextView
                     android:id="@+id/tv_rating"
                     android:layout_width="wrap_content"
@@ -65,50 +56,39 @@
                     android:textSize="11sp"
                     android:textColor="@color/amber"
                     android:textStyle="bold" />
-
                 <View android:layout_width="3dp" android:layout_height="3dp"
                     android:background="@drawable/dot_mid" android:layout_marginHorizontal="6dp" />
-
                 <TextView
                     android:id="@+id/tv_size"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="11sp"
                     android:textColor="@color/t3" />
-
             </LinearLayout>
-
         </LinearLayout>
-
-        <!-- Action buttons -->
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"
             android:gravity="center"
             android:layout_marginStart="8dp">
-
             <ImageButton
                 android:id="@+id/btn_play"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:src="@drawable/ic_play"
-                android:imageTintList="@color/red_color"
+                app:tint="@color/red"
                 android:background="@drawable/bg_icon_btn_filled"
                 android:contentDescription="Play"
                 android:layout_marginBottom="8dp" />
-
             <ImageButton
                 android:id="@+id/btn_delete"
                 android:layout_width="40dp"
                 android:layout_height="40dp"
                 android:src="@drawable/ic_delete"
-                android:imageTintList="@color/t2_color"
+                app:tint="@color/t2"
                 android:background="@drawable/bg_icon_btn"
                 android:contentDescription="Delete" />
-
         </LinearLayout>
-
     </LinearLayout>
-
 </androidx.cardview.widget.CardView>
