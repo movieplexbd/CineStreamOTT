@@ -16,7 +16,6 @@ class AuthRepository(private val context: Context) {
     private val auth = FirebaseAuth.getInstance()
     private val db = FirebaseDatabase.getInstance().reference
 
-    // ── Google Sign-In client ──────────────────────────────────────────────
     fun getGoogleSignInClient(webClientId: String): GoogleSignInClient {
         val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
             .requestIdToken(webClientId)
@@ -25,52 +24,65 @@ class AuthRepository(private val context: Context) {
         return GoogleSignIn.getClient(context, gso)
     }
 
-    // ── Current user ────────────────────────────────────────────────────────
     val currentFirebaseUser: FirebaseUser? get() = auth.currentUser
     val isLoggedIn: Boolean get() = auth.currentUser != null
 
-    // ── Sign-in with Google credential ──────────────────────────────────────
+    // Google Sign-In
     suspend fun signInWithGoogle(idToken: String): Result<FirebaseUser> {
         return try {
             val credential = GoogleAuthProvider.getCredential(idToken, null)
             val result = auth.signInWithCredential(credential).await()
             val firebaseUser = result.user!!
-
-            // Save / update user in Realtime DB
             saveUserToDatabase(firebaseUser)
-
             Result.success(firebaseUser)
         } catch (e: Exception) {
             Result.failure(e)
         }
     }
 
-    // ── Save user profile to Firebase DB ────────────────────────────────────
-    private suspend fun saveUserToDatabase(firebaseUser: FirebaseUser) {
+    // Email Sign-In
+    suspend fun signInWithEmail(email: String, password: String): Result<FirebaseUser> {
+        return try {
+            val result = auth.signInWithEmailAndPassword(email, password).await()
+            val firebaseUser = result.user!!
+            Result.success(firebaseUser)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    // Email Sign-Up
+    suspend fun signUpWithEmail(email: String, password: String, displayName: String): Result<FirebaseUser> {
+        return try {
+            val result = auth.createUserWithEmailAndPassword(email, password).await()
+            val firebaseUser = result.user!!
+            saveUserToDatabase(firebaseUser, displayName)
+            Result.success(firebaseUser)
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
+    private suspend fun saveUserToDatabase(firebaseUser: FirebaseUser, overrideName: String? = null) {
         val uid = firebaseUser.uid
         val userRef = db.child("users").child(uid)
-
-        // Only write email/name; don't overwrite subscription fields
         val snapshot = userRef.get().await()
         if (!snapshot.exists()) {
             val newUser = User(
                 uid = uid,
                 email = firebaseUser.email ?: "",
-                displayName = firebaseUser.displayName ?: "",
+                displayName = overrideName ?: firebaseUser.displayName ?: "",
                 photoUrl = firebaseUser.photoUrl?.toString() ?: "",
                 subscriptionStatus = User.PLAN_FREE,
                 subscriptionExpiry = 0L
             )
             userRef.setValue(newUser).await()
         } else {
-            // Update display info only
             userRef.child("email").setValue(firebaseUser.email).await()
-            userRef.child("displayName").setValue(firebaseUser.displayName).await()
-            userRef.child("photoUrl").setValue(firebaseUser.photoUrl?.toString()).await()
+            if (overrideName != null) userRef.child("displayName").setValue(overrideName).await()
         }
     }
 
-    // ── Sign out ─────────────────────────────────────────────────────────────
     suspend fun signOut(googleSignInClient: GoogleSignInClient) {
         auth.signOut()
         googleSignInClient.signOut().await()
