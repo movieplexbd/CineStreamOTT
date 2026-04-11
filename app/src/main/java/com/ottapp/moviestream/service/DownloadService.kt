@@ -35,13 +35,11 @@ class DownloadService : Service() {
         val videoUrl   = intent.getStringExtra(Constants.EXTRA_VIDEO_URL)   ?: return START_NOT_STICKY
         val bannerUrl  = intent.getStringExtra(Constants.EXTRA_BANNER_URL)  ?: ""
 
-        // Start foreground with initial notification
         startForeground(
             Constants.DOWNLOAD_NOTIFICATION_ID,
             buildNotification(movieTitle, 0)
         )
 
-        // Start download coroutine
         val job = scope.launch {
             downloadFile(movieId, movieTitle, videoUrl, bannerUrl)
         }
@@ -79,8 +77,7 @@ class DownloadService : Service() {
             outputStream.use { out ->
                 inputStream.use { inp ->
                     while (inp.read(buffer).also { bytesRead = it } != -1) {
-                        if (!isActive) {
-                            // Cancelled
+                        if (!coroutineContext.isActive) {
                             tempFile.delete()
                             return
                         }
@@ -101,7 +98,6 @@ class DownloadService : Service() {
 
             connection.disconnect()
 
-            // Finalize
             val success = repo.finalizeTempFile(movieId)
             if (success) {
                 val meta = DownloadedMovie(
@@ -126,8 +122,6 @@ class DownloadService : Service() {
             if (activeJobs.isEmpty()) stopSelf()
         }
     }
-
-    // ── Notifications ─────────────────────────────────────────────────────────
 
     private fun buildNotification(title: String, progress: Int): Notification {
         return NotificationCompat.Builder(this, OTTApplication.DOWNLOAD_CHANNEL_ID)
