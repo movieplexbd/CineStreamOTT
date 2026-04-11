@@ -7,6 +7,7 @@ package com.ottapp.moviestream.ui.profile
   import android.view.ViewGroup
   import androidx.fragment.app.Fragment
   import androidx.fragment.app.viewModels
+  import com.google.firebase.auth.FirebaseAuth
   import com.ottapp.moviestream.LoginActivity
   import com.ottapp.moviestream.R
   import com.ottapp.moviestream.databinding.FragmentProfileBinding
@@ -33,8 +34,19 @@ package com.ottapp.moviestream.ui.profile
       override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
           super.onViewCreated(view, savedInstanceState)
 
+          // Firebase Auth থেকে সরাসরি email চেক — সবচেয়ে নির্ভরযোগ্য পদ্ধতি
+          val authEmail = FirebaseAuth.getInstance().currentUser?.email
+          if (authEmail == ADMIN_EMAIL) {
+              binding.btnAdmin.visibility = View.VISIBLE
+          }
+
           viewModel.user.observe(viewLifecycleOwner) { user ->
-              if (user == null) return@observe
+              if (user == null) {
+                  // DB-তে user না থাকলেও Auth email দিয়ে admin check
+                  if (authEmail == ADMIN_EMAIL) binding.btnAdmin.visibility = View.VISIBLE
+                  return@observe
+              }
+
               binding.tvName.text  = user.displayName.ifEmpty { "ব্যবহারকারী" }
               binding.tvEmail.text = user.email
 
@@ -54,8 +66,8 @@ package com.ottapp.moviestream.ui.profile
                   binding.tvExpiry.visibility = View.GONE
               }
 
-              // Admin button - only show for admin email
-              if (user.email == ADMIN_EMAIL) {
+              // DB email বা Auth email — যেকোনো একটা হলেই admin button দেখাবে
+              if (user.email == ADMIN_EMAIL || authEmail == ADMIN_EMAIL) {
                   binding.btnAdmin.visibility = View.VISIBLE
               } else {
                   binding.btnAdmin.visibility = View.GONE
@@ -75,7 +87,6 @@ package com.ottapp.moviestream.ui.profile
           }
 
           binding.btnSignOut.setOnClickListener { viewModel.signOut() }
-
           binding.btnAdmin.setOnClickListener {
               startActivity(Intent(requireContext(), AdminActivity::class.java))
           }
