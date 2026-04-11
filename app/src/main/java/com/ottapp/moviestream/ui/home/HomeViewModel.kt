@@ -44,10 +44,11 @@ class HomeViewModel : ViewModel() {
             _loading.value = true
             try {
                 val all = movieRepo.getAllMovies()
-                _bannerMovies.value  = all.filter { it.trending }.take(5).ifEmpty { all.take(5) }
-                _trendingMovies.value = all.filter { it.trending }
-                _banglaMovies.value  = all.filter { it.category == Movie.CATEGORY_BANGLA }
-                _hindiMovies.value   = all.filter { it.category == Movie.CATEGORY_HINDI }
+                val trending = all.filter { it.trending }
+                _bannerMovies.value  = trending.take(5).ifEmpty { all.take(5) }
+                _trendingMovies.value = trending
+                _banglaMovies.value  = all.filter { it.category.orEmpty() == Movie.CATEGORY_BANGLA }
+                _hindiMovies.value   = all.filter { it.category.orEmpty() == Movie.CATEGORY_HINDI }
             } catch (e: Exception) {
                 _error.value = e.message
             } finally {
