@@ -110,9 +110,9 @@ class HomeFragment : Fragment() {
 
         viewModel.currentUser.observe(viewLifecycleOwner) { user ->
             if (user != null) {
-                val initial = user.displayName.orEmpty().firstOrNull()?.uppercaseChar()?.toString() ?: "U"
+                val initial = user.displayName.firstOrNull()?.uppercaseChar()?.toString() ?: "U"
                 binding.tvAvatarInitial.text = initial
-                if (!user.photoUrl.isNullOrEmpty()) {
+                if (user.photoUrl.isNotEmpty()) {
                     binding.ivAvatar.loadImage(user.photoUrl)
                 }
                 binding.tvSubscriptionBadge.text = if (user.isPremium) "PREMIUM" else "FREE"
@@ -167,8 +167,13 @@ class HomeFragment : Fragment() {
     }
 
     private fun openMovieDetail(movie: Movie) {
-        val bundle = bundleOf(Constants.EXTRA_MOVIE_ID to movie.id)
-        findNavController().navigate(R.id.action_home_to_detail, bundle)
+        if (!isAdded || _binding == null) return
+        try {
+            val bundle = bundleOf(Constants.EXTRA_MOVIE_ID to movie.id)
+            findNavController().navigate(R.id.action_home_to_detail, bundle)
+        } catch (e: Exception) {
+            // Prevent duplicate navigation crash
+        }
     }
 
     override fun onDestroyView() {
