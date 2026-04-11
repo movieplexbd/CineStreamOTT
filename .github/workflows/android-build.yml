@@ -27,6 +27,9 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
+      - name: Create local.properties
+        run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+
       - name: Cache Gradle packages
         uses: actions/cache@v4
         with:
@@ -83,4 +86,3 @@ jobs:
           echo "=== APK File Sizes ==="
           du -sh app/build/outputs/apk/debug/app-debug.apk 2>/dev/null || echo "Debug APK not found"
           du -sh app/build/outputs/apk/release/app-release-unsigned.apk 2>/dev/null || echo "Release APK not found"
-
