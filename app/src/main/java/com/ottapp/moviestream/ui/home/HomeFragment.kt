@@ -110,9 +110,9 @@ class HomeFragment : Fragment() {
 
         viewModel.currentUser.observe(viewLifecycleOwner) { user ->
             if (user != null) {
-                val initial = user.displayName.firstOrNull()?.uppercaseChar()?.toString() ?: "U"
+                val initial = user.displayName.orEmpty().firstOrNull()?.uppercaseChar()?.toString() ?: "U"
                 binding.tvAvatarInitial.text = initial
-                if (user.photoUrl.isNotEmpty()) {
+                if (!user.photoUrl.isNullOrEmpty()) {
                     binding.ivAvatar.loadImage(user.photoUrl)
                 }
                 binding.tvSubscriptionBadge.text = if (user.isPremium) "PREMIUM" else "FREE"
@@ -150,6 +150,7 @@ class HomeFragment : Fragment() {
         bannerRunnable?.let { bannerHandler.removeCallbacks(it) }
         bannerRunnable = object : Runnable {
             override fun run() {
+                if (_binding == null) return
                 val next = (currentBannerIndex + 1) % count
                 binding.viewPagerBanner.setCurrentItem(next, true)
                 bannerHandler.postDelayed(this, 4000)
