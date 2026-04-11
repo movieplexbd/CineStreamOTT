@@ -6,8 +6,6 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.view.inputmethod.InputMethodManager
-import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -43,11 +41,6 @@ class SearchFragment : Fragment() {
         setupSearch()
         setupFilters()
         observeViewModel()
-
-        // Auto focus search
-        binding.etSearch.requestFocus()
-        val imm = ContextCompat.getSystemService(requireContext(), InputMethodManager::class.java)
-        imm?.showSoftInput(binding.etSearch, InputMethodManager.SHOW_IMPLICIT)
     }
 
     private fun setupSearch() {
@@ -100,8 +93,13 @@ class SearchFragment : Fragment() {
     }
 
     private fun openDetail(movie: Movie) {
-        val bundle = bundleOf(Constants.EXTRA_MOVIE_ID to movie.id)
-        findNavController().navigate(R.id.action_search_to_detail, bundle)
+        if (!isAdded || _binding == null) return
+        try {
+            val bundle = bundleOf(Constants.EXTRA_MOVIE_ID to movie.id)
+            findNavController().navigate(R.id.action_search_to_detail, bundle)
+        } catch (e: Exception) {
+            // Prevent duplicate navigation crash
+        }
     }
 
     override fun onDestroyView() { _binding = null; super.onDestroyView() }
