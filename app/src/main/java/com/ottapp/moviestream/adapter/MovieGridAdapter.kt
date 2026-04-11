@@ -16,12 +16,11 @@ class MovieGridAdapter(
 
     inner class VH(private val b: ItemMovieCardBinding) : RecyclerView.ViewHolder(b.root) {
         fun bind(movie: Movie) {
-            b.ivThumb.loadImage(movie.bannerImageUrl, R.color.surface2)
-            b.tvTitle.text = movie.title
+            b.ivThumb.loadImage(movie.bannerImageUrl.orEmpty(), R.color.surface2)
+            b.tvTitle.text = movie.title.orEmpty()
             b.tvRating.text = "★ ${movie.imdbRating}"
-            b.tvCategory.text = movie.category
+            b.tvCategory.text = movie.category.orEmpty()
 
-            // Lock overlay for non-test movies (visual hint only; real lock in detail)
             b.ivLock.visibility = if (movie.testMovie) android.view.View.GONE else android.view.View.VISIBLE
 
             b.root.setOnClickListener { onClick(movie) }
