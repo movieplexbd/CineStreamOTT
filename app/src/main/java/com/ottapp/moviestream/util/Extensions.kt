@@ -1,0 +1,50 @@
+package com.ottapp.moviestream.util
+
+import android.content.Context
+import android.view.View
+import android.widget.ImageView
+import android.widget.Toast
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import java.util.concurrent.TimeUnit
+
+fun View.show()      { visibility = View.VISIBLE }
+fun View.hide()      { visibility = View.GONE    }
+fun View.invisible() { visibility = View.INVISIBLE }
+
+fun Context.toast(msg: String) =
+    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+
+fun ImageView.loadImage(url: String, placeholder: Int? = null) {
+    val req = Glide.with(context)
+        .load(url)
+        .transition(DrawableTransitionOptions.withCrossFade(200))
+    placeholder?.let { req.placeholder(it) }
+    req.into(this)
+}
+
+fun Long.toReadableSize(): String {
+    if (this <= 0) return "0 B"
+    val kb = this / 1024.0
+    val mb = kb  / 1024.0
+    val gb = mb  / 1024.0
+    return when {
+        gb >= 1 -> "%.1f GB".format(gb)
+        mb >= 1 -> "%.1f MB".format(mb)
+        kb >= 1 -> "%.1f KB".format(kb)
+        else    -> "$this B"
+    }
+}
+
+fun Long.toFormattedTime(): String {
+    val h = TimeUnit.MILLISECONDS.toHours(this)
+    val m = TimeUnit.MILLISECONDS.toMinutes(this) % 60
+    val s = TimeUnit.MILLISECONDS.toSeconds(this) % 60
+    return if (h > 0) "%02d:%02d:%02d".format(h, m, s)
+           else       "%02d:%02d".format(m, s)
+}
+
+fun Long.toReadableDate(): String {
+    val sdf = java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault())
+    return sdf.format(java.util.Date(this))
+}
