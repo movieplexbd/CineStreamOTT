@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg">
+
+    <!-- Search box -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="52dp"
+        android:layout_margin="13dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:background="@drawable/bg_search_box"
+        android:paddingHorizontal="14dp">
+
+        <ImageView
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_search"
+            android:imageTintList="@color/t3_color"
+            android:layout_marginEnd="8dp" />
+
+        <EditText
+            android:id="@+id/et_search"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:background="@null"
+            android:hint="@string/search_hint"
+            android:textColorHint="@color/t3"
+            android:textColor="@color/t1"
+            android:textSize="14sp"
+            android:singleLine="true"
+            android:imeOptions="actionSearch"
+            android:inputType="text" />
+
+        <ImageView
+            android:id="@+id/iv_clear"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:src="@drawable/ic_close"
+            android:imageTintList="@color/t3_color"
+            android:visibility="gone"
+            android:padding="2dp" />
+
+    </LinearLayout>
+
+    <!-- Filter chips -->
+    <HorizontalScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:scrollbars="none"
+        android:overScrollMode="never"
+        android:paddingHorizontal="8dp"
+        android:layout_marginBottom="8dp">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="36dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
+
+            <Button android:id="@+id/chip_all"
+                style="@style/CategoryChip"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:text="@string/cat_all"
+                android:layout_marginHorizontal="4dp" />
+
+            <Button android:id="@+id/chip_bangla"
+                style="@style/CategoryChip"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:text="@string/cat_bangla"
+                android:layout_marginHorizontal="4dp" />
+
+            <Button android:id="@+id/chip_hindi"
+                style="@style/CategoryChip"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:text="@string/cat_hindi"
+                android:layout_marginHorizontal="4dp" />
+
+            <Button android:id="@+id/chip_trending"
+                style="@style/CategoryChip"
+                android:layout_width="wrap_content"
+                android:layout_height="30dp"
+                android:text="@string/cat_trending"
+                android:layout_marginHorizontal="4dp" />
+
+        </LinearLayout>
+    </HorizontalScrollView>
+
+    <!-- Progress -->
+    <ProgressBar
+        android:id="@+id/progress_search"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center_horizontal"
+        android:indeterminateTint="@color/red"
+        android:visibility="gone"
+        android:layout_marginBottom="8dp" />
+
+    <!-- Search hint -->
+    <LinearLayout
+        android:id="@+id/layout_search_hint"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🔍"
+            android:textSize="52sp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/search_hint_title"
+            android:textSize="16sp"
+            android:textColor="@color/t2"
+            android:layout_marginTop="12dp" />
+    </LinearLayout>
+
+    <!-- Empty result -->
+    <LinearLayout
+        android:id="@+id/layout_empty"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:gravity="center"
+        android:orientation="vertical"
+        android:visibility="gone">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="😔"
+            android:textSize="52sp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/search_empty_title"
+            android:textSize="18sp"
+            android:textStyle="bold"
+            android:textColor="@color/t1"
+            android:fontFamily="serif"
+            android:layout_marginTop="12dp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/search_empty_sub"
+            android:textSize="13sp"
+            android:textColor="@color/t3"
+            android:layout_marginTop="6dp" />
+    </LinearLayout>
+
+    <!-- Results grid -->
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/rv_results"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:padding="9dp"
+        android:clipToPadding="false"
+        android:overScrollMode="never"
+        android:scrollbars="none" />
+
+</LinearLayout>
