@@ -15,9 +15,9 @@ class BannerAdapter(
 
     inner class VH(private val b: ItemBannerBinding) : RecyclerView.ViewHolder(b.root) {
         fun bind(movie: Movie) {
-            b.ivBanner.loadImage(movie.bannerImageUrl)
-            b.tvBannerTitle.text = movie.title
-            b.tvBannerCategory.text = movie.category
+            b.ivBanner.loadImage(movie.bannerImageUrl.orEmpty())
+            b.tvBannerTitle.text = movie.title.orEmpty()
+            b.tvBannerCategory.text = movie.category.orEmpty()
             b.tvBannerRating.text = "⭐ ${movie.imdbRating}"
             b.btnBannerPlay.setOnClickListener { onClick(movie) }
             b.root.setOnClickListener { onClick(movie) }
