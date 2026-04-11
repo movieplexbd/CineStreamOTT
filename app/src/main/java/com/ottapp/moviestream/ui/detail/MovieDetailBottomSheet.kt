@@ -52,9 +52,11 @@ class MovieDetailBottomSheet : BottomSheetDialogFragment() {
     }
 
     private fun loadMovieDetails(movieId: String) {
-        binding.progressDetail.show()
+        _binding?.progressDetail?.show()
         lifecycleScope.launch {
-            val movie = movieRepo.getMovieById(movieId) ?: run {
+            val movie = movieRepo.getMovieById(movieId)
+            if (_binding == null) return@launch
+            if (movie == null) {
                 requireContext().toast("মুভি পাওয়া যায়নি")
                 dismiss()
                 return@launch
@@ -67,20 +69,18 @@ class MovieDetailBottomSheet : BottomSheetDialogFragment() {
 
     private fun populateUI(movie: Movie) {
         binding.ivBanner.loadImage(movie.bannerImageUrl)
-        binding.tvTitle.text = movie.title
-        binding.tvDescription.text = movie.description
+        binding.tvTitle.text = movie.title.orEmpty()
+        binding.tvDescription.text = movie.description.orEmpty()
         binding.tvRating.text = "⭐ ${movie.imdbRating} IMDb"
-        binding.tvCategory.text = movie.category
+        binding.tvCategory.text = movie.category.orEmpty()
         if (movie.year > 0) binding.tvYear.text = movie.year.toString()
 
-        // Test movie badge
         if (movie.testMovie) {
             binding.tvFreeBadge.show()
         } else {
             binding.tvFreeBadge.hide()
         }
 
-        // Download state
         if (dlRepo.isDownloaded(movie.id)) {
             binding.btnDownload.text = "✓ ডাউনলোড হয়েছে"
             binding.btnDownload.isEnabled = false
@@ -97,15 +97,21 @@ class MovieDetailBottomSheet : BottomSheetDialogFragment() {
             val canAccess = user?.isPremium == true || movie.testMovie
 
             if (!canAccess) {
-                showSubscriptionRequired()
+                if (_binding != null) showSubscriptionRequired()
                 return@launch
             }
 
-            // Local file first
+            if (_binding == null) return@launch
+
             val videoUrl = if (dlRepo.isDownloaded(movie.id)) {
                 dlRepo.getLocalFilePath(movie.id)
             } else {
                 movie.videoStreamUrl
+            }
+
+            if (videoUrl.isNullOrEmpty()) {
+                requireContext().toast("ভিডিও URL পাওয়া যায়নি")
+                return@launch
             }
 
             val intent = Intent(requireContext(), PlayerActivity::class.java).apply {
@@ -126,20 +132,27 @@ class MovieDetailBottomSheet : BottomSheetDialogFragment() {
             val canAccess = user?.isPremium == true || movie.testMovie
 
             if (!canAccess) {
-                showSubscriptionRequired()
+                if (_binding != null) showSubscriptionRequired()
                 return@launch
             }
+
+            if (_binding == null) return@launch
 
             if (dlRepo.isDownloaded(movie.id)) {
                 requireContext().toast("ইতিমধ্যে ডাউনলোড হয়েছে")
                 return@launch
             }
 
-            // Start download service
+            val downloadUrl = movie.downloadUrl.orEmpty().ifEmpty { movie.videoStreamUrl.orEmpty() }
+            if (downloadUrl.isEmpty()) {
+                requireContext().toast("ডাউনলোড URL পাওয়া যায়নি")
+                return@launch
+            }
+
             val intent = Intent(requireContext(), DownloadService::class.java).apply {
                 putExtra(Constants.EXTRA_MOVIE_ID,    movie.id)
                 putExtra(Constants.EXTRA_MOVIE_TITLE, movie.title)
-                putExtra(Constants.EXTRA_VIDEO_URL,   movie.downloadUrl.ifEmpty { movie.videoStreamUrl })
+                putExtra(Constants.EXTRA_VIDEO_URL,   downloadUrl)
                 putExtra(Constants.EXTRA_BANNER_URL,  movie.bannerImageUrl)
             }
             requireContext().startForegroundService(intent)
