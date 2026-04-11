@@ -5,7 +5,7 @@ on:
     branches: [ "main", "master" ]
   pull_request:
     branches: [ "main", "master" ]
-  workflow_dispatch:   # Manual trigger from GitHub UI
+  workflow_dispatch:
 
 jobs:
   build:
@@ -14,11 +14,9 @@ jobs:
 
     steps:
 
-      # ── 1. Checkout source ─────────────────────────────────────────────────
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # ── 2. Setup Java 17 ──────────────────────────────────────────────────
       - name: Set up JDK 17
         uses: actions/setup-java@v4
         with:
@@ -26,11 +24,9 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      # ── 3. Setup Android SDK ──────────────────────────────────────────────
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
 
-      # ── 4. Cache Gradle dependencies ─────────────────────────────────────
       - name: Cache Gradle packages
         uses: actions/cache@v4
         with:
@@ -41,37 +37,20 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      # ── 5. Grant execute permission to gradlew ────────────────────────────
       - name: Grant execute permission to gradlew
         run: chmod +x gradlew
 
-      # ── 6. Decode google-services.json from secret (optional) ─────────────
-      # Uncomment and add GOOGLE_SERVICES_JSON secret in GitHub repo settings
-      # - name: Decode google-services.json
-      #   run: |
-      #     echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > app/google-services.json
+      - name: Setup debug keystore
+        run: |
+          mkdir -p ~/.android
+          cp keystore/debug.keystore ~/.android/debug.keystore
 
-      # ── 7. Build Debug APK ────────────────────────────────────────────────
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      # ── 8. Build Release APK (unsigned) ──────────────────────────────────
       - name: Build Release APK
         run: ./gradlew assembleRelease --no-daemon --stacktrace
 
-      # ── 9. Sign Release APK (optional, needs keystore secret) ────────────
-      # Uncomment after setting up secrets: KEYSTORE_FILE, KEY_ALIAS,
-      # KEYSTORE_PASSWORD, KEY_PASSWORD in GitHub repo settings
-      # - name: Sign Release APK
-      #   uses: r0adkll/sign-android-release@v1
-      #   with:
-      #     releaseDirectory: app/build/outputs/apk/release
-      #     signingKeyBase64: ${{ secrets.KEYSTORE_FILE }}
-      #     alias: ${{ secrets.KEY_ALIAS }}
-      #     keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
-      #     keyPassword: ${{ secrets.KEY_PASSWORD }}
-
-      # ── 10. Upload Debug APK artifact ────────────────────────────────────
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
@@ -80,7 +59,6 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
-      # ── 11. Upload Release APK artifact ──────────────────────────────────
       - name: Upload Release APK
         uses: actions/upload-artifact@v4
         with:
@@ -89,18 +67,15 @@ jobs:
           retention-days: 30
           if-no-files-found: error
 
-      # ── 12. Build summary ────────────────────────────────────────────────
       - name: Build Summary
         if: success()
         run: |
-          echo "## ✅ Build Successful!" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "## Build Successful!" >> $GITHUB_STEP_SUMMARY
           echo "| APK | Path |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|------|" >> $GITHUB_STEP_SUMMARY
           echo "| Debug | app/build/outputs/apk/debug/app-debug.apk |" >> $GITHUB_STEP_SUMMARY
           echo "| Release | app/build/outputs/apk/release/app-release-unsigned.apk |" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "Download APKs from the **Artifacts** section above." >> $GITHUB_STEP_SUMMARY
+          echo "Download APKs from the Artifacts section above." >> $GITHUB_STEP_SUMMARY
 
       - name: Show APK sizes
         if: success()
@@ -108,3 +83,4 @@ jobs:
           echo "=== APK File Sizes ==="
           du -sh app/build/outputs/apk/debug/app-debug.apk 2>/dev/null || echo "Debug APK not found"
           du -sh app/build/outputs/apk/release/app-release-unsigned.apk 2>/dev/null || echo "Release APK not found"
+
