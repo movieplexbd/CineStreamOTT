@@ -9,10 +9,9 @@ import kotlinx.coroutines.tasks.await
 
 class MovieRepository {
 
-    private val db = FirebaseDatabase.getInstance().reference
+    private val db = FirebaseDatabase.getInstance("https://movies-bee24-default-rtdb.firebaseio.com").reference
     private val moviesRef = db.child("movies")
 
-    // ── Realtime flow of ALL movies ──────────────────────────────────────────
     fun getMoviesFlow(): Flow<List<Movie>> = callbackFlow {
         val listener = object : ValueEventListener {
             override fun onDataChange(snapshot: DataSnapshot) {
@@ -33,7 +32,6 @@ class MovieRepository {
         awaitClose { moviesRef.removeEventListener(listener) }
     }
 
-    // ── Single fetch ─────────────────────────────────────────────────────────
     suspend fun getAllMovies(): List<Movie> {
         val snapshot = moviesRef.get().await()
         return snapshot.children.mapNotNull { child ->
@@ -41,7 +39,6 @@ class MovieRepository {
         }
     }
 
-    // ── Trending movies ──────────────────────────────────────────────────────
     suspend fun getTrendingMovies(): List<Movie> {
         val snapshot = moviesRef.orderByChild("trending").equalTo(true).get().await()
         return snapshot.children.mapNotNull { child ->
@@ -49,7 +46,6 @@ class MovieRepository {
         }
     }
 
-    // ── Test movies (Free users can watch) ──────────────────────────────────
     suspend fun getTestMovies(): List<Movie> {
         val snapshot = moviesRef.orderByChild("testMovie").equalTo(true).get().await()
         return snapshot.children.mapNotNull { child ->
@@ -57,7 +53,6 @@ class MovieRepository {
         }
     }
 
-    // ── Movies by category ────────────────────────────────────────────────────
     suspend fun getMoviesByCategory(category: String): List<Movie> {
         val snapshot = moviesRef.orderByChild("category").equalTo(category).get().await()
         return snapshot.children.mapNotNull { child ->
@@ -65,24 +60,21 @@ class MovieRepository {
         }
     }
 
-    // ── Search movies ─────────────────────────────────────────────────────────
     suspend fun searchMovies(query: String): List<Movie> {
         val all = getAllMovies()
         val q = query.lowercase().trim()
         return all.filter { movie ->
-            movie.title.lowercase().contains(q) ||
-            movie.description.lowercase().contains(q) ||
-            movie.category.lowercase().contains(q)
+            movie.title.orEmpty().lowercase().contains(q) ||
+            movie.description.orEmpty().lowercase().contains(q) ||
+            movie.category.orEmpty().lowercase().contains(q)
         }
     }
 
-    // ── Get single movie ──────────────────────────────────────────────────────
     suspend fun getMovieById(movieId: String): Movie? {
         val snapshot = moviesRef.child(movieId).get().await()
         return snapshot.getValue(Movie::class.java)?.copy(id = movieId)
     }
 
-    // ── Admin: Add movie ──────────────────────────────────────────────────────
     suspend fun addMovie(movie: Movie): String {
         val newRef = moviesRef.push()
         val movieWithId = movie.copy(id = newRef.key ?: "")
@@ -90,12 +82,10 @@ class MovieRepository {
         return newRef.key ?: ""
     }
 
-    // ── Admin: Update movie ───────────────────────────────────────────────────
     suspend fun updateMovie(movie: Movie) {
         moviesRef.child(movie.id).setValue(movie).await()
     }
 
-    // ── Admin: Delete movie ───────────────────────────────────────────────────
     suspend fun deleteMovie(movieId: String) {
         moviesRef.child(movieId).removeValue().await()
     }
