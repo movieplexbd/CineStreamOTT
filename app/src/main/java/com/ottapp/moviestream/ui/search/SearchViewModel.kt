@@ -40,10 +40,12 @@ class SearchViewModel : ViewModel() {
         }
         searchJob = viewModelScope.launch {
             _loading.value = true
-            delay(300) // debounce
+            delay(300)
+            val q = query.lowercase()
             val filtered = allMovies.filter {
-                it.title.lowercase().contains(query.lowercase()) ||
-                it.description.lowercase().contains(query.lowercase())
+                it.title.orEmpty().lowercase().contains(q) ||
+                it.description.orEmpty().lowercase().contains(q) ||
+                it.category.orEmpty().lowercase().contains(q)
             }
             applyFilter(filtered)
             _loading.value = false
@@ -52,9 +54,12 @@ class SearchViewModel : ViewModel() {
 
     fun setFilter(cat: String) {
         _activeFilter.value = cat
+        val q = currentQuery.lowercase()
         val base = if (currentQuery.isBlank()) allMovies else
             allMovies.filter {
-                it.title.lowercase().contains(currentQuery.lowercase())
+                it.title.orEmpty().lowercase().contains(q) ||
+                it.description.orEmpty().lowercase().contains(q) ||
+                it.category.orEmpty().lowercase().contains(q)
             }
         applyFilter(base)
     }
@@ -64,7 +69,7 @@ class SearchViewModel : ViewModel() {
         _results.value = when (cat) {
             Constants.CAT_ALL      -> list
             Constants.CAT_TRENDING -> list.filter { it.trending }
-            else                   -> list.filter { it.category == cat }
+            else                   -> list.filter { it.category.orEmpty() == cat }
         }
     }
 }
