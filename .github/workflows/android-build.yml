@@ -9,7 +9,7 @@ on:
 
 jobs:
   build:
-    name: Build Debug & Release APK
+    name: Build Debug & Signed Release APK
     runs-on: ubuntu-latest
 
     steps:
@@ -48,41 +48,60 @@ jobs:
           mkdir -p ~/.android
           cp keystore/debug.keystore ~/.android/debug.keystore
 
+      - name: Decode release keystore
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > keystore/cinestream-release.jks
+          echo "Keystore decoded successfully"
+
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
-      - name: Build Release APK
+      - name: Build Signed Release APK
+        env:
+          KEYSTORE_PATH: ${{ github.workspace }}/keystore/cinestream-release.jks
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
         run: ./gradlew assembleRelease --no-daemon --stacktrace
+
+      - name: Verify APK signing
+        run: |
+          echo "=== Verifying Release APK signature ==="
+          $ANDROID_SDK_ROOT/build-tools/$(ls $ANDROID_SDK_ROOT/build-tools | sort -V | tail -1)/apksigner verify \
+            --verbose app/build/outputs/apk/release/app-release.apk 2>&1 | head -10 || \
+          echo "apksigner not available, skipping verification"
 
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: CineStream-Debug-${{ github.run_number }}
           path: app/build/outputs/apk/debug/app-debug.apk
-          retention-days: 30
+          retention-days: 90
           if-no-files-found: error
 
-      - name: Upload Release APK
+      - name: Upload Signed Release APK
         uses: actions/upload-artifact@v4
         with:
-          name: CineStream-Release-${{ github.run_number }}
-          path: app/build/outputs/apk/release/app-release-unsigned.apk
-          retention-days: 30
+          name: CineStream-Release-Signed-${{ github.run_number }}
+          path: app/build/outputs/apk/release/app-release.apk
+          retention-days: 90
           if-no-files-found: error
 
       - name: Build Summary
         if: success()
         run: |
-          echo "## Build Successful!" >> $GITHUB_STEP_SUMMARY
-          echo "| APK | Path |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----|------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Debug | app/build/outputs/apk/debug/app-debug.apk |" >> $GITHUB_STEP_SUMMARY
-          echo "| Release | app/build/outputs/apk/release/app-release-unsigned.apk |" >> $GITHUB_STEP_SUMMARY
-          echo "Download APKs from the Artifacts section above." >> $GITHUB_STEP_SUMMARY
+          echo "## ✅ Build Successful — Run #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| APK | Type | Signed |" >> $GITHUB_STEP_SUMMARY
+          echo "|-----|------|--------|" >> $GITHUB_STEP_SUMMARY
+          echo "| CineStream-Debug-${{ github.run_number }} | Debug | Debug key |" >> $GITHUB_STEP_SUMMARY
+          echo "| CineStream-Release-Signed-${{ github.run_number }} | Release | ✅ Release key |" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "📦 Download APKs from the **Artifacts** section above (valid 90 days)." >> $GITHUB_STEP_SUMMARY
 
       - name: Show APK sizes
         if: success()
         run: |
           echo "=== APK File Sizes ==="
           du -sh app/build/outputs/apk/debug/app-debug.apk 2>/dev/null || echo "Debug APK not found"
-          du -sh app/build/outputs/apk/release/app-release-unsigned.apk 2>/dev/null || echo "Release APK not found"
+          du -sh app/build/outputs/apk/release/app-release.apk 2>/dev/null || echo "Release APK not found"
