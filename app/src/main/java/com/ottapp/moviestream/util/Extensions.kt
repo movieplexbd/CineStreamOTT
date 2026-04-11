@@ -6,6 +6,7 @@ import android.widget.ImageView
 import android.widget.Toast
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
+import com.bumptech.glide.request.RequestOptions
 import java.util.concurrent.TimeUnit
 
 fun View.show()      { visibility = View.VISIBLE }
@@ -16,11 +17,13 @@ fun Context.toast(msg: String) =
     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 
 fun ImageView.loadImage(url: String, placeholder: Int? = null) {
-    val req = Glide.with(context)
-        .load(url)
+    var builder = Glide.with(context)
+        .load(url.ifBlank { null })
         .transition(DrawableTransitionOptions.withCrossFade(200))
-    placeholder?.let { req.placeholder(it) }
-    req.into(this)
+    if (placeholder != null) {
+        builder = builder.apply(RequestOptions().placeholder(placeholder).error(placeholder))
+    }
+    builder.into(this)
 }
 
 fun Long.toReadableSize(): String {
