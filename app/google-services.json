@@ -34,35 +34,6 @@
           ]
         }
       }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:1080659811750:android:266ba5286512b4f1edc367",
-        "android_client_info": {
-          "package_name": "com.ottapp.moviestream.debug"
-        }
-      },
-      "oauth_client": [
-        {
-          "client_id": "1080659811750-iedo8km8k81nv4npm71dcec7abn9kuvn.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
-      "api_key": [
-        {
-          "current_key": "AIzaSyDgVJ6uP7KgDg2-gT-ILIcNcUiebFVpmUE"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "1080659811750-iedo8km8k81nv4npm71dcec7abn9kuvn.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
-        }
-      }
     }
   ],
   "configuration_version": "1"
