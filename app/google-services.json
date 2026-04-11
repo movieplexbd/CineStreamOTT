@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "1080659811750",
+    "project_id": "movies-bee24",
+    "storage_bucket": "movies-bee24.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1080659811750:android:YOUR_ANDROID_APP_ID",
+        "android_client_info": {
+          "package_name": "com.ottapp.moviestream"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1080659811750-YOUR_WEB_CLIENT_ID.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsz-82MDaibWnIBUpoykrZHyJW7UMedX8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1080659811750-YOUR_WEB_CLIENT_ID.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
