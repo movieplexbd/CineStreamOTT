@@ -1,0 +1,260 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/swipe_refresh"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bg">
+
+        <!-- Shimmer placeholder while loading -->
+        <com.facebook.shimmer.ShimmerFrameLayout
+            android:id="@+id/shimmer_layout"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="visible">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <View android:layout_width="match_parent" android:layout_height="360dp"
+                    android:background="@color/surface2" />
+                <View android:layout_width="180dp" android:layout_height="20dp"
+                    android:layout_margin="14dp" android:background="@color/surface2" />
+                <View android:layout_width="match_parent" android:layout_height="160dp"
+                    android:layout_marginHorizontal="14dp" android:background="@color/surface2" />
+            </LinearLayout>
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
+        <!-- Main scrollable content -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/scroll_content"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:overScrollMode="never"
+            android:scrollbars="none"
+            android:visibility="gone">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- BANNER SECTION -->
+                <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="360dp">
+
+                    <androidx.viewpager2.widget.ViewPager2
+                        android:id="@+id/view_pager_banner"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent" />
+
+                    <!-- Search bar overlay on banner -->
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:layout_marginTop="12dp"
+                        android:layout_marginHorizontal="14dp"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+
+                        <!-- Avatar -->
+                        <de.hdodenhof.circleimageview.CircleImageView
+                            android:id="@+id/iv_avatar"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:src="@color/red"
+                            android:layout_marginStart="10dp" />
+
+                        <TextView
+                            android:id="@+id/tv_avatar_initial"
+                            android:layout_width="38dp"
+                            android:layout_height="38dp"
+                            android:gravity="center"
+                            android:text="U"
+                            android:textColor="@color/white"
+                            android:textSize="16sp"
+                            android:textStyle="bold"
+                            android:background="@drawable/bg_avatar"
+                            android:layout_marginStart="10dp" />
+
+                    </LinearLayout>
+
+                    <!-- Dots indicator -->
+                    <LinearLayout
+                        android:id="@+id/layout_dots"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|end"
+                        android:layout_margin="14dp"
+                        android:orientation="horizontal" />
+
+                    <!-- Subscription badge -->
+                    <TextView
+                        android:id="@+id/tv_subscription_badge"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="top|start"
+                        android:layout_margin="14dp"
+                        android:layout_marginTop="20dp"
+                        android:paddingHorizontal="10dp"
+                        android:paddingVertical="4dp"
+                        android:textSize="10sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        android:background="@drawable/bg_badge_free"
+                        android:visibility="gone" />
+
+                </FrameLayout>
+
+                <!-- ── TRENDING SECTION ── -->
+                <LinearLayout
+                    android:id="@+id/section_trending"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="18dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="14dp"
+                        android:layout_marginBottom="11dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/section_trending"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/t1"
+                            android:fontFamily="serif" />
+
+                        <Button
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:text="@string/see_all"
+                            android:textSize="11sp"
+                            android:textColor="@color/red"
+                            android:background="@drawable/bg_see_all"
+                            android:paddingHorizontal="11dp" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_trending"
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:paddingHorizontal="14dp"
+                        android:clipToPadding="false"
+                        android:overScrollMode="never"
+                        android:scrollbars="none" />
+                </LinearLayout>
+
+                <!-- ── BANGLA SECTION ── -->
+                <LinearLayout
+                    android:id="@+id/section_bangla"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="18dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="14dp"
+                        android:layout_marginBottom="11dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/section_bangla"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/t1"
+                            android:fontFamily="serif" />
+
+                        <Button
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:text="@string/see_all"
+                            android:textSize="11sp"
+                            android:textColor="@color/red"
+                            android:background="@drawable/bg_see_all"
+                            android:paddingHorizontal="11dp" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_bangla"
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:paddingHorizontal="14dp"
+                        android:clipToPadding="false"
+                        android:overScrollMode="never"
+                        android:scrollbars="none" />
+                </LinearLayout>
+
+                <!-- ── HINDI SECTION ── -->
+                <LinearLayout
+                    android:id="@+id/section_hindi"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="18dp"
+                    android:layout_marginBottom="24dp">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:gravity="center_vertical"
+                        android:paddingHorizontal="14dp"
+                        android:layout_marginBottom="11dp">
+
+                        <TextView
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            android:text="@string/section_hindi"
+                            android:textSize="17sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/t1"
+                            android:fontFamily="serif" />
+
+                        <Button
+                            android:layout_width="wrap_content"
+                            android:layout_height="30dp"
+                            android:text="@string/see_all"
+                            android:textSize="11sp"
+                            android:textColor="@color/red"
+                            android:background="@drawable/bg_see_all"
+                            android:paddingHorizontal="11dp" />
+                    </LinearLayout>
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_hindi"
+                        android:layout_width="match_parent"
+                        android:layout_height="220dp"
+                        android:paddingHorizontal="14dp"
+                        android:clipToPadding="false"
+                        android:overScrollMode="never"
+                        android:scrollbars="none" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.core.widget.NestedScrollView>
+
+    </FrameLayout>
+</androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
