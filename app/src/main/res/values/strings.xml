@@ -10,8 +10,18 @@
 
     <!-- Login -->
     <string name="login_title">স্বাগতম</string>
-    <string name="login_subtitle">আপনার গুগল অ্যাকাউন্ট দিয়ে লগইন করুন</string>
+    <string name="login_subtitle">আপনার অ্যাকাউন্ট দিয়ে লগইন করুন</string>
+    <string name="title_signin">লগইন করুন</string>
+    <string name="title_signup">নতুন অ্যাকাউন্ট</string>
+    <string name="btn_signin">লগইন</string>
+    <string name="btn_signup">অ্যাকাউন্ট তৈরি করুন</string>
     <string name="btn_google_signin">Google দিয়ে লগইন</string>
+    <string name="toggle_to_signup">অ্যাকাউন্ট নেই? এখানে তৈরি করুন</string>
+    <string name="toggle_to_signin">ইতিমধ্যে অ্যাকাউন্ট আছে? লগইন করুন</string>
+    <string name="hint_email">ইমেইল</string>
+    <string name="hint_password">পাসওয়ার্ড</string>
+    <string name="hint_confirm_password">পাসওয়ার্ড আবার দিন</string>
+    <string name="hint_name">আপনার নাম</string>
 
     <!-- Home -->
     <string name="section_trending">ট্রেন্ডিং</string>
@@ -45,7 +55,7 @@
     <string name="btn_download">ডাউনলোড</string>
     <string name="free_badge">বিনামূল্যে</string>
     <string name="locked_title">শুধু প্রিমিয়াম সদস্যদের জন্য</string>
-    <string name="locked_sub">এই মুভিটি দেখতে প্রিমিয়াম সাবস্ক্রিপশন প্রয়োজন। অ্যাডমিনের সাথে যোগাযোগ করুন।</string>
+    <string name="locked_sub">এই মুভিটি দেখতে প্রিমিয়াম সাবস্ক্রিপশন প্রয়োজন।</string>
 
     <!-- Player -->
     <string name="speed_label">স্পিড</string>
