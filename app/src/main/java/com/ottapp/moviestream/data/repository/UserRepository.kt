@@ -11,11 +11,10 @@ import kotlinx.coroutines.tasks.await
 class UserRepository {
 
     private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseDatabase.getInstance().reference
+    private val db = FirebaseDatabase.getInstance("https://movies-bee24-default-rtdb.firebaseio.com").reference
 
     val currentUid: String? get() = auth.currentUser?.uid
 
-    // ── Realtime user flow ───────────────────────────────────────────────────
     fun getCurrentUserFlow(): Flow<User?> = callbackFlow {
         val uid = currentUid ?: run {
             trySend(null)
@@ -36,18 +35,16 @@ class UserRepository {
         awaitClose { ref.removeEventListener(listener) }
     }
 
-    // ── Get user once ─────────────────────────────────────────────────────────
     suspend fun getCurrentUser(): User? {
         val uid = currentUid ?: return null
         val snapshot = db.child("users").child(uid).get().await()
         return snapshot.getValue(User::class.java)
     }
 
-    // ── Check if movie is accessible ──────────────────────────────────────────
     suspend fun canAccessMovie(movieId: String, isTestMovie: Boolean): Boolean {
         val user = getCurrentUser() ?: return false
-        if (user.isPremium) return true        // premium = access all
-        if (isTestMovie) return true           // test movie = free access
+        if (user.isPremium) return true
+        if (isTestMovie) return true
         return false
     }
 }
