@@ -32,7 +32,6 @@ object Constants {
     // Max test movies allowed
     const val MAX_TEST_MOVIES = 2
 
-    // Web client ID (replace with your actual OAuth web client ID from Firebase Console)
-    // Go to Firebase Console → Authentication → Sign-in method → Google → Web SDK config
-    const val WEB_CLIENT_ID = "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com"
+    // Web client ID from Firebase Console (OAuth 2.0 Web Client)
+    const val WEB_CLIENT_ID = "1080659811750-iedo8km8k81nv4npm71dcec7abn9kuvn.apps.googleusercontent.com"
 }
