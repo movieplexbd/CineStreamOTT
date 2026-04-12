@@ -1,12 +1,14 @@
 package com.ottapp.moviestream.ui.home
 
 import android.util.Log
-import androidx.lifecycle.*
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.ottapp.moviestream.data.model.Movie
 import com.ottapp.moviestream.data.model.User
 import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.data.repository.UserRepository
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class HomeViewModel : ViewModel() {
@@ -16,99 +18,80 @@ class HomeViewModel : ViewModel() {
     }
 
     private val movieRepo = MovieRepository()
-    private val userRepo  = UserRepository()
+    private val userRepo = UserRepository()
 
-    private val _bannerMovies   = MutableLiveData<List<Movie>>(emptyList())
+    // loading starts TRUE so shimmer shows immediately
+    private val _loading = MutableLiveData(true)
+    val loading: LiveData<Boolean> = _loading
+
+    private val _bannerMovies = MutableLiveData<List<Movie>>(emptyList())
     val bannerMovies: LiveData<List<Movie>> = _bannerMovies
 
     private val _trendingMovies = MutableLiveData<List<Movie>>(emptyList())
     val trendingMovies: LiveData<List<Movie>> = _trendingMovies
 
-    private val _banglaMovies   = MutableLiveData<List<Movie>>(emptyList())
+    private val _banglaMovies = MutableLiveData<List<Movie>>(emptyList())
     val banglaMovies: LiveData<List<Movie>> = _banglaMovies
 
-    private val _hindiMovies    = MutableLiveData<List<Movie>>(emptyList())
+    private val _hindiMovies = MutableLiveData<List<Movie>>(emptyList())
     val hindiMovies: LiveData<List<Movie>> = _hindiMovies
 
-    private val _allMovies      = MutableLiveData<List<Movie>>(emptyList())
+    private val _allMovies = MutableLiveData<List<Movie>>(emptyList())
     val allMovies: LiveData<List<Movie>> = _allMovies
 
-    private val _currentUser    = MutableLiveData<User?>(null)
+    private val _currentUser = MutableLiveData<User?>(null)
     val currentUser: LiveData<User?> = _currentUser
-
-    private val _loading = MutableLiveData(false)
-    val loading: LiveData<Boolean> = _loading
-
-    private val _error = MutableLiveData<String?>(null)
-    val error: LiveData<String?> = _error
 
     init {
         loadData()
-        observeUser()
     }
 
     fun loadData() {
         viewModelScope.launch {
             _loading.value = true
-            _error.value = null
             try {
-                val all = try {
-                    movieRepo.getAllMovies()
-                } catch (e: Exception) {
-                    Log.e(TAG, "getAllMovies exception: ${e.message}", e)
-                    emptyList()
-                }
-
+                // Load movies
+                val all = safeGetMovies()
                 _allMovies.value = all
 
                 val trending = all.filter { it.trending }
                 _trendingMovies.value = trending
+                _bannerMovies.value = if (trending.isNotEmpty()) trending.take(5) else all.take(5)
 
-                _bannerMovies.value = trending.take(5).ifEmpty { all.take(5) }
-
-                _banglaMovies.value = all.filter { movie ->
-                    val cat = movie.category.lowercase().trim()
-                    cat.contains("bangla") || cat.contains("বাংলা")
+                _banglaMovies.value = all.filter { m ->
+                    m.category.lowercase().let { it.contains("bangla") || it.contains("বাংলা") }
+                }
+                _hindiMovies.value = all.filter { m ->
+                    m.category.lowercase().let { it.contains("hindi") || it.contains("হিন্দি") }
                 }
 
-                _hindiMovies.value = all.filter { movie ->
-                    val cat = movie.category.lowercase().trim()
-                    cat.contains("hindi") || cat.contains("হিন্দি")
-                }
+                // Load user info (one-shot, no persistent listener)
+                safeGetUser()
 
             } catch (e: Exception) {
                 Log.e(TAG, "loadData error: ${e.message}", e)
-                _error.value = "ডেটা লোড ব্যর্থ"
-                _allMovies.value     = emptyList()
-                _bannerMovies.value  = emptyList()
-                _trendingMovies.value = emptyList()
-                _banglaMovies.value  = emptyList()
-                _hindiMovies.value   = emptyList()
             } finally {
                 _loading.value = false
             }
         }
     }
 
-    private fun observeUser() {
-        viewModelScope.launch {
-            try {
-                userRepo.getCurrentUserFlow()
-                    .catch { e ->
-                        Log.e(TAG, "User flow error: ${e.message}")
-                        emit(null)
-                    }
-                    .collect { user ->
-                        try {
-                            _currentUser.value = user
-                        } catch (e: Exception) {
-                            Log.e(TAG, "Set currentUser error: ${e.message}")
-                        }
-                    }
-            } catch (e: Exception) {
-                Log.e(TAG, "observeUser error: ${e.message}")
-                _currentUser.value = null
-            }
+    private suspend fun safeGetMovies(): List<Movie> {
+        return try {
+            movieRepo.getAllMovies()
+        } catch (e: Exception) {
+            Log.e(TAG, "getAllMovies error: ${e.message}", e)
+            emptyList()
+        }
+    }
+
+    private suspend fun safeGetUser() {
+        try {
+            val user = userRepo.getCurrentUser()
+            _currentUser.value = user
+        } catch (e: Exception) {
+            Log.e(TAG, "getUser error: ${e.message}", e)
+            _currentUser.value = null
         }
     }
 }
