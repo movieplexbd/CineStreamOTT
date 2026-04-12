@@ -27,9 +27,6 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-
       - name: Create local.properties
         run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
 
@@ -52,7 +49,6 @@ jobs:
           if [ -f "keystore/debug.keystore" ]; then
             cp keystore/debug.keystore ~/.android/debug.keystore
           else
-            echo "Generating debug keystore..."
             keytool -genkey -v \
               -keystore ~/.android/debug.keystore \
               -alias androiddebugkey \
@@ -65,11 +61,9 @@ jobs:
       - name: Setup release keystore
         run: |
           mkdir -p keystore
-          if [ -n "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" ]; then
-            echo "Using keystore from secret..."
-            echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > keystore/cinestream-release.jks
+          if [ -n "$RELEASE_KEYSTORE_B64" ]; then
+            echo "$RELEASE_KEYSTORE_B64" | base64 --decode > keystore/cinestream-release.jks
           else
-            echo "Generating new release keystore..."
             keytool -genkey -v \
               -keystore keystore/cinestream-release.jks \
               -alias cinestream_release \
@@ -78,80 +72,77 @@ jobs:
               -keypass "CineStream@2024SecureBD" \
               -dname "CN=CineStream,OU=MoviePlex,O=MoviePlexBD,L=Dhaka,S=Dhaka,C=BD"
           fi
-          echo "Keystore ready."
+        env:
+          RELEASE_KEYSTORE_B64: ${{ secrets.RELEASE_KEYSTORE_BASE64 }}
 
       - name: Build Debug APK
-        id: build_debug
         run: ./gradlew assembleDebug --no-daemon --stacktrace
 
       - name: Build Signed Release APK
-        id: build_release
+        run: ./gradlew assembleRelease --no-daemon --stacktrace
         env:
           KEYSTORE_PATH: ${{ github.workspace }}/keystore/cinestream-release.jks
-          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD || 'CineStream@2024SecureBD' }}
-          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS || 'cinestream_release' }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD || 'CineStream@2024SecureBD' }}
-        run: ./gradlew assembleRelease --no-daemon --stacktrace
+          RELEASE_STORE_PASSWORD: CineStream@2024SecureBD
+          RELEASE_KEY_ALIAS: cinestream_release
+          RELEASE_KEY_PASSWORD: CineStream@2024SecureBD
 
       - name: Get version info
         id: version
         run: |
-          VERSION_NAME=$(grep -m 1 'versionName' app/build.gradle | sed "s/.*versionName\s*['\"]//;s/['\"].*//")
-          VERSION_CODE=$(grep -m 1 'versionCode' app/build.gradle | sed 's/.*versionCode\s*//')
+          VERSION_NAME=$(grep -m 1 "versionName" app/build.gradle | sed "s/.*versionName\s*['\"]//;s/['\"].*//")
+          VERSION_CODE=$(grep -m 1 "versionCode" app/build.gradle | sed 's/.*versionCode\s*//')
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
-          echo "APK Version: $VERSION_NAME ($VERSION_CODE)"
 
-      - name: Rename APKs
+      - name: Rename and copy APKs
         run: |
           mkdir -p dist
-          cp app/build/outputs/apk/debug/app-debug.apk dist/CineStream-v${{ steps.version.outputs.version_name }}-debug.apk
-          cp app/build/outputs/apk/release/app-release.apk dist/CineStream-v${{ steps.version.outputs.version_name }}-release.apk
+          DEBUG_APK=$(find app/build/outputs/apk/debug -name "*.apk" | head -1)
+          RELEASE_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
+          cp "$DEBUG_APK"   dist/CineStream-v${{ steps.version.outputs.version_name }}-debug.apk
+          cp "$RELEASE_APK" dist/CineStream-v${{ steps.version.outputs.version_name }}-release.apk
 
-      - name: Upload Debug APK
+      - name: Upload Debug APK (Artifact)
         uses: actions/upload-artifact@v4
         with:
-          name: CineStream-v${{ steps.version.outputs.version_name }}-Debug-Build${{ github.run_number }}
+          name: CineStream-Debug-Build${{ github.run_number }}
           path: dist/CineStream-v${{ steps.version.outputs.version_name }}-debug.apk
           retention-days: 90
-          if-no-files-found: error
 
-      - name: Upload Release APK
+      - name: Upload Release APK (Artifact)
         uses: actions/upload-artifact@v4
         with:
-          name: CineStream-v${{ steps.version.outputs.version_name }}-Release-Build${{ github.run_number }}
+          name: CineStream-Release-Build${{ github.run_number }}
           path: dist/CineStream-v${{ steps.version.outputs.version_name }}-release.apk
           retention-days: 90
-          if-no-files-found: error
 
-      - name: Create GitHub Release (on push to main)
+      - name: Create GitHub Release
         if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.version_name }}-build${{ github.run_number }}
           name: "CineStream v${{ steps.version.outputs.version_name }} (Build #${{ github.run_number }})"
           body: |
-            ## CineStream Android APK — Build #${{ github.run_number }}
+            ## CineStream v${{ steps.version.outputs.version_name }} — Build #${{ github.run_number }}
 
-            ### নতুন আপডেট (v${{ steps.version.outputs.version_name }})
-            - Advanced video player with gesture controls
-            - Swipe to seek forward/backward
-            - Double-tap to skip 10s
-            - Home screen 3-column movie grid
-            - Auto-navigate to download page on download click
-            - Storage usage display in download page
-            - Professional category buttons
-            - Search button in header
-            - Full profile settings page
-            - Fixed navigation back stack
+            ### UI Upgrades in this build
+            - Floating search button (minimal, top-right only, no heavy header)
+            - Full-width banner with ViewPager2 auto-scroll + dot indicators
+            - Fixed navigation back stack (Home button always returns home)
+            - Bottom navigation: compact icon+text, clean divider
+            - Smooth scale animation on button press
+            - Premium light theme with soft shadows and spacing
+            - Back button on all internal detail pages
 
-            ### ডাউনলোড করুন
+            ### APK Download
             | File | Type |
             |------|------|
-            | `CineStream-v${{ steps.version.outputs.version_name }}-release.apk` | Release (Recommended) |
+            | `CineStream-v${{ steps.version.outputs.version_name }}-release.apk` | **Release (Recommended)** |
             | `CineStream-v${{ steps.version.outputs.version_name }}-debug.apk` | Debug |
 
-            > **ইনস্টল করতে:** Settings > Security > Unknown Sources চালু করুন
+            > **Install:** Settings → Security → Unknown Sources → Enable
+            > 
+            > **Direct link:** https://github.com/${{ github.repository }}/releases/latest
           files: |
             dist/CineStream-v${{ steps.version.outputs.version_name }}-release.apk
             dist/CineStream-v${{ steps.version.outputs.version_name }}-debug.apk
@@ -163,24 +154,22 @@ jobs:
       - name: Build Summary
         if: always()
         run: |
-          echo "## 🎬 CineStream Build — #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
+          VER="${{ steps.version.outputs.version_name }}"
+          echo "## CineStream Build #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "| APK | Status |" >> $GITHUB_STEP_SUMMARY
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          if [ -f "dist/CineStream-v${{ steps.version.outputs.version_name }}-debug.apk" ]; then
-            SIZE=$(du -sh dist/CineStream-v${{ steps.version.outputs.version_name }}-debug.apk | cut -f1)
-            echo "| Debug APK ($SIZE) | ✅ সফল |" >> $GITHUB_STEP_SUMMARY
+          if [ -f "dist/CineStream-v${VER}-debug.apk" ]; then
+            SZ=$(du -sh "dist/CineStream-v${VER}-debug.apk" | cut -f1)
+            echo "| Debug APK ($SZ) | SUCCESS |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| Debug APK | ❌ ব্যর্থ |" >> $GITHUB_STEP_SUMMARY
+            echo "| Debug APK | FAILED |" >> $GITHUB_STEP_SUMMARY
           fi
-          if [ -f "dist/CineStream-v${{ steps.version.outputs.version_name }}-release.apk" ]; then
-            SIZE=$(du -sh dist/CineStream-v${{ steps.version.outputs.version_name }}-release.apk | cut -f1)
-            echo "| Release APK ($SIZE) | ✅ সফল |" >> $GITHUB_STEP_SUMMARY
+          if [ -f "dist/CineStream-v${VER}-release.apk" ]; then
+            SZ=$(du -sh "dist/CineStream-v${VER}-release.apk" | cut -f1)
+            echo "| Release APK ($SZ) | SUCCESS |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| Release APK | ❌ ব্যর্থ |" >> $GITHUB_STEP_SUMMARY
+            echo "| Release APK | FAILED |" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "### ডাউনলোড লিংক" >> $GITHUB_STEP_SUMMARY
-          echo "Artifacts section থেকে APK ডাউনলোড করুন (90 দিন পর্যন্ত সংরক্ষিত)" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Releases page:** https://github.com/${{ github.repository }}/releases" >> $GITHUB_STEP_SUMMARY
+          echo "**Releases:** https://github.com/${{ github.repository }}/releases" >> $GITHUB_STEP_SUMMARY
