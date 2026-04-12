@@ -11,13 +11,13 @@ import android.util.Rational
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
+import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.ui.AspectRatioFrameLayout
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.ottapp.moviestream.R
 import com.ottapp.moviestream.databinding.ActivityPlayerBinding
@@ -27,7 +27,7 @@ import com.ottapp.moviestream.util.show
 import com.ottapp.moviestream.util.toast
 import com.ottapp.moviestream.util.toFormattedTime
 
-@UnstableApi
+@OptIn(UnstableApi::class)
 class PlayerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPlayerBinding
@@ -38,25 +38,34 @@ class PlayerActivity : AppCompatActivity() {
     private var movieTitle = ""
     private var videoUrl   = ""
 
-    private val hideHandler = Handler(Looper.getMainLooper())
+    private val hideHandler  = Handler(Looper.getMainLooper())
     private val hideRunnable = Runnable { hideControls() }
     private var controlsVisible = true
     private val HIDE_DELAY = 3500L
 
-    private val speedLabels = arrayOf("0.5x","0.75x","1.0x","1.25x","1.5x","2.0x")
-    private val speedValues = floatArrayOf(0.5f,0.75f,1.0f,1.25f,1.5f,2.0f)
+    private val speedLabels = arrayOf("0.5x", "0.75x", "1.0x", "1.25x", "1.5x", "2.0x")
+    private val speedValues = floatArrayOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f)
     private var speedIndex  = 2
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        hideSystemUI()
+
         binding = ActivityPlayerBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        // Call AFTER setContentView so window is ready
+        hideSystemUI()
 
         prefs      = getSharedPreferences("ott_prefs", MODE_PRIVATE)
         movieId    = intent.getStringExtra(Constants.EXTRA_MOVIE_ID)    ?: ""
         movieTitle = intent.getStringExtra(Constants.EXTRA_MOVIE_TITLE) ?: "Movie"
         videoUrl   = intent.getStringExtra(Constants.EXTRA_VIDEO_URL)   ?: ""
+
+        if (videoUrl.isBlank()) {
+            toast("ভিডিও URL পাওয়া যায়নি")
+            finish()
+            return
+        }
 
         binding.tvPlayerTitle.text = movieTitle
         setupPlayer()
@@ -65,14 +74,17 @@ class PlayerActivity : AppCompatActivity() {
 
     // ── Player ───────────────────────────────────────────────────────────────
     private fun setupPlayer() {
-        player = ExoPlayer.Builder(this).build().also { exo ->
+        try {
+            val exo = ExoPlayer.Builder(this).build()
+            player = exo
+
             binding.playerView.player = exo
-            binding.playerView.resizeMode = AspectRatioFrameLayout.RESIZE_MODE_FIT
-            binding.playerView.useController = false
 
             exo.setMediaItem(MediaItem.fromUri(videoUrl))
+
             val saved = prefs.getLong(Constants.PREF_PLAYBACK_POSITION + movieId, 0L)
-            if (saved > 5000) exo.seekTo(saved)
+            if (saved > 5000L) exo.seekTo(saved)
+
             exo.prepare()
             exo.playWhenReady = true
 
@@ -80,42 +92,79 @@ class PlayerActivity : AppCompatActivity() {
                 override fun onPlaybackStateChanged(state: Int) {
                     when (state) {
                         Player.STATE_BUFFERING -> binding.progressBuffering.show()
-                        Player.STATE_READY     -> { binding.progressBuffering.hide(); startProgressLoop() }
-                        Player.STATE_ENDED     -> { binding.btnPlayPause.setImageResource(R.drawable.ic_replay); savePosition(0L) }
+                        Player.STATE_READY -> {
+                            binding.progressBuffering.hide()
+                            startProgressLoop()
+                        }
+                        Player.STATE_ENDED -> {
+                            binding.btnPlayPause.setImageResource(R.drawable.ic_replay)
+                            savePosition(0L)
+                        }
                         else -> {}
                     }
                 }
-                override fun onIsPlayingChanged(playing: Boolean) {
+
+                override fun onIsPlayingChanged(isPlaying: Boolean) {
                     binding.btnPlayPause.setImageResource(
-                        if (playing) R.drawable.ic_pause else R.drawable.ic_play
+                        if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
                     )
                 }
+
                 override fun onPlayerError(error: PlaybackException) {
-                    toast("প্লেব্যাক ত্রুটি: ${error.message}")
                     binding.progressBuffering.hide()
+                    val msg = when (error.errorCode) {
+                        PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED,
+                        PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT ->
+                            "নেটওয়ার্ক সংযোগ ব্যর্থ"
+                        PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS ->
+                            "ভিডিও লোড ব্যর্থ (HTTP Error)"
+                        PlaybackException.ERROR_CODE_PARSING_CONTAINER_UNSUPPORTED ->
+                            "ভিডিও ফরম্যাট সাপোর্টেড নয়"
+                        else -> "প্লেব্যাক ত্রুটি: ${error.message}"
+                    }
+                    toast(msg)
                 }
             })
+
+        } catch (e: Exception) {
+            toast("প্লেয়ার শুরু করতে সমস্যা: ${e.message}")
+            finish()
         }
     }
 
     // ── Controls ─────────────────────────────────────────────────────────────
     private fun setupControls() {
         binding.btnBack.setOnClickListener        { onBackPressedDispatcher.onBackPressed() }
-        binding.btnPlayPause.setOnClickListener   { player?.run { if (isPlaying) pause() else play() }; resetHide() }
-        binding.btnSeekBack.setOnClickListener    { player?.seekTo((player!!.currentPosition - 10_000).coerceAtLeast(0)); resetHide() }
-        binding.btnSeekForward.setOnClickListener { player?.seekTo((player!!.currentPosition + 10_000).coerceAtMost(player!!.duration)); resetHide() }
+        binding.btnPlayPause.setOnClickListener   { togglePlayPause(); resetHide() }
+        binding.btnSeekBack.setOnClickListener    { seekBy(-10_000); resetHide() }
+        binding.btnSeekForward.setOnClickListener { seekBy(+10_000); resetHide() }
         binding.tvSpeed.setOnClickListener        { showSpeedDialog() }
         binding.btnFullscreen.setOnClickListener  { enterPiP() }
         binding.playerView.setOnClickListener     { toggleControls() }
 
         binding.seekBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
-            override fun onStartTrackingTouch(sb: android.widget.SeekBar)  {}
-            override fun onStopTrackingTouch(sb: android.widget.SeekBar)   { player?.seekTo(sb.progress.toLong()); resetHide() }
+            override fun onStartTrackingTouch(sb: android.widget.SeekBar) {}
+            override fun onStopTrackingTouch(sb: android.widget.SeekBar) {
+                player?.seekTo(sb.progress.toLong())
+                resetHide()
+            }
             override fun onProgressChanged(sb: android.widget.SeekBar, p: Int, fromUser: Boolean) {
                 if (fromUser) binding.tvCurrentTime.text = p.toLong().toFormattedTime()
             }
         })
+
         resetHide()
+    }
+
+    private fun togglePlayPause() {
+        val exo = player ?: return
+        if (exo.isPlaying) exo.pause() else exo.play()
+    }
+
+    private fun seekBy(offsetMs: Long) {
+        val exo = player ?: return
+        val target = (exo.currentPosition + offsetMs).coerceIn(0L, exo.duration.coerceAtLeast(0L))
+        exo.seekTo(target)
     }
 
     // ── Progress loop ────────────────────────────────────────────────────────
@@ -136,7 +185,7 @@ class PlayerActivity : AppCompatActivity() {
     private fun startProgressLoop() = progressHandler.post(progressLoop)
 
     // ── Controls show/hide ───────────────────────────────────────────────────
-    private fun toggleControls() { if (controlsVisible) hideControls() else showControls() }
+    private fun toggleControls()  { if (controlsVisible) hideControls() else showControls() }
     private fun showControls() {
         controlsVisible = true
         binding.controlsOverlay.show()
@@ -144,10 +193,11 @@ class PlayerActivity : AppCompatActivity() {
     }
     private fun hideControls() {
         controlsVisible = false
-        binding.controlsOverlay.animate().alpha(0f).setDuration(300).withEndAction {
-            binding.controlsOverlay.hide()
-            binding.controlsOverlay.alpha = 1f
-        }.start()
+        binding.controlsOverlay.animate()
+            .alpha(0f).setDuration(300).withEndAction {
+                binding.controlsOverlay.hide()
+                binding.controlsOverlay.alpha = 1f
+            }.start()
     }
     private fun resetHide() {
         hideHandler.removeCallbacks(hideRunnable)
@@ -169,9 +219,15 @@ class PlayerActivity : AppCompatActivity() {
     // ── PiP ──────────────────────────────────────────────────────────────────
     private fun enterPiP() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            enterPictureInPictureMode(
-                PictureInPictureParams.Builder().setAspectRatio(Rational(16, 9)).build()
-            )
+            try {
+                enterPictureInPictureMode(
+                    PictureInPictureParams.Builder()
+                        .setAspectRatio(Rational(16, 9))
+                        .build()
+                )
+            } catch (e: Exception) {
+                toast("PiP মোড সাপোর্টেড নয়")
+            }
         }
     }
 
@@ -183,17 +239,18 @@ class PlayerActivity : AppCompatActivity() {
     // ── System UI ─────────────────────────────────────────────────────────────
     private fun hideSystemUI() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.insetsController?.apply {
-                hide(WindowInsets.Type.systemBars())
-                systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+            window.insetsController?.let { ctrl ->
+                ctrl.hide(WindowInsets.Type.systemBars())
+                ctrl.systemBarsBehavior =
+                    WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
             }
         } else {
             @Suppress("DEPRECATION")
             window.decorView.systemUiVisibility = (
                 View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                or View.SYSTEM_UI_FLAG_FULLSCREEN
-                or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            )
+                    or View.SYSTEM_UI_FLAG_FULLSCREEN
+                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                )
         }
     }
 
@@ -205,13 +262,17 @@ class PlayerActivity : AppCompatActivity() {
         super.onPause()
         player?.let { savePosition(it.currentPosition); it.pause() }
     }
+
     override fun onStop() {
         super.onStop()
         progressHandler.removeCallbacks(progressLoop)
     }
+
     override fun onDestroy() {
         super.onDestroy()
         hideHandler.removeCallbacks(hideRunnable)
-        player?.release(); player = null
+        progressHandler.removeCallbacks(progressLoop)
+        player?.release()
+        player = null
     }
 }

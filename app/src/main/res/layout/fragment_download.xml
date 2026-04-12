@@ -25,7 +25,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="14dp"
-        android:layout_marginBottom="12dp"
+        android:layout_marginBottom="10dp"
         android:visibility="gone"
         app:cardCornerRadius="13dp"
         app:cardElevation="1dp"
@@ -55,52 +55,114 @@
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Empty state -->
-    <LinearLayout
-        android:id="@+id/layout_empty"
+    <!-- Scrollable content to support both sections -->
+    <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:visibility="gone">
+        android:overScrollMode="never">
 
-        <TextView
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="📥"
-            android:textSize="60sp" />
+            android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/download_empty_title"
-            android:textSize="18sp"
-            android:textStyle="bold"
-            android:textColor="@color/t1"
-            android:fontFamily="serif"
-            android:layout_marginTop="14dp" />
+            <!-- ═══ Active Downloads (in-progress) ═══════════════════════════ -->
+            <LinearLayout
+                android:id="@+id/section_active"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/download_empty_sub"
-            android:textSize="13sp"
-            android:textColor="@color/t3"
-            android:gravity="center"
-            android:layout_marginTop="6dp"
-            android:layout_marginHorizontal="32dp" />
-    </LinearLayout>
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="⏬  এখন ডাউনলোড হচ্ছে"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/red"
+                    android:paddingHorizontal="16dp"
+                    android:paddingBottom="8dp" />
 
-    <!-- Downloads list -->
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/rv_downloads"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:overScrollMode="never"
-        android:scrollbars="none"
-        android:paddingBottom="16dp"
-        android:clipToPadding="false" />
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rv_active"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:overScrollMode="never"
+                    android:nestedScrollingEnabled="false" />
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/border"
+                    android:layout_marginHorizontal="14dp"
+                    android:layout_marginTop="8dp"
+                    android:layout_marginBottom="12dp" />
+
+            </LinearLayout>
+
+            <!-- ═══ Empty state (only when both lists empty) ══════════════════ -->
+            <LinearLayout
+                android:id="@+id/layout_empty"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:orientation="vertical"
+                android:paddingVertical="60dp"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="📥"
+                    android:textSize="60sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/download_empty_title"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/t1"
+                    android:fontFamily="serif"
+                    android:layout_marginTop="14dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/download_empty_sub"
+                    android:textSize="13sp"
+                    android:textColor="@color/t3"
+                    android:gravity="center"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginHorizontal="32dp" />
+            </LinearLayout>
+
+            <!-- ═══ Completed Downloads ════════════════════════════════════════ -->
+            <TextView
+                android:id="@+id/tv_completed_label"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="সংরক্ষিত মুভি"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:textColor="@color/t2"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="8dp"
+                android:visibility="gone" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_downloads"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:overScrollMode="never"
+                android:nestedScrollingEnabled="false"
+                android:paddingBottom="16dp"
+                android:clipToPadding="false" />
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
 
 </LinearLayout>
