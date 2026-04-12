@@ -1,6 +1,7 @@
 package com.ottapp.moviestream.ui.movies
 
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -19,64 +20,86 @@ import com.ottapp.moviestream.util.show
 
 class MoviesFragment : Fragment() {
 
-    private var _binding: FragmentMoviesBinding? = null
-    private val binding get() = _binding!!
-    private val viewModel: MoviesViewModel by viewModels()
-    private lateinit var adapter: MovieGridAdapter
+    companion object {
+        private const val TAG = "MoviesFragment"
+    }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentMoviesBinding.inflate(inflater, container, false)
-        return binding.root
+    private var _binding: FragmentMoviesBinding? = null
+    private val binding get() = _binding
+    private val viewModel: MoviesViewModel by viewModels()
+    private var adapter: MovieGridAdapter? = null
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return try {
+            _binding = FragmentMoviesBinding.inflate(inflater, container, false)
+            _binding?.root
+        } catch (e: Exception) {
+            Log.e(TAG, "Inflate error: ${e.message}", e)
+            null
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (_binding == null) return
 
-        adapter = MovieGridAdapter { movie -> openDetail(movie) }
-        binding.rvMovies.layoutManager = GridLayoutManager(requireContext(), 3)
-        binding.rvMovies.adapter = adapter
+        try {
+            val ctx = context ?: return
+            adapter = MovieGridAdapter { movie -> openDetail(movie) }
+            binding?.rvMovies?.layoutManager = GridLayoutManager(ctx, 3)
+            binding?.rvMovies?.adapter = adapter
 
-        setupCategoryTabs()
-        observeViewModel()
+            setupCategoryTabs()
+            observeViewModel()
+        } catch (e: Exception) {
+            Log.e(TAG, "onViewCreated error: ${e.message}", e)
+        }
     }
 
     private fun setupCategoryTabs() {
+        val b = binding ?: return
         val tabs = listOf(
-            binding.tabAll      to Constants.CAT_ALL,
-            binding.tabBangla   to Constants.CAT_BANGLA,
-            binding.tabHindi    to Constants.CAT_HINDI,
-            binding.tabTrending to Constants.CAT_TRENDING
+            b.tabAll      to Constants.CAT_ALL,
+            b.tabBangla   to Constants.CAT_BANGLA,
+            b.tabHindi    to Constants.CAT_HINDI,
+            b.tabTrending to Constants.CAT_TRENDING
         )
         tabs.forEach { (btn, cat) ->
             btn.setOnClickListener {
-                tabs.forEach { (b, _) -> b.isSelected = false }
+                tabs.forEach { (bt, _) -> bt.isSelected = false }
                 btn.isSelected = true
                 viewModel.setCategory(cat)
             }
         }
-        binding.tabAll.isSelected = true
+        b.tabAll.isSelected = true
     }
 
     private fun observeViewModel() {
         viewModel.loading.observe(viewLifecycleOwner) { loading ->
-            if (loading) {
-                binding.shimmer.startShimmer()
-                binding.shimmer.show()
-                binding.rvMovies.hide()
-            } else {
-                binding.shimmer.stopShimmer()
-                binding.shimmer.hide()
-                binding.rvMovies.show()
+            val b = binding ?: return@observe
+            try {
+                if (loading) {
+                    b.shimmer.startShimmer()
+                    b.shimmer.show()
+                    b.rvMovies.hide()
+                } else {
+                    b.shimmer.stopShimmer()
+                    b.shimmer.hide()
+                    b.rvMovies.show()
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Loading observer error: ${e.message}")
             }
         }
         viewModel.filteredMovies.observe(viewLifecycleOwner) { movies ->
-            adapter.submitList(movies)
+            val b = binding ?: return@observe
+            adapter?.submitList(movies)
             if (movies.isEmpty()) {
-                binding.tvEmpty.show()
-                binding.rvMovies.hide()
+                b.tvEmpty.show()
+                b.rvMovies.hide()
             } else {
-                binding.tvEmpty.hide()
-                binding.rvMovies.show()
+                b.tvEmpty.hide()
+                b.rvMovies.show()
             }
         }
     }
@@ -87,12 +110,13 @@ class MoviesFragment : Fragment() {
             val bundle = bundleOf(Constants.EXTRA_MOVIE_ID to movie.id)
             findNavController().navigate(R.id.action_movies_to_detail, bundle)
         } catch (e: Exception) {
-            // Prevent duplicate navigation crash
+            Log.e(TAG, "openDetail error: ${e.message}")
         }
     }
 
     override fun onDestroyView() {
-        _binding?.shimmer?.stopShimmer()
+        try { _binding?.shimmer?.stopShimmer() } catch (e: Exception) { }
+        adapter = null
         _binding = null
         super.onDestroyView()
     }

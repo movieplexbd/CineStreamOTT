@@ -1,14 +1,25 @@
 package com.ottapp.moviestream.ui.movies
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.ottapp.moviestream.data.model.Movie
 import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.util.Constants
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.launch
 
 class MoviesViewModel : ViewModel() {
 
+    companion object {
+        private const val TAG = "MoviesViewModel"
+    }
+
     private val repo = MovieRepository()
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        Log.e(TAG, "Coroutine exception: ${throwable.message}", throwable)
+        _loading.postValue(false)
+    }
 
     private val _allMovies = MutableLiveData<List<Movie>>(emptyList())
     private val _filteredMovies = MutableLiveData<List<Movie>>(emptyList())
@@ -25,7 +36,7 @@ class MoviesViewModel : ViewModel() {
     init { loadMovies() }
 
     fun loadMovies() {
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             _loading.value = true
             _error.value = null
             try {
@@ -33,6 +44,7 @@ class MoviesViewModel : ViewModel() {
                 _allMovies.value = movies
                 applyFilter(movies)
             } catch (e: Exception) {
+                Log.e(TAG, "loadMovies error: ${e.message}", e)
                 _error.value = e.message
                 _filteredMovies.value = emptyList()
             } finally {
@@ -47,14 +59,19 @@ class MoviesViewModel : ViewModel() {
     }
 
     private fun applyFilter(all: List<Movie>) {
-        _filteredMovies.value = when (selectedCategory) {
-            Constants.CAT_ALL      -> all
-            Constants.CAT_TRENDING -> all.filter { it.trending }
-            else                   -> all.filter { movie ->
-                val cat = movie.category.lowercase().trim()
-                val sel = selectedCategory.lowercase().trim()
-                cat == sel || cat.contains(sel) || sel.contains(cat)
+        _filteredMovies.value = try {
+            when (selectedCategory) {
+                Constants.CAT_ALL      -> all
+                Constants.CAT_TRENDING -> all.filter { it.trending }
+                else                   -> all.filter { movie ->
+                    val cat = movie.category.lowercase().trim()
+                    val sel = selectedCategory.lowercase().trim()
+                    cat == sel || cat.contains(sel) || sel.contains(cat)
+                }
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "applyFilter error: ${e.message}")
+            all
         }
     }
 }

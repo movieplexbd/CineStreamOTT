@@ -125,11 +125,26 @@ jobs:
           body: |
             ## CineStream v${{ steps.version.outputs.version_name }} — Build #${{ github.run_number }}
 
-            ### Bug Fixes in this build
-            - Fixed crash on Android 7.0-7.1 (API 24-25) when starting download service
-            - Fixed SwipeRefreshLayout dismissing immediately without waiting for data
-            - Fixed ProfileViewModel parameter shadowing warning
-            - Improved download service compatibility using ContextCompat
+            ### Bug Fixes & Improvements
+            - Fixed crash on app startup and after login when data loads
+            - Fixed crash on Android 8 (API 26), Android 9 (API 27-28), and Android 10 (API 29)
+            - Added global crash handler to prevent unexpected app closures
+            - Fixed Fragment lifecycle issues — binding accessed after view destroyed
+            - Fixed duplicate LiveData observer in HomeFragment causing data loading crash
+            - Fixed Firebase singleton initialization race condition
+            - Fixed operator precedence bug in MainActivity navigation
+            - Fixed Glide image loading crash when Activity/Fragment is destroyed
+            - Fixed DownloadService foreground service crash on Android 8-9
+            - Fixed display cutout theme crash on Android 8 (moved to values-v28)
+            - Added CoroutineExceptionHandler to all ViewModels
+            - Made all Fragment binding access null-safe
+            - Improved ProGuard rules for release builds
+            - Version bumped to 2.1.0 (versionCode 4)
+
+            ### Compatibility
+            - **Minimum:** Android 8.0 (API 24)
+            - **Target:** Android 14 (API 34)
+            - **Tested:** Android 8, 9, 10
 
             ### APK Download
             | File | Type |

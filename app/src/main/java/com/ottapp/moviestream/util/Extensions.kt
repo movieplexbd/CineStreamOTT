@@ -1,9 +1,12 @@
 package com.ottapp.moviestream.util
 
+import android.app.Activity
 import android.content.Context
+import android.util.Log
 import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.fragment.app.Fragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
@@ -13,17 +16,46 @@ fun View.show()      { visibility = View.VISIBLE }
 fun View.hide()      { visibility = View.GONE    }
 fun View.invisible() { visibility = View.INVISIBLE }
 
-fun Context.toast(msg: String) =
-    Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+fun Context.toast(msg: String) {
+    try {
+        Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+    } catch (e: Exception) {
+        Log.e("Extensions", "Toast error: ${e.message}")
+    }
+}
 
 fun ImageView.loadImage(url: String, placeholder: Int? = null) {
-    var builder = Glide.with(context)
-        .load(url.ifBlank { null })
-        .transition(DrawableTransitionOptions.withCrossFade(200))
-    if (placeholder != null) {
-        builder = builder.apply(RequestOptions().placeholder(placeholder).error(placeholder))
+    try {
+        val ctx = context ?: return
+        if (ctx is Activity && (ctx.isFinishing || ctx.isDestroyed)) return
+
+        var builder = Glide.with(ctx)
+            .load(url.ifBlank { null })
+            .transition(DrawableTransitionOptions.withCrossFade(200))
+        if (placeholder != null) {
+            builder = builder.apply(RequestOptions().placeholder(placeholder).error(placeholder))
+        }
+        builder.into(this)
+    } catch (e: Exception) {
+        Log.e("Extensions", "loadImage error: ${e.message}")
     }
-    builder.into(this)
+}
+
+fun ImageView.loadImageSafe(url: String, placeholder: Int? = null) {
+    try {
+        val ctx = context ?: return
+        if (ctx is Activity && (ctx.isFinishing || ctx.isDestroyed)) return
+
+        var builder = Glide.with(ctx)
+            .load(url.ifBlank { null })
+            .transition(DrawableTransitionOptions.withCrossFade(200))
+        if (placeholder != null) {
+            builder = builder.apply(RequestOptions().placeholder(placeholder).error(placeholder))
+        }
+        builder.into(this)
+    } catch (e: Exception) {
+        Log.e("Extensions", "loadImageSafe error: ${e.message}")
+    }
 }
 
 fun Long.toReadableSize(): String {
@@ -40,14 +72,22 @@ fun Long.toReadableSize(): String {
 }
 
 fun Long.toFormattedTime(): String {
-    val h = TimeUnit.MILLISECONDS.toHours(this)
-    val m = TimeUnit.MILLISECONDS.toMinutes(this) % 60
-    val s = TimeUnit.MILLISECONDS.toSeconds(this) % 60
-    return if (h > 0) "%02d:%02d:%02d".format(h, m, s)
-           else       "%02d:%02d".format(m, s)
+    try {
+        val h = TimeUnit.MILLISECONDS.toHours(this)
+        val m = TimeUnit.MILLISECONDS.toMinutes(this) % 60
+        val s = TimeUnit.MILLISECONDS.toSeconds(this) % 60
+        return if (h > 0) "%02d:%02d:%02d".format(h, m, s)
+               else       "%02d:%02d".format(m, s)
+    } catch (e: Exception) {
+        return "00:00"
+    }
 }
 
 fun Long.toReadableDate(): String {
-    val sdf = java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault())
-    return sdf.format(java.util.Date(this))
+    return try {
+        val sdf = java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.getDefault())
+        sdf.format(java.util.Date(this))
+    } catch (e: Exception) {
+        ""
+    }
 }

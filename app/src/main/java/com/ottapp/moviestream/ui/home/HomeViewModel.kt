@@ -6,6 +6,7 @@ import com.ottapp.moviestream.data.model.Movie
 import com.ottapp.moviestream.data.model.User
 import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.data.repository.UserRepository
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
@@ -17,6 +18,11 @@ class HomeViewModel : ViewModel() {
 
     private val movieRepo = MovieRepository()
     private val userRepo  = UserRepository()
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        Log.e(TAG, "Coroutine exception: ${throwable.message}", throwable)
+        _loading.postValue(false)
+    }
 
     private val _bannerMovies   = MutableLiveData<List<Movie>>(emptyList())
     val bannerMovies: LiveData<List<Movie>> = _bannerMovies
@@ -48,7 +54,7 @@ class HomeViewModel : ViewModel() {
     }
 
     fun loadData() {
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             _loading.value = true
             _error.value = null
             try {
@@ -62,13 +68,17 @@ class HomeViewModel : ViewModel() {
                 _bannerMovies.value = trending.take(5).ifEmpty { all.take(5) }
 
                 _banglaMovies.value = all.filter { movie ->
-                    val cat = movie.category.lowercase().trim()
-                    cat.contains("bangla") || cat.contains("বাংলা")
+                    try {
+                        val cat = movie.category.lowercase().trim()
+                        cat.contains("bangla") || cat.contains("বাংলা")
+                    } catch (e: Exception) { false }
                 }
 
                 _hindiMovies.value = all.filter { movie ->
-                    val cat = movie.category.lowercase().trim()
-                    cat.contains("hindi") || cat.contains("হিন্দি")
+                    try {
+                        val cat = movie.category.lowercase().trim()
+                        cat.contains("hindi") || cat.contains("হিন্দি")
+                    } catch (e: Exception) { false }
                 }
 
             } catch (e: Exception) {
@@ -86,7 +96,7 @@ class HomeViewModel : ViewModel() {
     }
 
     private fun observeUser() {
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             try {
                 userRepo.getCurrentUserFlow()
                     .catch {

@@ -3,6 +3,7 @@ package com.ottapp.moviestream.ui.search
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -21,50 +22,70 @@ import com.ottapp.moviestream.util.show
 
 class SearchFragment : Fragment() {
 
-    private var _binding: FragmentSearchBinding? = null
-    private val binding get() = _binding!!
-    private val viewModel: SearchViewModel by viewModels()
-    private lateinit var adapter: MovieGridAdapter
+    companion object {
+        private const val TAG = "SearchFragment"
+    }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
-        _binding = FragmentSearchBinding.inflate(inflater, container, false)
-        return binding.root
+    private var _binding: FragmentSearchBinding? = null
+    private val binding get() = _binding
+    private val viewModel: SearchViewModel by viewModels()
+    private var adapter: MovieGridAdapter? = null
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        return try {
+            _binding = FragmentSearchBinding.inflate(inflater, container, false)
+            _binding?.root
+        } catch (e: Exception) {
+            Log.e(TAG, "Inflate error: ${e.message}", e)
+            null
+        }
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        if (_binding == null) return
 
-        adapter = MovieGridAdapter { openDetail(it) }
-        binding.rvResults.layoutManager = GridLayoutManager(requireContext(), 3)
-        binding.rvResults.adapter = adapter
+        try {
+            val ctx = context ?: return
+            adapter = MovieGridAdapter { openDetail(it) }
+            binding?.rvResults?.layoutManager = GridLayoutManager(ctx, 3)
+            binding?.rvResults?.adapter = adapter
 
-        setupSearch()
-        setupFilters()
-        observeViewModel()
+            setupSearch()
+            setupFilters()
+            observeViewModel()
+        } catch (e: Exception) {
+            Log.e(TAG, "onViewCreated error: ${e.message}", e)
+        }
     }
 
     private fun setupSearch() {
-        binding.etSearch.addTextChangedListener(object : TextWatcher {
+        binding?.etSearch?.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                viewModel.search(s.toString())
-                binding.ivClear.visibility = if (s.isNullOrEmpty()) View.GONE else View.VISIBLE
+                try {
+                    viewModel.search(s.toString())
+                    binding?.ivClear?.visibility = if (s.isNullOrEmpty()) View.GONE else View.VISIBLE
+                } catch (e: Exception) {
+                    Log.e(TAG, "Search text changed error: ${e.message}")
+                }
             }
             override fun afterTextChanged(s: Editable?) {}
         })
 
-        binding.ivClear.setOnClickListener {
-            binding.etSearch.setText("")
-            adapter.submitList(emptyList())
+        binding?.ivClear?.setOnClickListener {
+            binding?.etSearch?.setText("")
+            adapter?.submitList(emptyList())
         }
     }
 
     private fun setupFilters() {
+        val b = binding ?: return
         val filters = listOf(
-            binding.chipAll      to Constants.CAT_ALL,
-            binding.chipBangla   to Constants.CAT_BANGLA,
-            binding.chipHindi    to Constants.CAT_HINDI,
-            binding.chipTrending to Constants.CAT_TRENDING
+            b.chipAll      to Constants.CAT_ALL,
+            b.chipBangla   to Constants.CAT_BANGLA,
+            b.chipHindi    to Constants.CAT_HINDI,
+            b.chipTrending to Constants.CAT_TRENDING
         )
         filters.forEach { (chip, cat) ->
             chip.setOnClickListener {
@@ -73,21 +94,27 @@ class SearchFragment : Fragment() {
                 viewModel.setFilter(cat)
             }
         }
-        binding.chipAll.isSelected = true
+        b.chipAll.isSelected = true
     }
 
     private fun observeViewModel() {
         viewModel.loading.observe(viewLifecycleOwner) { loading ->
-            if (loading) binding.progressSearch.show() else binding.progressSearch.hide()
+            val b = binding ?: return@observe
+            if (loading) b.progressSearch.show() else b.progressSearch.hide()
         }
 
         viewModel.results.observe(viewLifecycleOwner) { movies ->
-            adapter.submitList(movies)
-            val query = binding.etSearch.text.toString()
-            when {
-                query.isBlank()   -> { binding.layoutEmpty.hide(); binding.layoutSearchHint.show() }
-                movies.isEmpty()  -> { binding.layoutEmpty.show(); binding.layoutSearchHint.hide() }
-                else              -> { binding.layoutEmpty.hide(); binding.layoutSearchHint.hide() }
+            val b = binding ?: return@observe
+            adapter?.submitList(movies)
+            try {
+                val query = b.etSearch.text.toString()
+                when {
+                    query.isBlank()   -> { b.layoutEmpty.hide(); b.layoutSearchHint.show() }
+                    movies.isEmpty()  -> { b.layoutEmpty.show(); b.layoutSearchHint.hide() }
+                    else              -> { b.layoutEmpty.hide(); b.layoutSearchHint.hide() }
+                }
+            } catch (e: Exception) {
+                Log.e(TAG, "Results observer error: ${e.message}")
             }
         }
     }
@@ -98,9 +125,13 @@ class SearchFragment : Fragment() {
             val bundle = bundleOf(Constants.EXTRA_MOVIE_ID to movie.id)
             findNavController().navigate(R.id.action_search_to_detail, bundle)
         } catch (e: Exception) {
-            // Prevent duplicate navigation crash
+            Log.e(TAG, "openDetail error: ${e.message}")
         }
     }
 
-    override fun onDestroyView() { _binding = null; super.onDestroyView() }
+    override fun onDestroyView() {
+        adapter = null
+        _binding = null
+        super.onDestroyView()
+    }
 }

@@ -37,9 +37,10 @@ class PlayerActivity : AppCompatActivity() {
         private const val TAG = "PlayerActivity"
     }
 
-    private lateinit var binding: ActivityPlayerBinding
+    private var _binding: ActivityPlayerBinding? = null
+    private val binding get() = _binding
     private var player: ExoPlayer? = null
-    private lateinit var prefs: SharedPreferences
+    private var prefs: SharedPreferences? = null
 
     private var movieId    = ""
     private var movieTitle = ""
@@ -57,12 +58,14 @@ class PlayerActivity : AppCompatActivity() {
     private val progressHandler = Handler(Looper.getMainLooper())
     private val progressLoop = object : Runnable {
         override fun run() {
-            updateProgressBar()
-            progressHandler.postDelayed(this, 500)
+            if (_binding != null) {
+                updateProgressBar()
+                progressHandler.postDelayed(this, 500)
+            }
         }
     }
 
-    private lateinit var gestureDetector: GestureDetector
+    private var gestureDetector: GestureDetector? = null
     private var swipeStartX = 0f
     private var swipeStartPos = 0L
     private var isSeeking = false
@@ -70,8 +73,8 @@ class PlayerActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
-            binding = ActivityPlayerBinding.inflate(layoutInflater)
-            setContentView(binding.root)
+            _binding = ActivityPlayerBinding.inflate(layoutInflater)
+            setContentView(_binding!!.root)
             hideSystemUI()
 
             prefs      = getSharedPreferences("ott_prefs", MODE_PRIVATE)
@@ -85,7 +88,7 @@ class PlayerActivity : AppCompatActivity() {
                 return
             }
 
-            binding.tvPlayerTitle.text = movieTitle
+            binding?.tvPlayerTitle?.text = movieTitle
             setupPlayer()
             setupControls()
             setupGestures()
@@ -100,122 +103,143 @@ class PlayerActivity : AppCompatActivity() {
         try {
             val exo = ExoPlayer.Builder(this).build()
             player = exo
-            binding.playerView.player = exo
+            binding?.playerView?.player = exo
             exo.setMediaItem(MediaItem.fromUri(videoUrl))
-            val saved = prefs.getLong(Constants.PREF_PLAYBACK_POSITION + movieId, 0L)
+            val saved = prefs?.getLong(Constants.PREF_PLAYBACK_POSITION + movieId, 0L) ?: 0L
             if (saved > 5000L) exo.seekTo(saved)
             exo.prepare()
             exo.playWhenReady = true
 
             exo.addListener(object : Player.Listener {
                 override fun onPlaybackStateChanged(state: Int) {
-                    when (state) {
-                        Player.STATE_BUFFERING -> {
-                            binding.progressBuffering.show()
-                            binding.loadingOverlay.show()
+                    if (_binding == null) return
+                    try {
+                        when (state) {
+                            Player.STATE_BUFFERING -> {
+                                binding?.progressBuffering?.show()
+                                binding?.loadingOverlay?.show()
+                            }
+                            Player.STATE_READY -> {
+                                binding?.progressBuffering?.hide()
+                                binding?.loadingOverlay?.hide()
+                                startProgressLoop()
+                            }
+                            Player.STATE_ENDED -> {
+                                binding?.btnPlayPause?.setImageResource(R.drawable.ic_replay)
+                                savePosition(0L)
+                            }
+                            else -> {}
                         }
-                        Player.STATE_READY -> {
-                            binding.progressBuffering.hide()
-                            binding.loadingOverlay.hide()
-                            startProgressLoop()
-                        }
-                        Player.STATE_ENDED -> {
-                            binding.btnPlayPause.setImageResource(R.drawable.ic_replay)
-                            savePosition(0L)
-                        }
-                        else -> {}
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Playback state error: ${e.message}")
                     }
                 }
 
                 override fun onIsPlayingChanged(isPlaying: Boolean) {
-                    binding.btnPlayPause.setImageResource(
-                        if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
-                    )
+                    try {
+                        binding?.btnPlayPause?.setImageResource(
+                            if (isPlaying) R.drawable.ic_pause else R.drawable.ic_play
+                        )
+                    } catch (e: Exception) { }
                 }
 
                 override fun onPlayerError(error: PlaybackException) {
-                    binding.progressBuffering.hide()
-                    binding.loadingOverlay.hide()
-                    toast("ভিডিও লোড করতে সমস্যা: ${error.message}")
+                    try {
+                        binding?.progressBuffering?.hide()
+                        binding?.loadingOverlay?.hide()
+                        toast("ভিডিও লোড করতে সমস্যা: ${error.message}")
+                    } catch (e: Exception) { }
                 }
             })
         } catch (e: Exception) {
             Log.e(TAG, "setupPlayer error: ${e.message}", e)
-            toast("Player শুরু করতে সমস্যা: ${e.message}")
+            toast("Player শুরু করতে সমস্যা")
             finish()
         }
     }
 
     private fun setupControls() {
-        binding.controlsOverlay.setOnClickListener {
-            if (controlsVisible) {
-                hideControls()
-            } else {
-                showControls()
-            }
+        val b = binding ?: return
+
+        b.controlsOverlay.setOnClickListener {
+            if (controlsVisible) hideControls() else showControls()
         }
 
-        binding.btnBack.setOnClickListener { finish() }
+        b.btnBack.setOnClickListener { finish() }
 
-        binding.btnPlayPause.setOnClickListener {
-            player?.let { p ->
-                if (p.playbackState == Player.STATE_ENDED) {
-                    p.seekTo(0)
-                    p.play()
-                } else {
-                    if (p.isPlaying) p.pause() else p.play()
+        b.btnPlayPause.setOnClickListener {
+            try {
+                player?.let { p ->
+                    if (p.playbackState == Player.STATE_ENDED) {
+                        p.seekTo(0)
+                        p.play()
+                    } else {
+                        if (p.isPlaying) p.pause() else p.play()
+                    }
+                    scheduleHide()
                 }
-                scheduleHide()
+            } catch (e: Exception) {
+                Log.e(TAG, "Play/pause error: ${e.message}")
             }
         }
 
-        binding.btnSeekBack.setOnClickListener {
-            player?.let { p ->
-                p.seekTo((p.currentPosition - 10_000).coerceAtLeast(0))
-                showSeekAnimation(false)
+        b.btnSeekBack.setOnClickListener {
+            try {
+                player?.let { p ->
+                    p.seekTo((p.currentPosition - 10_000).coerceAtLeast(0))
+                    showSeekAnimation(false)
+                    scheduleHide()
+                }
+            } catch (e: Exception) { }
+        }
+
+        b.btnSeekForward.setOnClickListener {
+            try {
+                player?.let { p ->
+                    p.seekTo((p.currentPosition + 10_000).coerceAtMost(p.duration.coerceAtLeast(0)))
+                    showSeekAnimation(true)
+                    scheduleHide()
+                }
+            } catch (e: Exception) { }
+        }
+
+        b.tvSpeed.setOnClickListener {
+            try {
+                speedIndex = (speedIndex + 1) % speedValues.size
+                val speed = speedValues[speedIndex]
+                player?.setPlaybackSpeed(speed)
+                binding?.tvSpeed?.text = speedLabels[speedIndex]
                 scheduleHide()
-            }
+            } catch (e: Exception) { }
         }
 
-        binding.btnSeekForward.setOnClickListener {
-            player?.let { p ->
-                p.seekTo((p.currentPosition + 10_000).coerceAtMost(p.duration.coerceAtLeast(0)))
-                showSeekAnimation(true)
-                scheduleHide()
-            }
-        }
+        b.btnPip.setOnClickListener { enterPip() }
 
-        binding.tvSpeed.setOnClickListener {
-            speedIndex = (speedIndex + 1) % speedValues.size
-            val speed = speedValues[speedIndex]
-            player?.setPlaybackSpeed(speed)
-            binding.tvSpeed.text = speedLabels[speedIndex]
-            scheduleHide()
-        }
-
-        binding.btnPip.setOnClickListener { enterPip() }
-
-        binding.seekBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
+        b.seekBar.setOnSeekBarChangeListener(object : android.widget.SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
-                    player?.let { p ->
-                        val dur = p.duration.coerceAtLeast(1)
-                        val pos = (progress.toLong() * dur / 1000L).coerceAtLeast(0)
-                        binding.tvPosition.text = pos.toFormattedTime()
-                    }
+                    try {
+                        player?.let { p ->
+                            val dur = p.duration.coerceAtLeast(1)
+                            val pos = (progress.toLong() * dur / 1000L).coerceAtLeast(0)
+                            binding?.tvPosition?.text = pos.toFormattedTime()
+                        }
+                    } catch (e: Exception) { }
                 }
             }
             override fun onStartTrackingTouch(seekBar: android.widget.SeekBar?) {
                 progressHandler.removeCallbacks(progressLoop)
             }
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {
-                player?.let { p ->
-                    val dur = p.duration.coerceAtLeast(1)
-                    val pos = (seekBar!!.progress.toLong() * dur / 1000L).coerceAtLeast(0)
-                    p.seekTo(pos)
-                    startProgressLoop()
-                }
-                scheduleHide()
+                try {
+                    player?.let { p ->
+                        val dur = p.duration.coerceAtLeast(1)
+                        val pos = (seekBar!!.progress.toLong() * dur / 1000L).coerceAtLeast(0)
+                        p.seekTo(pos)
+                        startProgressLoop()
+                    }
+                    scheduleHide()
+                } catch (e: Exception) { }
             }
         })
     }
@@ -223,19 +247,21 @@ class PlayerActivity : AppCompatActivity() {
     private fun setupGestures() {
         gestureDetector = GestureDetector(this, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent): Boolean {
-                val screenWidth = binding.root.width
-                val x = e.x
-                if (x < screenWidth / 2) {
-                    player?.let { p ->
-                        p.seekTo((p.currentPosition - 10_000).coerceAtLeast(0))
-                        showSeekAnimation(false)
+                try {
+                    val screenWidth = binding?.root?.width ?: return true
+                    val x = e.x
+                    if (x < screenWidth / 2) {
+                        player?.let { p ->
+                            p.seekTo((p.currentPosition - 10_000).coerceAtLeast(0))
+                            showSeekAnimation(false)
+                        }
+                    } else {
+                        player?.let { p ->
+                            p.seekTo((p.currentPosition + 10_000).coerceAtMost(p.duration.coerceAtLeast(0)))
+                            showSeekAnimation(true)
+                        }
                     }
-                } else {
-                    player?.let { p ->
-                        p.seekTo((p.currentPosition + 10_000).coerceAtMost(p.duration.coerceAtLeast(0)))
-                        showSeekAnimation(true)
-                    }
-                }
+                } catch (e: Exception) { }
                 return true
             }
 
@@ -245,39 +271,43 @@ class PlayerActivity : AppCompatActivity() {
             }
         })
 
-        binding.gestureArea.setOnTouchListener { _, event ->
-            gestureDetector.onTouchEvent(event)
+        binding?.gestureArea?.setOnTouchListener { _, event ->
+            try {
+                gestureDetector?.onTouchEvent(event)
 
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    swipeStartX = event.x
-                    swipeStartPos = player?.currentPosition ?: 0L
-                    isSeeking = false
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    val deltaX = event.x - swipeStartX
-                    if (abs(deltaX) > 20) {
-                        isSeeking = true
-                        val seekDelta = (deltaX * 0.3f).toLong() * 1000L
-                        val maxDur = player?.duration?.coerceAtLeast(0L) ?: 0L
-                        val newPos = (swipeStartPos + seekDelta).coerceIn(0L, maxDur)
-                        binding.tvSeekIndicator.text = if (deltaX > 0)
-                            "+${(seekDelta / 1000).toInt()}s" else "${(seekDelta / 1000).toInt()}s"
-                        binding.tvSeekIndicator.show()
-                        binding.tvPosition.text = newPos.toFormattedTime()
+                when (event.action) {
+                    MotionEvent.ACTION_DOWN -> {
+                        swipeStartX = event.x
+                        swipeStartPos = player?.currentPosition ?: 0L
+                        isSeeking = false
                     }
-                }
-                MotionEvent.ACTION_UP -> {
-                    if (isSeeking) {
+                    MotionEvent.ACTION_MOVE -> {
                         val deltaX = event.x - swipeStartX
-                        val seekDelta = (deltaX * 0.3f).toLong() * 1000L
-                        val maxDur = player?.duration?.coerceAtLeast(0L) ?: 0L
-                        val newPos = (swipeStartPos + seekDelta).coerceIn(0L, maxDur)
-                        player?.seekTo(newPos)
-                        binding.tvSeekIndicator.hide()
-                        scheduleHide()
+                        if (abs(deltaX) > 20) {
+                            isSeeking = true
+                            val seekDelta = (deltaX * 0.3f).toLong() * 1000L
+                            val maxDur = player?.duration?.coerceAtLeast(0L) ?: 0L
+                            val newPos = (swipeStartPos + seekDelta).coerceIn(0L, maxDur)
+                            binding?.tvSeekIndicator?.text = if (deltaX > 0)
+                                "+${(seekDelta / 1000).toInt()}s" else "${(seekDelta / 1000).toInt()}s"
+                            binding?.tvSeekIndicator?.show()
+                            binding?.tvPosition?.text = newPos.toFormattedTime()
+                        }
+                    }
+                    MotionEvent.ACTION_UP -> {
+                        if (isSeeking) {
+                            val deltaX = event.x - swipeStartX
+                            val seekDelta = (deltaX * 0.3f).toLong() * 1000L
+                            val maxDur = player?.duration?.coerceAtLeast(0L) ?: 0L
+                            val newPos = (swipeStartPos + seekDelta).coerceIn(0L, maxDur)
+                            player?.seekTo(newPos)
+                            binding?.tvSeekIndicator?.hide()
+                            scheduleHide()
+                        }
                     }
                 }
+            } catch (e: Exception) {
+                Log.e(TAG, "Gesture error: ${e.message}")
             }
             true
         }
@@ -285,7 +315,8 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun showSeekAnimation(forward: Boolean) {
         try {
-            val indicator = if (forward) binding.seekForwardIndicator else binding.seekBackIndicator
+            val b = binding ?: return
+            val indicator = if (forward) b.seekForwardIndicator else b.seekBackIndicator
             indicator.show()
             indicator.animate().alpha(1f).setDuration(200).withEndAction {
                 indicator.animate().alpha(0f).setStartDelay(500).setDuration(300).withEndAction {
@@ -303,29 +334,37 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun updateProgressBar() {
-        player?.let { p ->
-            val duration = p.duration.coerceAtLeast(0)
-            val position = p.currentPosition
-            if (duration > 0) {
-                binding.seekBar.progress = ((position * 1000) / duration).toInt()
+        try {
+            val b = binding ?: return
+            player?.let { p ->
+                val duration = p.duration.coerceAtLeast(0)
+                val position = p.currentPosition
+                if (duration > 0) {
+                    b.seekBar.progress = ((position * 1000) / duration).toInt()
+                }
+                b.tvPosition.text = position.toFormattedTime()
+                b.tvDuration.text = duration.toFormattedTime()
             }
-            binding.tvPosition.text = position.toFormattedTime()
-            binding.tvDuration.text = duration.toFormattedTime()
-        }
+        } catch (e: Exception) { }
     }
 
     private fun showControls() {
         controlsVisible = true
-        binding.controlsOverlay.animate().alpha(1f).setDuration(200).start()
-        binding.controlsOverlay.show()
-        scheduleHide()
+        try {
+            val b = binding ?: return
+            b.controlsOverlay.animate().alpha(1f).setDuration(200).start()
+            b.controlsOverlay.show()
+            scheduleHide()
+        } catch (e: Exception) { }
     }
 
     private fun hideControls() {
         controlsVisible = false
-        binding.controlsOverlay.animate().alpha(0f).setDuration(300).withEndAction {
-            if (!controlsVisible) binding.controlsOverlay.visibility = View.INVISIBLE
-        }.start()
+        try {
+            binding?.controlsOverlay?.animate()?.alpha(0f)?.setDuration(300)?.withEndAction {
+                if (!controlsVisible) binding?.controlsOverlay?.visibility = View.INVISIBLE
+            }?.start()
+        } catch (e: Exception) { }
     }
 
     private fun scheduleHide() {
@@ -349,7 +388,7 @@ class PlayerActivity : AppCompatActivity() {
     override fun onPictureInPictureModeChanged(inPiP: Boolean, cfg: Configuration) {
         super.onPictureInPictureModeChanged(inPiP, cfg)
         try {
-            if (inPiP) binding.controlsOverlay.hide() else binding.controlsOverlay.show()
+            if (inPiP) binding?.controlsOverlay?.hide() else binding?.controlsOverlay?.show()
         } catch (e: Exception) {
             Log.e(TAG, "PiP mode change error: ${e.message}")
         }
@@ -380,7 +419,7 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun savePosition(pos: Long) {
         try {
-            prefs.edit().putLong(Constants.PREF_PLAYBACK_POSITION + movieId, pos).apply()
+            prefs?.edit()?.putLong(Constants.PREF_PLAYBACK_POSITION + movieId, pos)?.apply()
         } catch (e: Exception) {
             Log.e(TAG, "savePosition error: ${e.message}")
         }
@@ -401,7 +440,6 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     override fun onDestroy() {
-        super.onDestroy()
         hideHandler.removeCallbacks(hideRunnable)
         progressHandler.removeCallbacks(progressLoop)
         try {
@@ -410,5 +448,7 @@ class PlayerActivity : AppCompatActivity() {
             Log.e(TAG, "Player release error: ${e.message}")
         }
         player = null
+        _binding = null
+        super.onDestroy()
     }
 }

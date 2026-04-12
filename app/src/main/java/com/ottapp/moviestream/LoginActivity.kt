@@ -19,7 +19,12 @@ import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityLoginBinding
+    companion object {
+        private const val TAG = "LoginActivity"
+    }
+
+    private var _binding: ActivityLoginBinding? = null
+    private val binding get() = _binding
     private var authRepository: AuthRepository? = null
 
     private var isSignUpMode = false
@@ -34,12 +39,17 @@ class LoginActivity : AppCompatActivity() {
             if (!idToken.isNullOrEmpty()) {
                 setLoading(true)
                 lifecycleScope.launch {
-                    val repo = authRepository ?: return@launch
-                    val res = repo.signInWithGoogle(idToken)
-                    res.fold(
-                        onSuccess = { goToMain() },
-                        onFailure = { showError(friendlyError(it.message)) }
-                    )
+                    try {
+                        val repo = authRepository ?: return@launch
+                        val res = repo.signInWithGoogle(idToken)
+                        res.fold(
+                            onSuccess = { goToMain() },
+                            onFailure = { showError(friendlyError(it.message)) }
+                        )
+                    } catch (e: Exception) {
+                        Log.e(TAG, "Google sign-in coroutine error: ${e.message}")
+                        showError("সাইন-ইন সমস্যা হয়েছে")
+                    }
                 }
             } else {
                 showError("Google token পাওয়া যায়নি। Firebase Console-এ SHA-1 যোগ করুন।")
@@ -53,34 +63,38 @@ class LoginActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityLoginBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
         try {
-            authRepository = AuthRepository(this)
+            _binding = ActivityLoginBinding.inflate(layoutInflater)
+            setContentView(_binding!!.root)
+
+            try {
+                authRepository = AuthRepository(this)
+            } catch (e: Exception) {
+                Log.e(TAG, "AuthRepository init failed: ${e.message}", e)
+            }
+
+            if (OTTApplication.firebaseReady) {
+                binding?.btnGoogleSignIn?.show()
+            } else {
+                binding?.btnGoogleSignIn?.hide()
+            }
+
+            setupClickListeners()
         } catch (e: Exception) {
-            Log.e("LoginActivity", "AuthRepository init failed: ${e.message}", e)
+            Log.e(TAG, "onCreate error: ${e.message}", e)
         }
-
-        if (OTTApplication.firebaseReady) {
-            binding.btnGoogleSignIn.show()
-        } else {
-            binding.btnGoogleSignIn.hide()
-        }
-
-        setupClickListeners()
     }
 
     private fun setupClickListeners() {
-        binding.btnEmailAction.setOnClickListener {
+        binding?.btnEmailAction?.setOnClickListener {
             handleEmailAuth()
         }
 
-        binding.tvToggleMode.setOnClickListener {
+        binding?.tvToggleMode?.setOnClickListener {
             toggleMode()
         }
 
-        binding.btnGoogleSignIn.setOnClickListener {
+        binding?.btnGoogleSignIn?.setOnClickListener {
             launchGoogleSignIn()
         }
     }
@@ -106,19 +120,20 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun toggleMode() {
+        val b = binding ?: return
         isSignUpMode = !isSignUpMode
         if (isSignUpMode) {
-            binding.tilConfirmPassword.show()
-            binding.tilName.show()
-            binding.btnEmailAction.text = getString(R.string.btn_signup)
-            binding.tvToggleMode.text = getString(R.string.toggle_to_signin)
-            binding.tvAuthTitle.text = getString(R.string.title_signup)
+            b.tilConfirmPassword.show()
+            b.tilName.show()
+            b.btnEmailAction.text = getString(R.string.btn_signup)
+            b.tvToggleMode.text = getString(R.string.toggle_to_signin)
+            b.tvAuthTitle.text = getString(R.string.title_signup)
         } else {
-            binding.tilConfirmPassword.hide()
-            binding.tilName.hide()
-            binding.btnEmailAction.text = getString(R.string.btn_signin)
-            binding.tvToggleMode.text = getString(R.string.toggle_to_signup)
-            binding.tvAuthTitle.text = getString(R.string.title_signin)
+            b.tilConfirmPassword.hide()
+            b.tilName.hide()
+            b.btnEmailAction.text = getString(R.string.btn_signin)
+            b.tvToggleMode.text = getString(R.string.toggle_to_signup)
+            b.tvAuthTitle.text = getString(R.string.title_signin)
         }
     }
 
@@ -129,8 +144,9 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        val email = binding.etEmail.text.toString().trim()
-        val password = binding.etPassword.text.toString().trim()
+        val b = binding ?: return
+        val email = b.etEmail.text.toString().trim()
+        val password = b.etPassword.text.toString().trim()
 
         if (email.isEmpty() || password.isEmpty()) {
             showError("ইমেইল এবং পাসওয়ার্ড দিন")
@@ -142,8 +158,8 @@ class LoginActivity : AppCompatActivity() {
         }
 
         if (isSignUpMode) {
-            val confirmPassword = binding.etConfirmPassword.text.toString().trim()
-            val name = binding.etName.text.toString().trim()
+            val confirmPassword = b.etConfirmPassword.text.toString().trim()
+            val name = b.etName.text.toString().trim()
             if (password != confirmPassword) {
                 showError("পাসওয়ার্ড মিলছে না")
                 return
@@ -154,27 +170,42 @@ class LoginActivity : AppCompatActivity() {
             }
             setLoading(true)
             lifecycleScope.launch {
-                val result = repo.signUpWithEmail(email, password, name)
-                result.fold(
-                    onSuccess = { goToMain() },
-                    onFailure = { showError(friendlyError(it.message)) }
-                )
+                try {
+                    val result = repo.signUpWithEmail(email, password, name)
+                    result.fold(
+                        onSuccess = { goToMain() },
+                        onFailure = { showError(friendlyError(it.message)) }
+                    )
+                } catch (e: Exception) {
+                    showError("সাইন-আপ সমস্যা হয়েছে")
+                }
             }
         } else {
             setLoading(true)
             lifecycleScope.launch {
-                val result = repo.signInWithEmail(email, password)
-                result.fold(
-                    onSuccess = { goToMain() },
-                    onFailure = { showError(friendlyError(it.message)) }
-                )
+                try {
+                    val result = repo.signInWithEmail(email, password)
+                    result.fold(
+                        onSuccess = { goToMain() },
+                        onFailure = { showError(friendlyError(it.message)) }
+                    )
+                } catch (e: Exception) {
+                    showError("সাইন-ইন সমস্যা হয়েছে")
+                }
             }
         }
     }
 
     private fun goToMain() {
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
+        if (isFinishing || isDestroyed) return
+        try {
+            startActivity(Intent(this, MainActivity::class.java).apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TOP
+            })
+            finish()
+        } catch (e: Exception) {
+            Log.e(TAG, "goToMain error: ${e.message}")
+        }
     }
 
     private fun friendlyError(msg: String?): String {
@@ -192,13 +223,24 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setLoading(loading: Boolean) {
-        binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
-        binding.btnEmailAction.isEnabled = !loading
-        binding.btnGoogleSignIn.isEnabled = !loading
+        try {
+            binding?.progressBar?.visibility = if (loading) View.VISIBLE else View.GONE
+            binding?.btnEmailAction?.isEnabled = !loading
+            binding?.btnGoogleSignIn?.isEnabled = !loading
+        } catch (e: Exception) {
+            Log.e(TAG, "setLoading error: ${e.message}")
+        }
     }
 
     private fun showError(msg: String) {
-        toast(msg)
+        try {
+            toast(msg)
+        } catch (e: Exception) { }
         setLoading(false)
+    }
+
+    override fun onDestroy() {
+        _binding = null
+        super.onDestroy()
     }
 }

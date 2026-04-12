@@ -1,16 +1,27 @@
 package com.ottapp.moviestream.ui.search
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.ottapp.moviestream.data.model.Movie
 import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.util.Constants
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
 class SearchViewModel : ViewModel() {
 
+    companion object {
+        private const val TAG = "SearchViewModel"
+    }
+
     private val repo = MovieRepository()
+
+    private val exceptionHandler = CoroutineExceptionHandler { _, throwable ->
+        Log.e(TAG, "Coroutine exception: ${throwable.message}", throwable)
+        _loading.postValue(false)
+    }
 
     private val _results = MutableLiveData<List<Movie>>(emptyList())
     val results: LiveData<List<Movie>> = _results
@@ -29,11 +40,11 @@ class SearchViewModel : ViewModel() {
     private var searchJob: Job? = null
 
     init {
-        // Preload movies so search is instant
-        viewModelScope.launch {
+        viewModelScope.launch(exceptionHandler) {
             try {
                 allMovies = repo.getAllMovies()
             } catch (e: Exception) {
+                Log.e(TAG, "Preload error: ${e.message}")
                 _error.value = e.message
                 allMovies = emptyList()
             }
@@ -48,18 +59,19 @@ class SearchViewModel : ViewModel() {
             _loading.value = false
             return
         }
-        searchJob = viewModelScope.launch {
+        searchJob = viewModelScope.launch(exceptionHandler) {
             _loading.value = true
             try {
                 delay(300)
                 val q = query.lowercase()
                 val filtered = allMovies.filter {
-                    it.title.orEmpty().lowercase().contains(q) ||
-                    it.description.orEmpty().lowercase().contains(q) ||
-                    it.category.orEmpty().lowercase().contains(q)
+                    it.title.lowercase().contains(q) ||
+                    it.description.lowercase().contains(q) ||
+                    it.category.lowercase().contains(q)
                 }
                 applyFilter(filtered)
             } catch (e: Exception) {
+                Log.e(TAG, "search error: ${e.message}")
                 _results.value = emptyList()
             } finally {
                 _loading.value = false
@@ -72,23 +84,28 @@ class SearchViewModel : ViewModel() {
         val q = currentQuery.lowercase()
         val base = if (currentQuery.isBlank()) allMovies else
             allMovies.filter {
-                it.title.orEmpty().lowercase().contains(q) ||
-                it.description.orEmpty().lowercase().contains(q) ||
-                it.category.orEmpty().lowercase().contains(q)
+                it.title.lowercase().contains(q) ||
+                it.description.lowercase().contains(q) ||
+                it.category.lowercase().contains(q)
             }
         applyFilter(base)
     }
 
     private fun applyFilter(list: List<Movie>) {
         val cat = _activeFilter.value ?: Constants.CAT_ALL
-        _results.value = when (cat) {
-            Constants.CAT_ALL      -> list
-            Constants.CAT_TRENDING -> list.filter { it.trending }
-            else                   -> list.filter { movie ->
-                val c = movie.category.orEmpty().lowercase().trim()
-                val s = cat.lowercase().trim()
-                c == s || c.contains(s) || s.contains(c)
+        _results.value = try {
+            when (cat) {
+                Constants.CAT_ALL      -> list
+                Constants.CAT_TRENDING -> list.filter { it.trending }
+                else                   -> list.filter { movie ->
+                    val c = movie.category.lowercase().trim()
+                    val s = cat.lowercase().trim()
+                    c == s || c.contains(s) || s.contains(c)
+                }
             }
+        } catch (e: Exception) {
+            Log.e(TAG, "applyFilter error: ${e.message}")
+            list
         }
     }
 }

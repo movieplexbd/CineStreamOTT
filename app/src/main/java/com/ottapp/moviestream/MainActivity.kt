@@ -10,7 +10,8 @@ import com.ottapp.moviestream.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
+    private var _binding: ActivityMainBinding? = null
+    private val binding get() = _binding
     private var navController: NavController? = null
 
     private var currentTabId: Int = R.id.homeFragment
@@ -18,8 +19,8 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         try {
-            binding = ActivityMainBinding.inflate(layoutInflater)
-            setContentView(binding.root)
+            _binding = ActivityMainBinding.inflate(layoutInflater)
+            setContentView(_binding!!.root)
 
             val navHost = supportFragmentManager
                 .findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
@@ -37,8 +38,9 @@ class MainActivity : AppCompatActivity() {
 
     private fun setupBottomNav() {
         val nc = navController ?: return
+        val b = binding ?: return
 
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
+        b.bottomNavigation.setOnItemSelectedListener { item ->
             val destId = item.itemId
 
             if (destId == currentTabId) {
@@ -65,7 +67,7 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        binding.bottomNavigation.setOnItemReselectedListener {
+        b.bottomNavigation.setOnItemReselectedListener {
             try {
                 val currentDest = nc.currentDestination?.id
                 if (currentDest != currentTabId) {
@@ -84,7 +86,7 @@ class MainActivity : AppCompatActivity() {
                 )
                 if (destination.id in tabIds) {
                     currentTabId = destination.id
-                    binding.bottomNavigation.selectedItemId = destination.id
+                    binding?.bottomNavigation?.selectedItemId = destination.id
                 }
             } catch (e: Exception) {
                 Log.e("MainActivity", "Destination changed error: ${e.message}")
@@ -93,6 +95,11 @@ class MainActivity : AppCompatActivity() {
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return navController?.navigateUp() ?: false || super.onSupportNavigateUp()
+        return (navController?.navigateUp() == true) || super.onSupportNavigateUp()
+    }
+
+    override fun onDestroy() {
+        _binding = null
+        super.onDestroy()
     }
 }
