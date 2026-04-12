@@ -5,7 +5,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
-import androidx.navigation.ui.setupWithNavController
 import com.ottapp.moviestream.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -13,7 +12,6 @@ class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
     private lateinit var navController: NavController
 
-    // Track current tab destination
     private var currentTabId: Int = R.id.homeFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -25,17 +23,17 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHost.navController
 
-        // Custom bottom nav behavior: stay on same fragment, fix back stack
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             val destId = item.itemId
+
             if (destId == currentTabId) {
-                // Already on this tab — do nothing (prevent duplicate navigation)
+                // Same tab tapped again: pop everything back to the tab root
+                navController.popBackStack(destId, false)
                 return@setOnItemSelectedListener true
             }
 
             currentTabId = destId
 
-            // Navigate to tab, clear back stack up to home, don't recreate if already in stack
             val navOptions = NavOptions.Builder()
                 .setLaunchSingleTop(true)
                 .setRestoreState(true)
@@ -49,13 +47,13 @@ class MainActivity : AppCompatActivity() {
             try {
                 navController.navigate(destId, null, navOptions)
             } catch (e: Exception) {
-                // fallback
+                // fallback: ignore
             }
             true
         }
 
-        // Ignore reselect — stay on same screen
-        binding.bottomNavigation.setOnItemReselectedListener { /* do nothing */ }
+        // Prevent reselect from doing anything extra — handled above
+        binding.bottomNavigation.setOnItemReselectedListener { /* handled in setOnItemSelectedListener */ }
 
         // Keep bottom nav in sync when navigating via code
         navController.addOnDestinationChangedListener { _, destination, _ ->
