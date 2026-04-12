@@ -7,7 +7,6 @@ import com.ottapp.moviestream.data.model.User
 import com.ottapp.moviestream.data.repository.AuthRepository
 import com.ottapp.moviestream.data.repository.DownloadRepository
 import com.ottapp.moviestream.data.repository.UserRepository
-import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.toReadableSize
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
@@ -57,13 +56,7 @@ class ProfileViewModel(app: Application) : AndroidViewModel(app) {
 
     fun signOut() = viewModelScope.launch {
         try {
-            val repo = authRepo
-            if (repo != null) {
-                val googleClient = try {
-                    repo.getGoogleSignInClient(Constants.WEB_CLIENT_ID)
-                } catch (e: Exception) { null }
-                repo.signOut(googleClient)
-            }
+            authRepo?.signOut()
         } catch (e: Exception) {
             Log.e(TAG, "Sign out error: ${e.message}")
         }

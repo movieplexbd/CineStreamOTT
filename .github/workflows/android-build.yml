@@ -125,19 +125,20 @@ jobs:
           body: |
             ## CineStream v${{ steps.version.outputs.version_name }} — Build #${{ github.run_number }}
 
-            ### Bug Fixes in this build
-            - Fixed crash on Android 7.0-7.1 (API 24-25) when starting download service
-            - Fixed SwipeRefreshLayout dismissing immediately without waiting for data
-            - Fixed ProfileViewModel parameter shadowing warning
-            - Improved download service compatibility using ContextCompat
+            ### এই বিল্ডে পরিবর্তন
+            - Google Sign-In সম্পূর্ণ সরানো হয়েছে — শুধুমাত্র Email/Password login
+            - অ্যাপ চালু হওয়ার সময় crash ঠিক করা হয়েছে
+            - Data load করার সময় crash ঠিক করা হয়েছে
+            - Firebase initialization আরও robust করা হয়েছে
+            - Google Play Services dependency সরানো হয়েছে (অ্যাপ হালকা হয়েছে)
 
-            ### APK Download
-            | File | Type |
+            ### APK ডাউনলোড
+            | ফাইল | ধরন |
             |------|------|
-            | `CineStream-v${{ steps.version.outputs.version_name }}-release.apk` | **Release (Recommended)** |
+            | `CineStream-v${{ steps.version.outputs.version_name }}-release.apk` | **Release (সুপারিশকৃত)** |
             | `CineStream-v${{ steps.version.outputs.version_name }}-debug.apk` | Debug |
 
-            > **Install:** Settings → Security → Unknown Sources → Enable
+            > **ইন্সটল করুন:** Settings → Security → Unknown Sources → Enable
             > 
             > **Direct link:** https://github.com/${{ github.repository }}/releases/latest
           files: |

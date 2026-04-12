@@ -4,14 +4,10 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import android.view.View
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.common.api.ApiException
 import com.ottapp.moviestream.data.repository.AuthRepository
 import com.ottapp.moviestream.databinding.ActivityLoginBinding
-import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.hide
 import com.ottapp.moviestream.util.show
 import com.ottapp.moviestream.util.toast
@@ -24,33 +20,6 @@ class LoginActivity : AppCompatActivity() {
 
     private var isSignUpMode = false
 
-    private val googleSignInLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        try {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            val account = task.getResult(ApiException::class.java)
-            val idToken = account.idToken
-            if (!idToken.isNullOrEmpty()) {
-                setLoading(true)
-                lifecycleScope.launch {
-                    val repo = authRepository ?: return@launch
-                    val res = repo.signInWithGoogle(idToken)
-                    res.fold(
-                        onSuccess = { goToMain() },
-                        onFailure = { showError(friendlyError(it.message)) }
-                    )
-                }
-            } else {
-                showError("Google token পাওয়া যায়নি। Firebase Console-এ SHA-1 যোগ করুন।")
-            }
-        } catch (e: ApiException) {
-            showError("Google সাইন-ইন ব্যর্থ (কোড: ${e.statusCode})")
-        } catch (e: Exception) {
-            showError("Google সাইন-ইন সমস্যা: ${e.message}")
-        }
-    }
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
@@ -62,11 +31,7 @@ class LoginActivity : AppCompatActivity() {
             Log.e("LoginActivity", "AuthRepository init failed: ${e.message}", e)
         }
 
-        if (OTTApplication.firebaseReady) {
-            binding.btnGoogleSignIn.show()
-        } else {
-            binding.btnGoogleSignIn.hide()
-        }
+        binding.btnGoogleSignIn.hide()
 
         setupClickListeners()
     }
@@ -78,30 +43,6 @@ class LoginActivity : AppCompatActivity() {
 
         binding.tvToggleMode.setOnClickListener {
             toggleMode()
-        }
-
-        binding.btnGoogleSignIn.setOnClickListener {
-            launchGoogleSignIn()
-        }
-    }
-
-    private fun launchGoogleSignIn() {
-        val repo = authRepository
-        if (repo == null) {
-            showError("Firebase সঠিকভাবে চালু হয়নি")
-            return
-        }
-        try {
-            val signInClient = repo.getGoogleSignInClient(Constants.WEB_CLIENT_ID)
-            signInClient.signOut().addOnCompleteListener {
-                try {
-                    googleSignInLauncher.launch(signInClient.signInIntent)
-                } catch (e: Exception) {
-                    showError("Google সাইন-ইন চালু করতে সমস্যা")
-                }
-            }
-        } catch (e: Exception) {
-            showError("Google সাইন-ইন কনফিগারেশন সমস্যা")
         }
     }
 
@@ -185,7 +126,6 @@ class LoginActivity : AppCompatActivity() {
             msg.contains("already in use") -> "এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট আছে"
             msg.contains("badly formatted") || msg.contains("format") -> "ইমেইল সঠিক নয়"
             msg.contains("network") -> "ইন্টারনেট সংযোগ নেই"
-            msg.contains("12501") || msg.contains("sign_in_failed") -> "Google সাইন-ইন কনফিগারেশন সমস্যা। SHA-1 যোগ করুন।"
             msg.contains("CONFIGURATION_NOT_FOUND") || msg.contains("API_NOT_AVAILABLE") -> "Firebase কনফিগারেশন সমস্যা"
             else -> msg
         }
@@ -194,7 +134,6 @@ class LoginActivity : AppCompatActivity() {
     private fun setLoading(loading: Boolean) {
         binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
         binding.btnEmailAction.isEnabled = !loading
-        binding.btnGoogleSignIn.isEnabled = !loading
     }
 
     private fun showError(msg: String) {

@@ -2,12 +2,8 @@ package com.ottapp.moviestream.data.repository
 
 import android.content.Context
 import android.util.Log
-import com.google.android.gms.auth.api.signin.GoogleSignIn
-import com.google.android.gms.auth.api.signin.GoogleSignInClient
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.auth.GoogleAuthProvider
 import com.google.firebase.database.FirebaseDatabase
 import com.ottapp.moviestream.data.model.User
 import kotlinx.coroutines.tasks.await
@@ -27,33 +23,11 @@ class AuthRepository(private val context: Context) {
         FirebaseDatabase.getInstance(DB_URL).reference
     }
 
-    fun getGoogleSignInClient(webClientId: String): GoogleSignInClient {
-        val gso = GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-            .requestIdToken(webClientId)
-            .requestEmail()
-            .build()
-        return GoogleSignIn.getClient(context, gso)
-    }
-
     val currentFirebaseUser: FirebaseUser?
         get() = try { auth.currentUser } catch (e: Exception) { null }
 
     val isLoggedIn: Boolean
         get() = try { auth.currentUser != null } catch (e: Exception) { false }
-
-    suspend fun signInWithGoogle(idToken: String): Result<FirebaseUser> {
-        return try {
-            val credential = GoogleAuthProvider.getCredential(idToken, null)
-            val result = auth.signInWithCredential(credential).await()
-            val firebaseUser = result.user
-                ?: return Result.failure(Exception("Firebase user null"))
-            saveUserToDatabase(firebaseUser)
-            Result.success(firebaseUser)
-        } catch (e: Exception) {
-            Log.e(TAG, "Google sign-in failed: ${e.message}", e)
-            Result.failure(e)
-        }
-    }
 
     suspend fun signInWithEmail(email: String, password: String): Result<FirebaseUser> {
         return try {
@@ -107,16 +81,11 @@ class AuthRepository(private val context: Context) {
         }
     }
 
-    suspend fun signOut(googleSignInClient: GoogleSignInClient?) {
+    suspend fun signOut() {
         try {
             auth.signOut()
         } catch (e: Exception) {
             Log.e(TAG, "Firebase sign-out error: ${e.message}")
-        }
-        try {
-            googleSignInClient?.signOut()?.await()
-        } catch (e: Exception) {
-            Log.e(TAG, "Google sign-out error: ${e.message}")
         }
     }
 }
