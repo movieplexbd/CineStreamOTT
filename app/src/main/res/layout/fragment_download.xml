@@ -7,55 +7,156 @@
     android:background="@color/bg">
 
     <!-- Header -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="ডাউনলোড"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="@color/t1"
-        android:fontFamily="serif"
-        android:paddingHorizontal="14dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="8dp" />
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="@color/surface"
+        android:elevation="2dp">
 
-    <!-- Storage info card -->
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="ডাউনলোড"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/t1"
+            android:fontFamily="serif" />
+    </LinearLayout>
+
+    <!-- Storage info card - detailed -->
     <androidx.cardview.widget.CardView
         android:id="@+id/card_storage"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="14dp"
-        android:layout_marginBottom="10dp"
+        android:layout_marginTop="12dp"
+        android:layout_marginBottom="4dp"
         android:visibility="gone"
-        app:cardCornerRadius="13dp"
-        app:cardElevation="1dp"
+        app:cardCornerRadius="14dp"
+        app:cardElevation="2dp"
         app:cardBackgroundColor="@color/surface">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:gravity="center_vertical"
+            android:orientation="vertical"
             android:padding="14dp">
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="💾"
-                android:textSize="20sp"
-                android:layout_marginEnd="10dp" />
+                android:text="স্টোরেজ তথ্য"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/t3"
+                android:layout_marginBottom="10dp" />
 
-            <TextView
-                android:id="@+id/tv_storage_used"
-                android:layout_width="wrap_content"
+            <LinearLayout
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="ব্যবহৃত জায়গা: ..."
-                android:textSize="13sp"
-                android:textColor="@color/t2" />
+                android:orientation="horizontal">
+
+                <!-- Used space -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/tv_storage_used"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0 MB"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/red" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ব্যবহৃত"
+                        android:textSize="11sp"
+                        android:textColor="@color/t3"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/border"
+                    android:layout_marginVertical="4dp" />
+
+                <!-- Free space -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/tv_storage_free"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="..."
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/green" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="ফাঁকা"
+                        android:textSize="11sp"
+                        android:textColor="@color/t3"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
+
+                <!-- Divider -->
+                <View
+                    android:layout_width="1dp"
+                    android:layout_height="match_parent"
+                    android:background="@color/border"
+                    android:layout_marginVertical="4dp" />
+
+                <!-- Download count -->
+                <LinearLayout
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:orientation="vertical"
+                    android:gravity="center">
+
+                    <TextView
+                        android:id="@+id/tv_download_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="0"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/amber" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="মুভি"
+                        android:textSize="11sp"
+                        android:textColor="@color/t3"
+                        android:layout_marginTop="2dp" />
+                </LinearLayout>
+            </LinearLayout>
+
         </LinearLayout>
     </androidx.cardview.widget.CardView>
 
-    <!-- Scrollable content to support both sections -->
+    <!-- Scrollable content -->
     <androidx.core.widget.NestedScrollView
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -67,7 +168,7 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- ═══ Active Downloads (in-progress) ═══════════════════════════ -->
+            <!-- Active Downloads (in-progress) -->
             <LinearLayout
                 android:id="@+id/section_active"
                 android:layout_width="match_parent"
@@ -75,15 +176,29 @@
                 android:orientation="vertical"
                 android:visibility="gone">
 
-                <TextView
-                    android:layout_width="wrap_content"
+                <LinearLayout
+                    android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="⏬  এখন ডাউনলোড হচ্ছে"
-                    android:textSize="13sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/red"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
                     android:paddingHorizontal="16dp"
-                    android:paddingBottom="8dp" />
+                    android:paddingTop="14dp"
+                    android:paddingBottom="8dp">
+
+                    <View
+                        android:layout_width="4dp"
+                        android:layout_height="16dp"
+                        android:background="@color/red"
+                        android:layout_marginEnd="10dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="এখন ডাউনলোড হচ্ছে"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/t1" />
+                </LinearLayout>
 
                 <androidx.recyclerview.widget.RecyclerView
                     android:id="@+id/rv_active"
@@ -92,25 +207,23 @@
                     android:overScrollMode="never"
                     android:nestedScrollingEnabled="false" />
 
-                <!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
                     android:background="@color/border"
                     android:layout_marginHorizontal="14dp"
                     android:layout_marginTop="8dp"
-                    android:layout_marginBottom="12dp" />
-
+                    android:layout_marginBottom="4dp" />
             </LinearLayout>
 
-            <!-- ═══ Empty state (only when both lists empty) ══════════════════ -->
+            <!-- Empty state -->
             <LinearLayout
                 android:id="@+id/layout_empty"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center"
                 android:orientation="vertical"
-                android:paddingVertical="60dp"
+                android:paddingVertical="80dp"
                 android:visibility="gone">
 
                 <TextView
@@ -140,18 +253,33 @@
                     android:layout_marginHorizontal="32dp" />
             </LinearLayout>
 
-            <!-- ═══ Completed Downloads ════════════════════════════════════════ -->
-            <TextView
-                android:id="@+id/tv_completed_label"
-                android:layout_width="wrap_content"
+            <!-- Completed Downloads section header -->
+            <LinearLayout
+                android:id="@+id/section_completed_header"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="সংরক্ষিত মুভি"
-                android:textSize="13sp"
-                android:textStyle="bold"
-                android:textColor="@color/t2"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
                 android:paddingHorizontal="16dp"
+                android:paddingTop="14dp"
                 android:paddingBottom="8dp"
-                android:visibility="gone" />
+                android:visibility="gone">
+
+                <View
+                    android:layout_width="4dp"
+                    android:layout_height="16dp"
+                    android:background="@color/green"
+                    android:layout_marginEnd="10dp" />
+
+                <TextView
+                    android:id="@+id/tv_completed_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="সংরক্ষিত মুভি"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/t1" />
+            </LinearLayout>
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rv_downloads"

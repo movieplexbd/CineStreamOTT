@@ -5,7 +5,7 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/homeFragment">
 
-    <!-- ══ HOME ══ -->
+    <!-- HOME -->
     <fragment
         android:id="@+id/homeFragment"
         android:name="com.ottapp.moviestream.ui.home.HomeFragment"
@@ -20,7 +20,7 @@
             app:popExitAnim="@anim/slide_down" />
     </fragment>
 
-    <!-- ══ MOVIES ══ -->
+    <!-- MOVIES -->
     <fragment
         android:id="@+id/moviesFragment"
         android:name="com.ottapp.moviestream.ui.movies.MoviesFragment"
@@ -35,7 +35,7 @@
             app:popExitAnim="@anim/slide_down" />
     </fragment>
 
-    <!-- ══ SEARCH ══ -->
+    <!-- SEARCH -->
     <fragment
         android:id="@+id/searchFragment"
         android:name="com.ottapp.moviestream.ui.search.SearchFragment"
@@ -50,21 +50,21 @@
             app:popExitAnim="@anim/slide_down" />
     </fragment>
 
-    <!-- ══ DOWNLOAD ══ -->
+    <!-- DOWNLOAD -->
     <fragment
         android:id="@+id/downloadFragment"
         android:name="com.ottapp.moviestream.ui.download.DownloadFragment"
         android:label="ডাউনলোড"
         tools:layout="@layout/fragment_download" />
 
-    <!-- ══ PROFILE ══ -->
+    <!-- PROFILE -->
     <fragment
         android:id="@+id/profileFragment"
         android:name="com.ottapp.moviestream.ui.profile.ProfileFragment"
         android:label="প্রোফাইল"
         tools:layout="@layout/fragment_profile" />
 
-    <!-- ══ DETAIL (shared destination) ══ -->
+    <!-- DETAIL (shared destination) -->
     <fragment
         android:id="@+id/movieDetailFragment"
         android:name="com.ottapp.moviestream.ui.detail.MovieDetailFragment"
@@ -75,5 +75,13 @@
             app:argType="string"
             android:defaultValue="" />
     </fragment>
+
+    <!-- Global actions for navigating to tabs from anywhere -->
+    <action
+        android:id="@+id/action_global_to_download"
+        app:destination="@id/downloadFragment"
+        app:popUpTo="@id/homeFragment"
+        app:popUpToInclusive="false"
+        app:launchSingleTop="true" />
 
 </navigation>

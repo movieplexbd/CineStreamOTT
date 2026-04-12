@@ -2,6 +2,8 @@ package com.ottapp.moviestream.ui.download
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Environment
+import android.os.StatFs
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -18,69 +20,86 @@ import com.ottapp.moviestream.ui.player.PlayerActivity
 import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.hide
 import com.ottapp.moviestream.util.show
+import com.ottapp.moviestream.util.toReadableSize
 
 class DownloadFragment : Fragment() {
 
     private var _binding: FragmentDownloadBinding? = null
     private val binding get() = _binding!!
-
     private val viewModel: DownloadViewModel by viewModels()
-    private lateinit var completedAdapter: DownloadAdapter
-    private lateinit var activeAdapter: ActiveDownloadAdapter
 
-    override fun onCreateView(
-        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): View {
+    private lateinit var activeAdapter: ActiveDownloadAdapter
+    private lateinit var downloadAdapter: DownloadAdapter
+
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentDownloadBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        setupAdapters()
+        observeViewModel()
+        updateFreeStorage()
+    }
 
-        completedAdapter = DownloadAdapter(
+    private fun setupAdapters() {
+        activeAdapter = ActiveDownloadAdapter { movieId -> cancelDownload(movieId) }
+        binding.rvActive.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = activeAdapter
+            isNestedScrollingEnabled = false
+        }
+
+        downloadAdapter = DownloadAdapter(
             onPlay   = { movie -> playOffline(movie) },
             onDelete = { movie -> confirmDelete(movie) }
         )
-        binding.rvDownloads.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvDownloads.adapter = completedAdapter
-
-        activeAdapter = ActiveDownloadAdapter(onCancel = { movieId -> cancelDownload(movieId) })
-        binding.rvActive.layoutManager = LinearLayoutManager(requireContext())
-        binding.rvActive.adapter = activeAdapter
-
-        observeViewModel()
-    }
-
-    override fun onResume() {
-        super.onResume()
-        viewModel.loadDownloads()
+        binding.rvDownloads.apply {
+            layoutManager = LinearLayoutManager(requireContext())
+            adapter = downloadAdapter
+            isNestedScrollingEnabled = false
+        }
     }
 
     private fun observeViewModel() {
-        viewModel.activeDownloads.observe(viewLifecycleOwner) { map ->
-            val list = map.values.toList()
-            activeAdapter.submitList(list)
-            if (list.isNotEmpty()) binding.sectionActive.show() else binding.sectionActive.hide()
+        viewModel.activeDownloads.observe(viewLifecycleOwner) { active ->
+            if (active.isNotEmpty()) {
+                activeAdapter.submitList(active.values.toList())
+                binding.sectionActive.show()
+            } else {
+                binding.sectionActive.hide()
+            }
             refreshEmpty()
         }
 
-        viewModel.downloads.observe(viewLifecycleOwner) { list ->
-            completedAdapter.submitList(list)
-            if (list.isNotEmpty()) {
-                binding.tvCompletedLabel.show()
-                binding.rvDownloads.show()
+        viewModel.downloads.observe(viewLifecycleOwner) { downloads ->
+            downloadAdapter.submitList(downloads)
+            if (downloads.isNotEmpty()) {
+                binding.tvCompletedLabel.text = "সংরক্ষিত মুভি (${downloads.size}টি)"
+                binding.sectionCompletedHeader.show()
                 binding.cardStorage.show()
+                binding.tvDownloadCount.text = downloads.size.toString()
             } else {
-                binding.tvCompletedLabel.hide()
-                binding.rvDownloads.hide()
-                binding.cardStorage.hide()
+                binding.sectionCompletedHeader.hide()
+                binding.cardStorage.visibility = View.GONE
             }
             refreshEmpty()
         }
 
         viewModel.storageUsed.observe(viewLifecycleOwner) { size ->
-            binding.tvStorageUsed.text = "ব্যবহৃত জায়গা: $size"
+            binding.tvStorageUsed.text = size
+            binding.cardStorage.show()
+        }
+    }
+
+    private fun updateFreeStorage() {
+        try {
+            val stat = StatFs(Environment.getDataDirectory().path)
+            val free = stat.availableBlocksLong * stat.blockSizeLong
+            binding.tvStorageFree.text = free.toReadableSize()
+        } catch (e: Exception) {
+            binding.tvStorageFree.text = "N/A"
         }
     }
 
@@ -113,9 +132,18 @@ class DownloadFragment : Fragment() {
         AlertDialog.Builder(requireContext())
             .setTitle("ডিলিট করবেন?")
             .setMessage("\"${movie.title}\" ডাউনলোড মুছে ফেলতে চান?")
-            .setPositiveButton("ডিলিট") { _, _ -> viewModel.deleteDownload(movie.movieId) }
+            .setPositiveButton("ডিলিট") { _, _ ->
+                viewModel.deleteDownload(movie.movieId)
+                updateFreeStorage()
+            }
             .setNegativeButton("বাতিল", null)
             .show()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewModel.loadDownloads()
+        updateFreeStorage()
     }
 
     override fun onDestroyView() { _binding = null; super.onDestroyView() }

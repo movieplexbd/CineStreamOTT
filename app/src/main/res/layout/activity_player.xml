@@ -4,6 +4,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@color/black">
+
+    <!-- Video surface -->
     <androidx.media3.ui.PlayerView
         android:id="@+id/player_view"
         android:layout_width="match_parent"
@@ -12,21 +14,129 @@
         app:surface_type="surface_view"
         app:resize_mode="fit"
         android:background="@color/black" />
-    <ProgressBar
-        android:id="@+id/progress_buffering"
-        android:layout_width="52dp"
-        android:layout_height="52dp"
+
+    <!-- Loading / Buffering overlay -->
+    <FrameLayout
+        android:id="@+id/loading_overlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="#55000000"
+        android:visibility="visible">
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:orientation="vertical"
+            android:gravity="center">
+
+            <ProgressBar
+                android:id="@+id/progress_buffering"
+                android:layout_width="60dp"
+                android:layout_height="60dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/red" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="লোড হচ্ছে..."
+                android:textColor="@color/white"
+                android:textSize="13sp"
+                android:layout_marginTop="12dp" />
+        </LinearLayout>
+    </FrameLayout>
+
+    <!-- Transparent gesture capture area (above player, below controls) -->
+    <View
+        android:id="@+id/gesture_area"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/transparent"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- Seek forward indicator (double-tap right) -->
+    <LinearLayout
+        android:id="@+id/seek_forward_indicator"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center_vertical|end"
+        android:layout_marginEnd="60dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="@drawable/bg_seek_indicator"
+        android:visibility="gone"
+        android:alpha="0">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="▶▶"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="+10s"
+            android:textColor="@color/white"
+            android:textSize="11sp"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
+
+    <!-- Seek back indicator (double-tap left) -->
+    <LinearLayout
+        android:id="@+id/seek_back_indicator"
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center_vertical|start"
+        android:layout_marginStart="60dp"
+        android:orientation="vertical"
+        android:gravity="center"
+        android:background="@drawable/bg_seek_indicator"
+        android:visibility="gone"
+        android:alpha="0">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="◀◀"
+            android:textColor="@color/white"
+            android:textSize="20sp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="-10s"
+            android:textColor="@color/white"
+            android:textSize="11sp"
+            android:layout_marginTop="4dp" />
+    </LinearLayout>
+
+    <!-- Swipe seek time indicator -->
+    <TextView
+        android:id="@+id/tv_seek_indicator"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:indeterminateTint="@color/red"
+        android:paddingHorizontal="20dp"
+        android:paddingVertical="10dp"
+        android:background="@drawable/bg_speed_btn"
+        android:textColor="@color/white"
+        android:textSize="16sp"
+        android:textStyle="bold"
         android:visibility="gone" />
+
+    <!-- Controls overlay -->
     <LinearLayout
         android:id="@+id/controls_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
         android:background="@color/player_overlay"
-        android:clickable="true"
-        android:focusable="true">
+        android:clickable="false"
+        android:focusable="false">
+
+        <!-- TOP BAR: Back + Title + Speed + PiP -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -34,6 +144,7 @@
             android:gravity="center_vertical"
             android:padding="14dp"
             android:background="@drawable/gradient_top">
+
             <ImageButton
                 android:id="@+id/btn_back"
                 android:layout_width="38dp"
@@ -41,6 +152,7 @@
                 android:src="@drawable/ic_arrow_back"
                 android:background="@drawable/bg_icon_btn"
                 android:contentDescription="Back" />
+
             <TextView
                 android:id="@+id/tv_player_title"
                 android:layout_width="0dp"
@@ -52,6 +164,7 @@
                 android:textStyle="bold"
                 android:singleLine="true"
                 android:ellipsize="end" />
+
             <TextView
                 android:id="@+id/tv_speed"
                 android:layout_width="wrap_content"
@@ -62,15 +175,30 @@
                 android:textColor="@color/white"
                 android:textSize="11sp"
                 android:textStyle="bold"
-                android:text="1.0x" />
+                android:text="1.0x"
+                android:layout_marginEnd="8dp" />
+
+            <ImageButton
+                android:id="@+id/btn_pip"
+                android:layout_width="34dp"
+                android:layout_height="34dp"
+                android:src="@drawable/ic_pip"
+                android:background="@drawable/bg_icon_btn"
+                android:contentDescription="PiP"
+                android:padding="6dp" />
         </LinearLayout>
+
+        <!-- MIDDLE: flex spacer -->
         <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+        <!-- CENTER CONTROLS: seek back, play/pause, seek forward -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal"
             android:layout_marginBottom="8dp">
+
             <ImageButton
                 android:id="@+id/btn_seek_back"
                 android:layout_width="56dp"
@@ -78,6 +206,7 @@
                 android:src="@drawable/ic_replay_10"
                 android:background="@color/transparent"
                 android:contentDescription="Seek back 10s" />
+
             <ImageButton
                 android:id="@+id/btn_play_pause"
                 android:layout_width="68dp"
@@ -86,6 +215,7 @@
                 android:src="@drawable/ic_pause"
                 android:background="@drawable/bg_play_circle"
                 android:contentDescription="Play/Pause" />
+
             <ImageButton
                 android:id="@+id/btn_seek_forward"
                 android:layout_width="56dp"
@@ -94,58 +224,50 @@
                 android:background="@color/transparent"
                 android:contentDescription="Seek forward 10s" />
         </LinearLayout>
-        <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+        <!-- BOTTOM: seekbar + time -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:padding="14dp"
+            android:paddingHorizontal="14dp"
+            android:paddingBottom="16dp"
             android:background="@drawable/gradient_bottom">
+
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginBottom="6dp">
+                android:gravity="center_vertical">
+
                 <TextView
-                    android:id="@+id/tv_current_time"
+                    android:id="@+id/tv_position"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="00:00"
-                    android:textColor="#AAFFFFFF"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-                <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" />
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:text="00:00" />
+
+                <SeekBar
+                    android:id="@+id/seek_bar"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:layout_marginHorizontal="10dp"
+                    android:progressTint="@color/red"
+                    android:thumbTint="@color/red"
+                    android:max="1000" />
+
                 <TextView
                     android:id="@+id/tv_duration"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="00:00"
-                    android:textColor="#AAFFFFFF"
-                    android:textSize="11sp"
-                    android:textStyle="bold" />
-            </LinearLayout>
-            <SeekBar
-                android:id="@+id/seek_bar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:thumbTint="@color/white"
-                android:progressTint="@color/red"
-                android:progressBackgroundTint="#55FFFFFF"
-                android:layout_marginBottom="10dp" />
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="end">
-                <ImageButton
-                    android:id="@+id/btn_fullscreen"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:src="@drawable/ic_pip"
-                    android:background="@color/transparent"
-                    android:contentDescription="Picture in picture" />
+                    android:textColor="@color/white"
+                    android:textSize="12sp"
+                    android:text="00:00" />
             </LinearLayout>
         </LinearLayout>
+
     </LinearLayout>
+
 </FrameLayout>

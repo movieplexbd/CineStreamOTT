@@ -1,84 +1,113 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@color/bg">
 
-    <!-- Header -->
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="মুভি"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:textColor="@color/t1"
-        android:fontFamily="serif"
-        android:paddingHorizontal="14dp"
-        android:paddingTop="16dp"
-        android:paddingBottom="8dp" />
+    <!-- Header with Search -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="60dp"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="16dp"
+        android:background="@color/surface"
+        android:elevation="2dp">
 
-    <!-- Category Tab Bar -->
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="মুভি"
+            android:textSize="20sp"
+            android:textStyle="bold"
+            android:textColor="@color/t1"
+            android:fontFamily="serif" />
+    </LinearLayout>
+
+    <!-- Category Tab Bar - Professional look -->
     <HorizontalScrollView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:scrollbars="none"
         android:overScrollMode="never"
         android:background="@color/surface"
-        android:paddingHorizontal="8dp">
+        android:elevation="1dp">
 
         <LinearLayout
             android:layout_width="wrap_content"
-            android:layout_height="46dp"
+            android:layout_height="52dp"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:divider="@drawable/divider_space"
-            android:showDividers="middle">
+            android:paddingHorizontal="12dp">
 
             <Button android:id="@+id/tab_all"
                 style="@style/CategoryChip"
                 android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="@string/cat_all" />
-
-            <Button android:id="@+id/tab_bangla"
-                style="@style/CategoryChip"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="@string/cat_bangla" />
-
-            <Button android:id="@+id/tab_hindi"
-                style="@style/CategoryChip"
-                android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="@string/cat_hindi" />
+                android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
+                android:text="সব মুভি" />
 
             <Button android:id="@+id/tab_trending"
                 style="@style/CategoryChip"
                 android:layout_width="wrap_content"
-                android:layout_height="32dp"
-                android:text="@string/cat_trending" />
+                android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
+                android:text="🔥 ট্রেন্ডিং" />
+
+            <Button android:id="@+id/tab_bangla"
+                style="@style/CategoryChip"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
+                android:text="🇧🇩 বাংলা" />
+
+            <Button android:id="@+id/tab_hindi"
+                style="@style/CategoryChip"
+                android:layout_width="wrap_content"
+                android:layout_height="36dp"
+                android:layout_marginEnd="8dp"
+                android:text="🎬 হিন্দি" />
 
         </LinearLayout>
     </HorizontalScrollView>
 
-    <!-- Separator -->
-    <View android:layout_width="match_parent" android:layout_height="1dp"
-        android:background="@color/border" />
-
-    <!-- Shimmer -->
+    <!-- Shimmer loading state -->
     <com.facebook.shimmer.ShimmerFrameLayout
         android:id="@+id/shimmer"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:visibility="visible">
-        <androidx.recyclerview.widget.RecyclerView
+        <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:orientation="vertical"
+            android:padding="10dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal">
+                <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="160dp"
+                    android:background="@color/surface2" android:layout_margin="4dp"/>
+                <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="160dp"
+                    android:background="@color/surface2" android:layout_margin="4dp"/>
+                <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="160dp"
+                    android:background="@color/surface2" android:layout_margin="4dp"/>
+            </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginTop="8dp">
+                <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="160dp"
+                    android:background="@color/surface2" android:layout_margin="4dp"/>
+                <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="160dp"
+                    android:background="@color/surface2" android:layout_margin="4dp"/>
+                <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="160dp"
+                    android:background="@color/surface2" android:layout_margin="4dp"/>
+            </LinearLayout>
+        </LinearLayout>
     </com.facebook.shimmer.ShimmerFrameLayout>
 
-    <!-- Movies Grid -->
+    <!-- Movie grid -->
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/rv_movies"
         android:layout_width="match_parent"
@@ -91,15 +120,27 @@
         android:visibility="visible" />
 
     <!-- Empty state -->
-    <TextView
+    <LinearLayout
         android:id="@+id/tv_empty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="এই ক্যাটাগরিতে কোনো মুভি নেই"
+        android:orientation="vertical"
         android:gravity="center"
-        android:textColor="@color/t3"
-        android:textSize="14sp"
-        android:padding="40dp"
-        android:visibility="gone" />
+        android:paddingVertical="60dp"
+        android:visibility="gone">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="🎬"
+            android:textSize="48sp" />
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="এই ক্যাটাগরিতে কোনো মুভি নেই"
+            android:textSize="14sp"
+            android:textColor="@color/t3"
+            android:layout_marginTop="12dp"
+            android:gravity="center" />
+    </LinearLayout>
 
 </LinearLayout>

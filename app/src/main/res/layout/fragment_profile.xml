@@ -1,181 +1,393 @@
 <?xml version="1.0" encoding="utf-8"?>
-  <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
-      xmlns:app="http://schemas.android.com/apk/res-auto"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:background="@color/bg"
-      android:scrollbars="none"
-      android:overScrollMode="never">
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/bg"
+    android:scrollbars="none"
+    android:overScrollMode="never">
 
-      <LinearLayout
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:orientation="vertical"
-          android:paddingBottom="24dp">
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-          <!-- Profile Card -->
-          <androidx.cardview.widget.CardView
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:layout_margin="14dp"
-              app:cardCornerRadius="18dp"
-              app:cardElevation="2dp"
-              app:cardBackgroundColor="@color/surface">
+        <!-- Header -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="60dp"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:paddingHorizontal="16dp"
+            android:background="@color/surface"
+            android:elevation="2dp">
 
-              <LinearLayout
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:orientation="vertical"
-                  android:gravity="center"
-                  android:padding="24dp">
+            <TextView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="প্রোফাইল"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:textColor="@color/t1"
+                android:fontFamily="serif" />
+        </LinearLayout>
 
-                  <de.hdodenhof.circleimageview.CircleImageView
-                      android:id="@+id/iv_avatar"
-                      android:layout_width="80dp"
-                      android:layout_height="80dp"
-                      android:src="@color/red"
-                      app:civ_border_width="2dp"
-                      app:civ_border_color="@color/border" />
+        <!-- Profile card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="14dp"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="2dp"
+            app:cardBackgroundColor="@color/surface">
 
-                  <TextView
-                      android:id="@+id/tv_name"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:text="ব্যবহারকারী"
-                      android:textSize="20sp"
-                      android:textStyle="bold"
-                      android:textColor="@color/t1"
-                      android:fontFamily="serif"
-                      android:layout_marginTop="12dp" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp"
+                android:gravity="center">
 
-                  <TextView
-                      android:id="@+id/tv_email"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:textSize="13sp"
-                      android:textColor="@color/t2"
-                      android:layout_marginTop="4dp" />
+                <de.hdodenhof.circleimageview.CircleImageView
+                    android:id="@+id/iv_avatar"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@color/red" />
 
-                  <TextView
-                      android:id="@+id/tv_plan_label"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:paddingHorizontal="16dp"
-                      android:paddingVertical="5dp"
-                      android:textSize="12sp"
-                      android:textStyle="bold"
-                      android:textColor="@color/white"
-                      android:layout_marginTop="12dp" />
+                <TextView
+                    android:id="@+id/tv_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ব্যবহারকারী"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/t1"
+                    android:layout_marginTop="12dp" />
 
-                  <TextView
-                      android:id="@+id/tv_expiry"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:textSize="12sp"
-                      android:textColor="@color/t3"
-                      android:layout_marginTop="4dp"
-                      android:visibility="gone" />
-              </LinearLayout>
-          </androidx.cardview.widget.CardView>
+                <TextView
+                    android:id="@+id/tv_email"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:textColor="@color/t2"
+                    android:layout_marginTop="4dp" />
 
-          <!-- Admin Panel Button (hidden by default, visible only for admin) -->
-          <com.google.android.material.button.MaterialButton
-              android:id="@+id/btn_admin"
-              android:layout_width="match_parent"
-              android:layout_height="52dp"
-              android:layout_marginHorizontal="14dp"
-              android:layout_marginBottom="10dp"
-              android:text="⚙ অ্যাডমিন প্যানেল"
-              android:textSize="15sp"
-              android:textColor="@color/white"
-              android:backgroundTint="@color/t1"
-              app:cornerRadius="13dp"
-              android:visibility="gone" />
+                <TextView
+                    android:id="@+id/tv_plan_label"
+                    android:layout_width="wrap_content"
+                    android:layout_height="28dp"
+                    android:paddingHorizontal="14dp"
+                    android:gravity="center"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    android:background="@drawable/bg_free_badge"
+                    android:layout_marginTop="10dp"
+                    android:text="ফ্রি প্ল্যান" />
 
-          <!-- Storage Info -->
-          <androidx.cardview.widget.CardView
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:layout_marginHorizontal="14dp"
-              android:layout_marginBottom="10dp"
-              app:cardCornerRadius="13dp"
-              app:cardElevation="1dp"
-              app:cardBackgroundColor="@color/surface">
+                <TextView
+                    android:id="@+id/tv_expiry"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:textColor="@color/t3"
+                    android:layout_marginTop="4dp"
+                    android:visibility="gone" />
 
-              <LinearLayout
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:orientation="horizontal"
-                  android:gravity="center_vertical"
-                  android:padding="16dp">
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
 
-                  <TextView
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:text="📦"
-                      android:textSize="20sp"
-                      android:layout_marginEnd="12dp" />
+        <!-- Section: অ্যাকাউন্ট -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="অ্যাকাউন্ট"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/t3"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="6dp" />
 
-                  <TextView
-                      android:id="@+id/tv_storage"
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:text="ডাউনলোড স্টোরেজ: ..."
-                      android:textSize="14sp"
-                      android:textColor="@color/t2" />
-              </LinearLayout>
-          </androidx.cardview.widget.CardView>
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="14dp"
+            android:layout_marginBottom="14dp"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="1dp"
+            app:cardBackgroundColor="@color/surface">
 
-          <!-- Premium info card -->
-          <androidx.cardview.widget.CardView
-              android:layout_width="match_parent"
-              android:layout_height="wrap_content"
-              android:layout_marginHorizontal="14dp"
-              android:layout_marginBottom="24dp"
-              app:cardCornerRadius="13dp"
-              app:cardElevation="1dp"
-              app:cardBackgroundColor="@color/red_soft">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
-              <LinearLayout
-                  android:layout_width="match_parent"
-                  android:layout_height="wrap_content"
-                  android:orientation="vertical"
-                  android:padding="16dp">
+                <!-- Storage info row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp">
 
-                  <TextView
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:text="প্রিমিয়াম সাবস্ক্রিপশন"
-                      android:textSize="14sp"
-                      android:textStyle="bold"
-                      android:textColor="@color/red" />
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_download"
+                        app:tint="@color/red"
+                        android:layout_marginEnd="14dp" />
 
-                  <TextView
-                      android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:text="সাবস্ক্রিপশন পরিবর্তন বা আপগ্রেডের জন্য অ্যাডমিনের সাথে যোগাযোগ করুন।"
-                      android:textSize="12sp"
-                      android:textColor="@color/t2"
-                      android:layout_marginTop="4dp"
-                      android:lineSpacingMultiplier="1.5" />
-              </LinearLayout>
-          </androidx.cardview.widget.CardView>
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ডাউনলোড স্টোরেজ"
+                            android:textSize="14sp"
+                            android:textColor="@color/t1" />
+                        <TextView
+                            android:id="@+id/tv_storage"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="গণনা হচ্ছে..."
+                            android:textSize="12sp"
+                            android:textColor="@color/t3" />
+                    </LinearLayout>
+                </LinearLayout>
 
-          <!-- Sign Out Button -->
-          <com.google.android.material.button.MaterialButton
-              android:id="@+id/btn_sign_out"
-              android:layout_width="match_parent"
-              android:layout_height="52dp"
-              android:layout_marginHorizontal="14dp"
-              android:text="@string/btn_signout"
-              android:textSize="15sp"
-              android:textColor="@color/red"
-              style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-              app:strokeColor="@color/red"
-              app:strokeWidth="1.5dp"
-              app:cornerRadius="13dp"
-              android:backgroundTint="@color/transparent" />
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/border" android:layout_marginHorizontal="16dp"/>
 
-      </LinearLayout>
-  </ScrollView>
-  
+                <!-- Clear Cache -->
+                <LinearLayout
+                    android:id="@+id/btn_clear_cache"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_delete"
+                        app:tint="@color/t2"
+                        android:layout_marginEnd="14dp" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="ক্যাশ মুছুন"
+                        android:textSize="14sp"
+                        android:textColor="@color/t1" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textSize="18sp"
+                        android:textColor="@color/t3" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Section: সাপোর্ট -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="সাপোর্ট ও তথ্য"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:textColor="@color/t3"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="6dp" />
+
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="14dp"
+            android:layout_marginBottom="14dp"
+            app:cardCornerRadius="14dp"
+            app:cardElevation="1dp"
+            app:cardBackgroundColor="@color/surface">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <!-- Share App -->
+                <LinearLayout
+                    android:id="@+id/btn_share_app"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_search"
+                        app:tint="@color/t2"
+                        android:layout_marginEnd="14dp" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="অ্যাপ শেয়ার করুন"
+                        android:textSize="14sp"
+                        android:textColor="@color/t1" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textSize="18sp"
+                        android:textColor="@color/t3" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/border" android:layout_marginHorizontal="16dp"/>
+
+                <!-- Contact Support -->
+                <LinearLayout
+                    android:id="@+id/btn_contact_support"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_download"
+                        app:tint="@color/t2"
+                        android:layout_marginEnd="14dp" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="সাপোর্টে যোগাযোগ"
+                        android:textSize="14sp"
+                        android:textColor="@color/t1" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textSize="18sp"
+                        android:textColor="@color/t3" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/border" android:layout_marginHorizontal="16dp"/>
+
+                <!-- Privacy Policy -->
+                <LinearLayout
+                    android:id="@+id/btn_privacy_policy"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_lock"
+                        app:tint="@color/t2"
+                        android:layout_marginEnd="14dp" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="প্রাইভেসি পলিসি"
+                        android:textSize="14sp"
+                        android:textColor="@color/t1" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textSize="18sp"
+                        android:textColor="@color/t3" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="@color/border" android:layout_marginHorizontal="16dp"/>
+
+                <!-- About -->
+                <LinearLayout
+                    android:id="@+id/btn_about"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="16dp"
+                    android:background="?attr/selectableItemBackground"
+                    android:clickable="true"
+                    android:focusable="true">
+                    <ImageView
+                        android:layout_width="22dp"
+                        android:layout_height="22dp"
+                        android:src="@drawable/ic_pip"
+                        app:tint="@color/t2"
+                        android:layout_marginEnd="14dp" />
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="অ্যাপ সম্পর্কে"
+                        android:textSize="14sp"
+                        android:textColor="@color/t1" />
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="›"
+                        android:textSize="18sp"
+                        android:textColor="@color/t3" />
+                </LinearLayout>
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Admin button (hidden by default) -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_admin"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginHorizontal="14dp"
+            android:layout_marginBottom="10dp"
+            android:text="⚙ অ্যাডমিন প্যানেল"
+            android:textSize="14sp"
+            android:textColor="@color/white"
+            app:cornerRadius="12dp"
+            app:backgroundTint="@color/t1"
+            android:visibility="gone" />
+
+        <!-- Sign out button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_sign_out"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginHorizontal="14dp"
+            android:layout_marginBottom="32dp"
+            android:text="লগআউট"
+            android:textSize="15sp"
+            android:textColor="@color/red"
+            style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+            app:strokeColor="@color/red"
+            app:strokeWidth="1.5dp"
+            app:cornerRadius="13dp"
+            app:backgroundTint="@color/transparent" />
+
+    </LinearLayout>
+</ScrollView>

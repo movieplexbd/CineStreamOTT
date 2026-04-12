@@ -8,6 +8,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.ottapp.moviestream.R
 import com.ottapp.moviestream.data.model.Movie
 import com.ottapp.moviestream.data.repository.DownloadRepository
 import com.ottapp.moviestream.data.repository.MovieRepository
@@ -44,7 +45,6 @@ class MovieDetailFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
         dlRepo = DownloadRepository(requireContext())
 
-        // Back button
         binding.btnBack.setOnClickListener {
             findNavController().navigateUp()
         }
@@ -88,16 +88,11 @@ class MovieDetailFragment : Fragment() {
     private fun populateUI(movie: Movie) {
         if (_binding == null) return
 
-        // Banner
         binding.ivBanner.loadImage(movie.bannerImageUrl)
-
-        // Title (on banner overlay)
         binding.tvTitleOverlay.text = movie.title.orEmpty()
 
-        // Free badge
         if (movie.testMovie) binding.tvFreeBadge.show() else binding.tvFreeBadge.hide()
 
-        // Meta
         binding.tvRating.text = "⭐ ${movie.imdbRating}"
         binding.tvCategory.text = movie.category.orEmpty()
         binding.tvDescription.text = movie.description.orEmpty()
@@ -113,98 +108,78 @@ class MovieDetailFragment : Fragment() {
 
         // Download button state
         if (dlRepo.isDownloaded(movie.id)) {
-            binding.btnDownload.text = "✓ ডাউনলোড হয়েছে"
+            binding.btnDownload.text = "ডাউনলোড হয়েছে ✓"
             binding.btnDownload.isEnabled = false
+        } else {
+            binding.btnDownload.text = "ডাউনলোড করুন"
+            binding.btnDownload.isEnabled = true
         }
 
-        binding.btnPlay.setOnClickListener { handlePlay(movie) }
-        binding.btnDownload.setOnClickListener { handleDownload(movie) }
-    }
-
-    private fun handlePlay(movie: Movie) {
-        lifecycleScope.launch {
-            try {
-                val user = userRepo.getCurrentUser()
+        // Watch button — opens player directly
+        binding.btnWatch.setOnClickListener {
+            lifecycleScope.launch {
+                val user = try { userRepo.getCurrentUser() } catch (e: Exception) { null }
                 if (_binding == null) return@launch
 
-                val canAccess = user?.isPremium == true || movie.testMovie
-                if (!canAccess) {
-                    showSubscriptionRequired()
-                    return@launch
-                }
-
-                val videoUrl = if (dlRepo.isDownloaded(movie.id)) {
-                    dlRepo.getLocalFilePath(movie.id)
+                if (movie.testMovie || user?.isPremium == true) {
+                    val url = if (dlRepo.isDownloaded(movie.id)) {
+                        dlRepo.getLocalFilePath(movie.id)
+                    } else {
+                        movie.videoStreamUrl
+                    }
+                    openPlayer(movie, url)
                 } else {
-                    movie.videoStreamUrl
+                    binding.layoutLocked.show()
                 }
-
-                if (videoUrl.isNullOrEmpty()) {
-                    requireContext().toast("ভিডিও URL পাওয়া যায়নি")
-                    return@launch
-                }
-
-                val intent = Intent(requireContext(), PlayerActivity::class.java).apply {
-                    putExtra(Constants.EXTRA_MOVIE_ID,    movie.id)
-                    putExtra(Constants.EXTRA_MOVIE_TITLE, movie.title)
-                    putExtra(Constants.EXTRA_VIDEO_URL,   videoUrl)
-                    putExtra(Constants.EXTRA_BANNER_URL,  movie.bannerImageUrl)
-                    putExtra(Constants.EXTRA_IS_LOCAL,    dlRepo.isDownloaded(movie.id))
-                }
-                startActivity(intent)
-
-            } catch (e: Exception) {
-                if (_binding != null) requireContext().toast("সমস্যা হয়েছে: ${e.message}")
             }
         }
-    }
 
-    private fun handleDownload(movie: Movie) {
-        lifecycleScope.launch {
-            try {
-                val user = userRepo.getCurrentUser()
+        // Download button — starts download and navigates to download page
+        binding.btnDownload.setOnClickListener {
+            lifecycleScope.launch {
+                val user = try { userRepo.getCurrentUser() } catch (e: Exception) { null }
                 if (_binding == null) return@launch
 
-                val canAccess = user?.isPremium == true || movie.testMovie
-                if (!canAccess) {
-                    showSubscriptionRequired()
-                    return@launch
+                if (movie.testMovie || user?.isPremium == true) {
+                    startDownload(movie)
+                    // Navigate to download tab
+                    try {
+                        findNavController().navigate(R.id.action_global_to_download)
+                    } catch (e: Exception) {
+                        requireContext().toast("ডাউনলোড শুরু হয়েছে")
+                    }
+                } else {
+                    binding.layoutLocked.show()
                 }
-
-                if (dlRepo.isDownloaded(movie.id)) {
-                    requireContext().toast("ইতিমধ্যে ডাউনলোড হয়েছে")
-                    return@launch
-                }
-
-                val downloadUrl = movie.downloadUrl.orEmpty()
-                    .ifEmpty { movie.videoStreamUrl.orEmpty() }
-                if (downloadUrl.isEmpty()) {
-                    requireContext().toast("ডাউনলোড URL পাওয়া যায়নি")
-                    return@launch
-                }
-
-                val intent = Intent(requireContext(), DownloadService::class.java).apply {
-                    putExtra(Constants.EXTRA_MOVIE_ID,    movie.id)
-                    putExtra(Constants.EXTRA_MOVIE_TITLE, movie.title)
-                    putExtra(Constants.EXTRA_VIDEO_URL,   downloadUrl)
-                    putExtra(Constants.EXTRA_BANNER_URL,  movie.bannerImageUrl)
-                }
-                requireContext().startForegroundService(intent)
-                requireContext().toast("ডাউনলোড শুরু হয়েছে...")
-
-                binding.btnDownload.text = "ডাউনলোড হচ্ছে..."
-                binding.btnDownload.isEnabled = false
-
-            } catch (e: Exception) {
-                if (_binding != null) requireContext().toast("সমস্যা হয়েছে: ${e.message}")
             }
         }
     }
 
-    private fun showSubscriptionRequired() {
-        if (_binding == null) return
-        binding.layoutLocked.visibility = View.VISIBLE
-        binding.layoutLocked.animate().alpha(1f).setDuration(300).start()
+    private fun openPlayer(movie: Movie, url: String) {
+        if (url.isBlank()) {
+            requireContext().toast("ভিডিও পাওয়া যায়নি")
+            return
+        }
+        val isLocal = dlRepo.isDownloaded(movie.id)
+        val intent = Intent(requireContext(), PlayerActivity::class.java).apply {
+            putExtra(Constants.EXTRA_MOVIE_ID,    movie.id)
+            putExtra(Constants.EXTRA_MOVIE_TITLE, movie.title)
+            putExtra(Constants.EXTRA_VIDEO_URL,   url)
+            putExtra(Constants.EXTRA_BANNER_URL,  movie.bannerImageUrl)
+            putExtra(Constants.EXTRA_IS_LOCAL,    isLocal)
+        }
+        startActivity(intent)
+    }
+
+    private fun startDownload(movie: Movie) {
+        val intent = Intent(requireContext(), DownloadService::class.java).apply {
+            putExtra(Constants.EXTRA_MOVIE_ID,    movie.id)
+            putExtra(Constants.EXTRA_MOVIE_TITLE, movie.title)
+            putExtra(Constants.EXTRA_VIDEO_URL,   movie.downloadUrl.ifEmpty { movie.videoStreamUrl })
+            putExtra(Constants.EXTRA_BANNER_URL,  movie.bannerImageUrl)
+        }
+        requireContext().startService(intent)
+        requireContext().toast("ডাউনলোড শুরু হয়েছে...")
     }
 
     override fun onDestroyView() {

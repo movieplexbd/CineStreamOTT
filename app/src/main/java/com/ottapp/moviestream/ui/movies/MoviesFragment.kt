@@ -59,11 +59,23 @@ class MoviesFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.loading.observe(viewLifecycleOwner) { loading ->
-            if (loading) binding.shimmer.show() else binding.shimmer.hide()
+            if (loading) {
+                binding.shimmer.show()
+                binding.rvMovies.hide()
+            } else {
+                binding.shimmer.hide()
+                binding.rvMovies.show()
+            }
         }
         viewModel.filteredMovies.observe(viewLifecycleOwner) { movies ->
             adapter.submitList(movies)
-            if (movies.isEmpty()) binding.tvEmpty.show() else binding.tvEmpty.hide()
+            if (movies.isEmpty()) {
+                binding.tvEmpty.show()
+                binding.rvMovies.hide()
+            } else {
+                binding.tvEmpty.hide()
+                binding.rvMovies.show()
+            }
         }
     }
 
