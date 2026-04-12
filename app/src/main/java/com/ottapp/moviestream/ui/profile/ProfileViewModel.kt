@@ -6,6 +6,7 @@ import com.ottapp.moviestream.data.model.User
 import com.ottapp.moviestream.data.repository.AuthRepository
 import com.ottapp.moviestream.data.repository.DownloadRepository
 import com.ottapp.moviestream.data.repository.UserRepository
+import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.toReadableSize
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
@@ -15,6 +16,7 @@ class ProfileViewModel(app: Application) : AndroidViewModel(app) {
     private val authRepo = AuthRepository(app)
     private val userRepo = UserRepository()
     private val dlRepo   = DownloadRepository(app)
+    private val app      = app
 
     private val _user        = MutableLiveData<User?>()
     val user: LiveData<User?> = _user
@@ -36,8 +38,8 @@ class ProfileViewModel(app: Application) : AndroidViewModel(app) {
     }
 
     fun signOut() = viewModelScope.launch {
-        // Pass null — Google sign-out not required (email/password only)
-        authRepo.signOut(null)
+        val googleClient = authRepo.getGoogleSignInClient(Constants.WEB_CLIENT_ID)
+        authRepo.signOut(googleClient)
         _signedOut.value = true
     }
 }

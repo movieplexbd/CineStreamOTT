@@ -135,7 +135,9 @@ class DownloadService : Service() {
             DownloadTracker.remove(movieId)
             activeJobs.remove(movieId)
             notifManager.cancel(notifId(movieId))
-            withContext(Dispatchers.Main) { if (activeJobs.isEmpty()) stopSelf() }
+            try {
+                withContext(Dispatchers.Main.immediate) { if (activeJobs.isEmpty()) stopSelf() }
+            } catch (_: Exception) { }
         }
     }
 

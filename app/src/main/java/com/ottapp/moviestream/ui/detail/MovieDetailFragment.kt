@@ -178,7 +178,7 @@ class MovieDetailFragment : Fragment() {
             putExtra(Constants.EXTRA_VIDEO_URL,   movie.downloadUrl.ifEmpty { movie.videoStreamUrl })
             putExtra(Constants.EXTRA_BANNER_URL,  movie.bannerImageUrl)
         }
-        requireContext().startService(intent)
+        requireContext().startForegroundService(intent)
         requireContext().toast("ডাউনলোড শুরু হয়েছে...")
     }
 
