@@ -6,9 +6,9 @@
     android:orientation="vertical"
     android:gravity="center"
     android:paddingHorizontal="32dp"
-    android:paddingBottom="180dp">
+    android:paddingBottom="200dp"
+    android:background="@color/bg">
 
-    <!-- Big emoji/icon -->
     <TextView
         android:id="@+id/tv_icon"
         android:layout_width="wrap_content"
@@ -16,25 +16,23 @@
         android:textSize="80sp"
         android:layout_marginBottom="24dp" />
 
-    <!-- Title -->
     <TextView
         android:id="@+id/tv_title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
+        android:textSize="22sp"
         android:textStyle="bold"
-        android:textColor="#FFFFFF"
+        android:textColor="@color/t1"
         android:gravity="center"
         android:lineSpacingMultiplier="1.3"
-        android:layout_marginBottom="16dp" />
+        android:layout_marginBottom="14dp" />
 
-    <!-- Subtitle / description -->
     <TextView
         android:id="@+id/tv_subtitle"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textSize="15sp"
-        android:textColor="#AAAAAA"
+        android:textColor="@color/t2"
         android:gravity="center"
         android:lineSpacingMultiplier="1.7" />
 

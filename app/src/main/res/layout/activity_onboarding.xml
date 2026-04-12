@@ -4,9 +4,8 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#0D0D0D">
+    android:background="@color/bg">
 
-    <!-- ViewPager2 for slides -->
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/view_pager"
         android:layout_width="match_parent"
@@ -21,7 +20,7 @@
         android:paddingHorizontal="24dp"
         android:paddingBottom="40dp"
         android:paddingTop="16dp"
-        android:background="@drawable/bg_onboard_bottom">
+        android:background="@color/bg">
 
         <!-- Dot indicators -->
         <LinearLayout
@@ -30,9 +29,8 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center_horizontal"
             android:orientation="horizontal"
-            android:layout_marginBottom="24dp" />
+            android:layout_marginBottom="20dp" />
 
-        <!-- Next / Get Started button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_next"
             android:layout_width="match_parent"
@@ -42,10 +40,9 @@
             android:textStyle="bold"
             android:textColor="@color/white"
             app:cornerRadius="14dp"
-            app:backgroundTint="#E8431C"
+            app:backgroundTint="@color/red"
             app:icon="@null" />
 
-        <!-- Skip button -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_skip"
             android:layout_width="match_parent"
@@ -53,7 +50,7 @@
             android:layout_marginTop="8dp"
             android:text="এড়িয়ে যান"
             android:textSize="14sp"
-            android:textColor="#888888"
+            android:textColor="@color/t3"
             style="@style/Widget.MaterialComponents.Button.TextButton"
             app:icon="@null" />
 

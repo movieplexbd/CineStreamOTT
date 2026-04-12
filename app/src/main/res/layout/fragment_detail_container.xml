@@ -1,371 +1,480 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
+<androidx.core.widget.NestedScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg">
+    android:background="@color/bg"
+    android:scrollbars="none"
+    android:overScrollMode="never">
 
-    <androidx.core.widget.NestedScrollView
+    <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scrollbars="none"
-        android:overScrollMode="never">
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
 
-        <LinearLayout
+        <!-- ── Player / Thumbnail area (16:9, scrolls with content) ── -->
+        <FrameLayout
+            android:id="@+id/container_player"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="220dp"
+            android:background="@color/black"
+            android:clickable="false"
+            android:focusable="false">
 
-            <!-- ── Inline Player (16:9, replaces banner) ── -->
-            <FrameLayout
-                android:id="@+id/container_player"
+            <!-- ExoPlayer surface (hidden until play tapped) -->
+            <androidx.media3.ui.PlayerView
+                android:id="@+id/inline_player_view"
                 android:layout_width="match_parent"
-                android:layout_height="220dp"
-                android:background="@color/black">
+                android:layout_height="match_parent"
+                app:use_controller="false"
+                app:surface_type="surface_view"
+                app:resize_mode="fill"
+                android:background="@color/black"
+                android:clickable="false"
+                android:focusable="false"
+                android:visibility="gone" />
 
-                <!-- Actual ExoPlayer view -->
-                <androidx.media3.ui.PlayerView
-                    android:id="@+id/inline_player_view"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    app:use_controller="false"
-                    app:surface_type="surface_view"
-                    app:resize_mode="fill"
-                    android:background="@color/black"
-                    android:visibility="gone" />
+            <!-- Thumbnail shown before playback -->
+            <ImageView
+                android:id="@+id/iv_thumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                android:background="@color/surface2"
+                android:clickable="false"
+                android:focusable="false" />
 
-                <!-- Thumbnail shown before playback -->
-                <ImageView
-                    android:id="@+id/iv_thumbnail"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:scaleType="centerCrop"
-                    android:background="@color/surface2" />
+            <!-- Gradient fade at bottom -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/gradient_bottom_detail"
+                android:clickable="false"
+                android:focusable="false" />
 
-                <!-- Gradient bottom fade -->
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:background="@drawable/gradient_bottom_detail" />
-
-                <!-- Back button (top-left) -->
-                <ImageButton
-                    android:id="@+id/btn_back"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
-                    android:layout_gravity="top|start"
-                    android:layout_margin="12dp"
-                    android:src="@drawable/ic_arrow_back"
-                    android:background="@drawable/bg_close_btn"
-                    android:contentDescription="Back"
-                    android:padding="8dp" />
-
-                <!-- Fullscreen button (top-right, shown during playback) -->
-                <ImageButton
-                    android:id="@+id/btn_fullscreen"
-                    android:layout_width="42dp"
-                    android:layout_height="42dp"
-                    android:layout_gravity="top|end"
-                    android:layout_margin="12dp"
-                    android:src="@drawable/ic_fullscreen"
-                    android:background="@drawable/bg_close_btn"
-                    android:contentDescription="Fullscreen"
-                    android:padding="8dp"
-                    android:visibility="gone" />
-
-                <!-- FREE badge (top-right when not fullscreen btn) -->
-                <TextView
-                    android:id="@+id/tv_free_badge"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="top|end"
-                    android:layout_margin="12dp"
-                    android:text="@string/free_badge"
-                    android:textSize="10sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    android:paddingHorizontal="10dp"
-                    android:paddingVertical="4dp"
-                    android:background="@drawable/bg_badge_free"
-                    android:visibility="gone" />
-
-                <!-- Title + Play button overlay (shown before play) -->
-                <LinearLayout
-                    android:id="@+id/play_overlay"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:orientation="vertical"
-                    android:gravity="bottom">
-
-                    <!-- Movie title at bottom -->
-                    <TextView
-                        android:id="@+id/tv_title_overlay"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textSize="18sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/white"
-                        android:fontFamily="serif"
-                        android:maxLines="2"
-                        android:ellipsize="end"
-                        android:paddingHorizontal="16dp"
-                        android:paddingBottom="60dp"
-                        android:shadowColor="#88000000"
-                        android:shadowDx="0"
-                        android:shadowDy="2"
-                        android:shadowRadius="6" />
-
-                </LinearLayout>
-
-                <!-- Center Play button -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_watch"
-                    android:layout_width="160dp"
-                    android:layout_height="48dp"
-                    android:layout_gravity="center"
-                    android:text="▶  দেখুন"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/white"
-                    app:cornerRadius="30dp"
-                    app:backgroundTint="@color/red"
-                    app:icon="@null" />
-
-                <!-- Buffering spinner shown while video loads -->
-                <ProgressBar
-                    android:id="@+id/progress_player"
-                    android:layout_width="44dp"
-                    android:layout_height="44dp"
-                    android:layout_gravity="center"
-                    android:indeterminateTint="@color/red"
-                    android:visibility="gone" />
-
-            </FrameLayout>
-
-            <!-- ── Content area (visible after movie data loads) ── -->
-            <LinearLayout
-                android:id="@+id/layout_content"
+            <!-- Title overlay at bottom (not clickable) -->
+            <TextView
+                android:id="@+id/tv_title_overlay"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:textSize="18sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:fontFamily="serif"
+                android:maxLines="2"
+                android:ellipsize="end"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="54dp"
+                android:shadowColor="#88000000"
+                android:shadowDx="0" android:shadowDy="2" android:shadowRadius="6"
+                android:clickable="false"
+                android:focusable="false" />
+
+            <!-- Back button -->
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_gravity="top|start"
+                android:layout_margin="12dp"
+                android:src="@drawable/ic_arrow_back"
+                android:background="@drawable/bg_close_btn"
+                android:contentDescription="Back"
+                android:padding="8dp" />
+
+            <!-- FREE badge -->
+            <TextView
+                android:id="@+id/tv_free_badge"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="top|end"
+                android:layout_margin="12dp"
+                android:text="@string/free_badge"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:background="@drawable/bg_badge_free"
+                android:visibility="gone"
+                android:clickable="false" />
+
+            <!-- ── Play button overlay (before playback) ── -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_watch"
+                android:layout_width="160dp"
+                android:layout_height="48dp"
+                android:layout_gravity="center"
+                android:text="▶  দেখুন"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/white"
+                app:cornerRadius="30dp"
+                app:backgroundTint="@color/red"
+                app:icon="@null" />
+
+            <!-- Buffering spinner (during video load) -->
+            <ProgressBar
+                android:id="@+id/progress_player"
+                android:layout_width="44dp"
+                android:layout_height="44dp"
+                android:layout_gravity="center"
+                android:indeterminateTint="@color/white"
+                android:visibility="gone"
+                android:clickable="false" />
+
+            <!-- ── Player Controls Overlay (shown during playback) ── -->
+            <LinearLayout
+                android:id="@+id/player_controls"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
                 android:orientation="vertical"
+                android:background="#99000000"
                 android:visibility="gone">
 
-                <!-- Meta row: rating, year, duration, category -->
+                <!-- Top row: back + title + fullscreen -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:paddingHorizontal="16dp"
-                    android:paddingTop="14dp"
-                    android:paddingBottom="12dp">
+                    android:padding="10dp">
 
                     <TextView
-                        android:id="@+id/tv_rating"
-                        android:layout_width="wrap_content"
+                        android:id="@+id/tv_player_title"
+                        android:layout_width="0dp"
                         android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:textColor="@color/white"
                         android:textSize="13sp"
                         android:textStyle="bold"
-                        android:textColor="@color/amber"
-                        android:background="@drawable/bg_rating"
-                        android:paddingHorizontal="8dp"
-                        android:paddingVertical="3dp"
-                        android:layout_marginEnd="8dp" />
+                        android:singleLine="true"
+                        android:ellipsize="end" />
 
-                    <TextView
-                        android:id="@+id/tv_year"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="12sp"
-                        android:textColor="@color/t2"
-                        android:background="@drawable/bg_tag"
-                        android:paddingHorizontal="8dp"
-                        android:paddingVertical="3dp"
-                        android:layout_marginEnd="8dp"
-                        android:visibility="gone" />
-
-                    <TextView
-                        android:id="@+id/tv_duration"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="12sp"
-                        android:textColor="@color/t2"
-                        android:background="@drawable/bg_tag"
-                        android:paddingHorizontal="8dp"
-                        android:paddingVertical="3dp"
-                        android:layout_marginEnd="8dp"
-                        android:visibility="gone" />
-
-                    <TextView
-                        android:id="@+id/tv_category"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:textSize="12sp"
-                        android:textColor="@color/red"
-                        android:background="@drawable/bg_tag"
-                        android:paddingHorizontal="8dp"
-                        android:paddingVertical="3dp" />
+                    <ImageButton
+                        android:id="@+id/btn_fullscreen"
+                        android:layout_width="36dp"
+                        android:layout_height="36dp"
+                        android:src="@drawable/ic_fullscreen"
+                        android:background="@drawable/bg_close_btn"
+                        android:contentDescription="Fullscreen"
+                        android:padding="7dp" />
 
                 </LinearLayout>
 
-                <!-- ── Subscription/Trial Info Card ── -->
+                <!-- Spacer -->
+                <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+
+                <!-- Center: seek back | play/pause | seek forward -->
                 <LinearLayout
-                    android:id="@+id/card_subscription_info"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_subscription_card"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginBottom="16dp"
-                    android:padding="16dp"
-                    android:visibility="gone">
+                    android:gravity="center"
+                    android:orientation="horizontal"
+                    android:layout_marginBottom="4dp">
 
-                    <!-- Status icon + text row -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="10dp">
+                    <ImageButton
+                        android:id="@+id/btn_ctrl_seek_back"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_replay_10"
+                        android:background="@color/transparent"
+                        android:contentDescription="10s back" />
 
-                        <TextView
-                            android:id="@+id/tv_access_icon"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:textSize="24sp"
-                            android:layout_marginEnd="12dp" />
+                    <ImageButton
+                        android:id="@+id/btn_ctrl_play_pause"
+                        android:layout_width="58dp"
+                        android:layout_height="58dp"
+                        android:layout_marginHorizontal="24dp"
+                        android:src="@drawable/ic_pause"
+                        android:background="@drawable/bg_play_circle"
+                        android:contentDescription="Play/Pause" />
 
-                        <LinearLayout
-                            android:layout_width="0dp"
-                            android:layout_height="wrap_content"
-                            android:layout_weight="1"
-                            android:orientation="vertical">
-
-                            <TextView
-                                android:id="@+id/tv_access_title"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="14sp"
-                                android:textStyle="bold"
-                                android:textColor="#FFFFFF" />
-
-                            <TextView
-                                android:id="@+id/tv_access_sub"
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:textSize="12sp"
-                                android:textColor="#AAAAAA"
-                                android:layout_marginTop="3dp" />
-
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <!-- Feature list shown when trial/no-access -->
-                    <LinearLayout
-                        android:id="@+id/layout_features"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginBottom="12dp"
-                        android:visibility="gone">
-
-                        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                            android:text="✅  সকল মুভি আনলিমিটেড দেখুন"
-                            android:textSize="13sp" android:textColor="#CCCCCC" android:layout_marginBottom="4dp" />
-                        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                            android:text="✅  অফলাইন ডাউনলোড করুন"
-                            android:textSize="13sp" android:textColor="#CCCCCC" android:layout_marginBottom="4dp" />
-                        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                            android:text="✅  ১ মাস পূর্ণ অ্যাক্সেস"
-                            android:textSize="13sp" android:textColor="#CCCCCC" android:layout_marginBottom="4dp" />
-                        <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                            android:text="✅  মাত্র ৳১০ — বিকাশ/নগদে সেন্ড মানি"
-                            android:textSize="13sp" android:textColor="#CCCCCC" />
-
-                    </LinearLayout>
-
-                    <!-- Subscribe CTA button -->
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_go_subscribe"
-                        android:layout_width="match_parent"
-                        android:layout_height="50dp"
-                        android:text="🔥 সাবস্ক্রাইব করুন — মাত্র ৳১০"
-                        android:textSize="14sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/white"
-                        app:cornerRadius="12dp"
-                        app:backgroundTint="#E8431C"
-                        app:icon="@null"
-                        android:visibility="gone" />
+                    <ImageButton
+                        android:id="@+id/btn_ctrl_seek_forward"
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_forward_10"
+                        android:background="@color/transparent"
+                        android:contentDescription="10s forward" />
 
                 </LinearLayout>
 
-                <!-- Download Button -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_download"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginBottom="16dp"
-                    android:text="ডাউনলোড করুন"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/red"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    app:strokeColor="@color/red"
-                    app:strokeWidth="1.5dp"
-                    app:cornerRadius="12dp"
-                    app:backgroundTint="@color/transparent"
-                    app:icon="@drawable/ic_download"
-                    app:iconTint="@color/red"
-                    app:iconGravity="textStart"
-                    app:iconPadding="8dp" />
-
-                <!-- Divider -->
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/border"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginBottom="14dp" />
-
-                <!-- Description Header -->
-                <TextView
+                <!-- Bottom: seekbar + time -->
+                <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="বিবরণ"
-                    android:textSize="16sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/t1"
-                    android:paddingHorizontal="16dp"
-                    android:paddingBottom="8dp" />
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:paddingHorizontal="12dp"
+                    android:paddingBottom="10dp">
 
-                <!-- Description -->
-                <TextView
-                    android:id="@+id/tv_description"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:textSize="14sp"
-                    android:textColor="@color/t2"
-                    android:paddingHorizontal="16dp"
-                    android:paddingBottom="24dp"
-                    android:lineSpacingMultiplier="1.7" />
+                    <TextView
+                        android:id="@+id/tv_ctrl_position"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/white"
+                        android:textSize="11sp"
+                        android:text="00:00" />
 
-                <View android:layout_width="match_parent" android:layout_height="40dp" />
+                    <SeekBar
+                        android:id="@+id/ctrl_seek_bar"
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:layout_marginHorizontal="8dp"
+                        android:progressTint="@color/red"
+                        android:thumbTint="@color/red"
+                        android:max="1000" />
+
+                    <TextView
+                        android:id="@+id/tv_ctrl_duration"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textColor="@color/white"
+                        android:textSize="11sp"
+                        android:text="00:00" />
+
+                </LinearLayout>
 
             </LinearLayout>
 
+            <!-- Tap area (toggles controls visibility during playback) -->
+            <View
+                android:id="@+id/player_tap_area"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@color/transparent"
+                android:clickable="true"
+                android:focusable="true"
+                android:visibility="gone" />
+
+        </FrameLayout>
+
+        <!-- ── Page loading progress (shown under player while data loads) ── -->
+        <ProgressBar
+            android:id="@+id/progress_center"
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="60dp"
+            android:indeterminateTint="@color/red"
+            android:visibility="gone" />
+
+        <!-- ── Content area ── -->
+        <LinearLayout
+            android:id="@+id/layout_content"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <!-- Meta row -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingHorizontal="16dp"
+                android:paddingTop="14dp"
+                android:paddingBottom="12dp">
+
+                <TextView
+                    android:id="@+id/tv_rating"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="13sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/amber"
+                    android:background="@drawable/bg_rating"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp"
+                    android:layout_marginEnd="8dp" />
+
+                <TextView
+                    android:id="@+id/tv_year"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:textColor="@color/t2"
+                    android:background="@drawable/bg_tag"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp"
+                    android:layout_marginEnd="8dp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/tv_duration"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:textColor="@color/t2"
+                    android:background="@drawable/bg_tag"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp"
+                    android:layout_marginEnd="8dp"
+                    android:visibility="gone" />
+
+                <TextView
+                    android:id="@+id/tv_category"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textSize="12sp"
+                    android:textColor="@color/red"
+                    android:background="@drawable/bg_tag"
+                    android:paddingHorizontal="8dp"
+                    android:paddingVertical="3dp" />
+
+            </LinearLayout>
+
+            <!-- ── Subscription / Trial Info Card (light theme) ── -->
+            <LinearLayout
+                android:id="@+id/card_subscription_info"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:background="@drawable/bg_subscription_card"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp"
+                android:padding="16dp"
+                android:visibility="gone">
+
+                <!-- Status row -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:layout_marginBottom="10dp">
+
+                    <TextView
+                        android:id="@+id/tv_access_icon"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:textSize="24sp"
+                        android:layout_marginEnd="12dp" />
+
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:orientation="vertical">
+
+                        <TextView
+                            android:id="@+id/tv_access_title"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="@color/t1" />
+
+                        <TextView
+                            android:id="@+id/tv_access_sub"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:textSize="12sp"
+                            android:textColor="@color/t2"
+                            android:layout_marginTop="3dp" />
+
+                    </LinearLayout>
+                </LinearLayout>
+
+                <!-- Feature list -->
+                <LinearLayout
+                    android:id="@+id/layout_features"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="12dp"
+                    android:visibility="gone">
+
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="✅  সকল মুভি আনলিমিটেড দেখুন"
+                        android:textSize="13sp" android:textColor="@color/t2" android:layout_marginBottom="4dp" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="✅  অফলাইন ডাউনলোড করুন"
+                        android:textSize="13sp" android:textColor="@color/t2" android:layout_marginBottom="4dp" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="✅  ১ মাস পূর্ণ অ্যাক্সেস"
+                        android:textSize="13sp" android:textColor="@color/t2" android:layout_marginBottom="4dp" />
+                    <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
+                        android:text="✅  মাত্র ৳১০ — বিকাশ/নগদে সেন্ড মানি"
+                        android:textSize="13sp" android:textColor="@color/t2" />
+
+                </LinearLayout>
+
+                <!-- Subscribe CTA -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_go_subscribe"
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:text="🔥 সাবস্ক্রাইব করুন — মাত্র ৳১০"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    app:cornerRadius="12dp"
+                    app:backgroundTint="@color/red"
+                    app:icon="@null"
+                    android:visibility="gone" />
+
+            </LinearLayout>
+
+            <!-- Download Button -->
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_download"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="16dp"
+                android:text="ডাউনলোড করুন"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="@color/red"
+                style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                app:strokeColor="@color/red"
+                app:strokeWidth="1.5dp"
+                app:cornerRadius="12dp"
+                app:backgroundTint="@color/transparent"
+                app:icon="@drawable/ic_download"
+                app:iconTint="@color/red"
+                app:iconGravity="textStart"
+                app:iconPadding="8dp" />
+
+            <!-- Divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:background="@color/border"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginBottom="14dp" />
+
+            <!-- Description Header -->
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="বিবরণ"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:textColor="@color/t1"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="8dp" />
+
+            <!-- Description -->
+            <TextView
+                android:id="@+id/tv_description"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="@color/t2"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="24dp"
+                android:lineSpacingMultiplier="1.7" />
+
+            <View android:layout_width="match_parent" android:layout_height="48dp" />
+
         </LinearLayout>
-    </androidx.core.widget.NestedScrollView>
 
-    <!-- Global loading spinner -->
-    <ProgressBar
-        android:id="@+id/progress_center"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:indeterminateTint="@color/red"
-        android:visibility="gone"
-        android:layout_gravity="center" />
-
-</FrameLayout>
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>
