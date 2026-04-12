@@ -5,6 +5,7 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import androidx.core.app.NotificationCompat
 import com.ottapp.moviestream.OTTApplication
 import com.ottapp.moviestream.R
@@ -24,6 +25,7 @@ class DownloadService : Service() {
     companion object {
         const val ACTION_CANCEL         = "action_cancel_download"
         const val EXTRA_MOVIE_ID_CANCEL = "extra_movie_id_cancel"
+        private const val TAG = "DownloadService"
     }
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -50,17 +52,28 @@ class DownloadService : Service() {
         val videoUrl   = intent.getStringExtra(Constants.EXTRA_VIDEO_URL)   ?: return START_NOT_STICKY
         val bannerUrl  = intent.getStringExtra(Constants.EXTRA_BANNER_URL)  ?: ""
 
-        if (activeJobs.containsKey(movieId)) return START_NOT_STICKY   // already in progress
+        if (activeJobs.containsKey(movieId)) return START_NOT_STICKY
 
         DownloadTracker.start(movieId, movieTitle, bannerUrl)
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            startForeground(
-                notifId(movieId),
-                buildNotif(movieId, movieTitle, -1),
-                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-            )
-        } else {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                startForeground(
+                    notifId(movieId),
+                    buildNotif(movieId, movieTitle, -1),
+                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+                )
+            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                startForeground(
+                    notifId(movieId),
+                    buildNotif(movieId, movieTitle, -1),
+                    0
+                )
+            } else {
+                startForeground(notifId(movieId), buildNotif(movieId, movieTitle, -1))
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "startForeground failed: ${e.message}", e)
             startForeground(notifId(movieId), buildNotif(movieId, movieTitle, -1))
         }
 
@@ -74,8 +87,8 @@ class DownloadService : Service() {
         activeJobs[movieId]?.cancel()
         activeJobs.remove(movieId)
         DownloadTracker.remove(movieId)
-        repo.getTempFile(movieId).delete()
-        notifManager.cancel(notifId(movieId))
+        try { repo.getTempFile(movieId).delete() } catch (_: Exception) {}
+        try { notifManager.cancel(notifId(movieId)) } catch (_: Exception) {}
         if (activeJobs.isEmpty()) stopSelf()
     }
 
@@ -88,7 +101,13 @@ class DownloadService : Service() {
                 connectTimeout = 15_000
                 readTimeout    = 30_000
                 requestMethod  = "GET"
+                setRequestProperty("User-Agent", "CineStream/1.0")
                 connect()
+            }
+
+            val responseCode = conn.responseCode
+            if (responseCode !in 200..299) {
+                throw Exception("HTTP $responseCode")
             }
 
             val total      = conn.contentLengthLong
@@ -111,9 +130,11 @@ class DownloadService : Service() {
                         if (now - lastNotify > 400) {
                             val pct = if (total > 0) ((downloaded * 100) / total).toInt() else -1
                             DownloadTracker.update(movieId, pct)
-                            withContext(Dispatchers.Main) {
-                                notifManager.notify(notifId(movieId), buildNotif(movieId, title, pct))
-                            }
+                            try {
+                                withContext(Dispatchers.Main) {
+                                    notifManager.notify(notifId(movieId), buildNotif(movieId, title, pct))
+                                }
+                            } catch (_: Exception) {}
                             lastNotify = now
                         }
                     }
@@ -137,21 +158,20 @@ class DownloadService : Service() {
             }
 
         } catch (e: CancellationException) {
-            // silently cancelled
+            try { tempFile.delete() } catch (_: Exception) {}
         } catch (e: Exception) {
-            tempFile.delete()
+            Log.e(TAG, "Download failed: ${e.message}", e)
+            try { tempFile.delete() } catch (_: Exception) {}
             showDoneNotif(movieId, title, success = false)
         } finally {
             DownloadTracker.remove(movieId)
             activeJobs.remove(movieId)
-            notifManager.cancel(notifId(movieId))
+            try { notifManager.cancel(notifId(movieId)) } catch (_: Exception) {}
             try {
                 withContext(Dispatchers.Main.immediate) { if (activeJobs.isEmpty()) stopSelf() }
             } catch (_: Exception) { }
         }
     }
-
-    // ── Notification helpers ──────────────────────────────────────────────────
 
     private fun notifId(movieId: String) = movieId.hashCode().and(0x7FFFFFFF)
 
@@ -171,20 +191,24 @@ class DownloadService : Service() {
             .setSmallIcon(R.drawable.ic_download_notif)
             .setContentTitle("ডাউনলোড হচ্ছে")
             .setContentText(title)
-            .setProgress(100, progress, progress < 0)
+            .setProgress(100, progress.coerceAtLeast(0), progress < 0)
             .setOngoing(true)
             .setSilent(true)
             .addAction(R.drawable.ic_close, "বাতিল", cancelPi(movieId))
             .build()
 
     private fun showDoneNotif(movieId: String, title: String, success: Boolean) {
-        val notif = NotificationCompat.Builder(this, OTTApplication.DOWNLOAD_CHANNEL_ID)
-            .setSmallIcon(R.drawable.ic_download_notif)
-            .setContentTitle(if (success) "✓ ডাউনলোড সম্পন্ন" else "✗ ডাউনলোড ব্যর্থ")
-            .setContentText(if (success) "$title সংরক্ষিত হয়েছে" else "$title ডাউনলোড করা যায়নি")
-            .setAutoCancel(true)
-            .build()
-        notifManager.notify(notifId(movieId), notif)
+        try {
+            val notif = NotificationCompat.Builder(this, OTTApplication.DOWNLOAD_CHANNEL_ID)
+                .setSmallIcon(R.drawable.ic_download_notif)
+                .setContentTitle(if (success) "ডাউনলোড সম্পন্ন" else "ডাউনলোড ব্যর্থ")
+                .setContentText(if (success) "$title সংরক্ষিত হয়েছে" else "$title ডাউনলোড করা যায়নি")
+                .setAutoCancel(true)
+                .build()
+            notifManager.notify(notifId(movieId), notif)
+        } catch (e: Exception) {
+            Log.e(TAG, "Done notification error: ${e.message}")
+        }
     }
 
     override fun onDestroy() { scope.cancel(); super.onDestroy() }

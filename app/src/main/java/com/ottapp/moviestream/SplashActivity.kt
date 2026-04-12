@@ -5,28 +5,49 @@ import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.google.firebase.auth.FirebaseAuth
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
 
-    private val auth = FirebaseAuth.getInstance()
-
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_splash)
 
-        // 1.5 সেকেন্ড পরে check করবে
+        try {
+            setContentView(R.layout.activity_splash)
+        } catch (e: Exception) {
+            Log.e("SplashActivity", "Layout inflate error: ${e.message}", e)
+        }
+
         Handler(Looper.getMainLooper()).postDelayed({
-            if (auth.currentUser != null) {
-                // Already logged in → MainActivity
-                startActivity(Intent(this, MainActivity::class.java))
-            } else {
-                // Not logged in → LoginActivity
-                startActivity(Intent(this, LoginActivity::class.java))
+            try {
+                if (!isFinishing && !isDestroyed) {
+                    val isLoggedIn = try {
+                        OTTApplication.firebaseReady && FirebaseAuth.getInstance().currentUser != null
+                    } catch (e: Exception) {
+                        Log.e("SplashActivity", "Firebase auth check failed: ${e.message}", e)
+                        false
+                    }
+
+                    if (isLoggedIn) {
+                        startActivity(Intent(this, MainActivity::class.java))
+                    } else {
+                        startActivity(Intent(this, LoginActivity::class.java))
+                    }
+                    finish()
+                }
+            } catch (e: Exception) {
+                Log.e("SplashActivity", "Navigation error: ${e.message}", e)
+                try {
+                    startActivity(Intent(this, LoginActivity::class.java))
+                    finish()
+                } catch (e2: Exception) {
+                    Log.e("SplashActivity", "Fatal navigation error", e2)
+                    finish()
+                }
             }
-            finish()
         }, 1500)
     }
 }

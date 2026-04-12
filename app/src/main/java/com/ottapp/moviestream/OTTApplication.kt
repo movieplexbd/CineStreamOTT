@@ -10,14 +10,28 @@ import com.google.firebase.FirebaseApp
 
 class OTTApplication : Application(), Configuration.Provider {
 
+    companion object {
+        const val DOWNLOAD_CHANNEL_ID = "ott_downloads"
+        var firebaseReady = false
+            private set
+    }
+
     override fun onCreate() {
         super.onCreate()
+        initFirebaseSafely()
+        createNotificationChannels()
+    }
+
+    private fun initFirebaseSafely() {
         try {
-            FirebaseApp.initializeApp(this)
+            if (FirebaseApp.getApps(this).isEmpty()) {
+                FirebaseApp.initializeApp(this)
+            }
+            firebaseReady = true
         } catch (e: Exception) {
             Log.e("OTTApplication", "Firebase init failed: ${e.message}", e)
+            firebaseReady = false
         }
-        createNotificationChannels()
     }
 
     private fun createNotificationChannels() {
@@ -32,7 +46,7 @@ class OTTApplication : Application(), Configuration.Provider {
                     setSound(null, null)
                 }
                 val notificationManager = getSystemService(NotificationManager::class.java)
-                notificationManager.createNotificationChannel(downloadChannel)
+                notificationManager?.createNotificationChannel(downloadChannel)
             } catch (e: Exception) {
                 Log.e("OTTApplication", "Notification channel error: ${e.message}", e)
             }
@@ -43,8 +57,4 @@ class OTTApplication : Application(), Configuration.Provider {
         get() = Configuration.Builder()
             .setMinimumLoggingLevel(Log.INFO)
             .build()
-
-    companion object {
-        const val DOWNLOAD_CHANNEL_ID = "ott_downloads"
-    }
 }

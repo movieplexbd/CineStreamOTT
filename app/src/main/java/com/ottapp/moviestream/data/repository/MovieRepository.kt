@@ -1,20 +1,28 @@
 package com.ottapp.moviestream.data.repository
 
+import android.util.Log
 import com.google.firebase.database.FirebaseDatabase
 import com.ottapp.moviestream.data.model.Movie
 import kotlinx.coroutines.tasks.await
 
 class MovieRepository {
 
-    private val db = FirebaseDatabase.getInstance("https://movies-bee24-default-rtdb.firebaseio.com").reference
-    private val moviesRef = db.child("movies")
+    companion object {
+        private const val TAG = "MovieRepository"
+        private const val DB_URL = "https://movies-bee24-default-rtdb.firebaseio.com"
+    }
 
-    // Manually parse Firebase snapshot to Movie
-    // This avoids crash when Firebase stores year as String instead of Int
+    private val db by lazy {
+        FirebaseDatabase.getInstance(DB_URL).reference
+    }
+
+    private val moviesRef by lazy {
+        db.child("movies")
+    }
+
     @Suppress("UNCHECKED_CAST")
     private fun snapshotToMovie(snapshot: com.google.firebase.database.DataSnapshot): Movie? {
         return try {
-            // Support both Map<String,*> and direct Movie mapping
             val rawValue = snapshot.value ?: return null
 
             val data: Map<*, *> = when (rawValue) {
@@ -61,19 +69,30 @@ class MovieRepository {
                 }
             )
         } catch (e: Exception) {
-            null // Return null on parse error so one bad entry doesn't crash the whole list
+            Log.e(TAG, "Parse movie error: ${e.message}")
+            null
         }
     }
 
     suspend fun getAllMovies(): List<Movie> {
-        val snapshot = moviesRef.get().await()
-        return snapshot.children.mapNotNull { child -> snapshotToMovie(child) }
+        return try {
+            val snapshot = moviesRef.get().await()
+            snapshot.children.mapNotNull { child -> snapshotToMovie(child) }
+        } catch (e: Exception) {
+            Log.e(TAG, "getAllMovies error: ${e.message}", e)
+            emptyList()
+        }
     }
 
     suspend fun getMovieById(id: String): Movie? {
         if (id.isEmpty()) return null
-        val snapshot = moviesRef.child(id).get().await()
-        return snapshotToMovie(snapshot)
+        return try {
+            val snapshot = moviesRef.child(id).get().await()
+            snapshotToMovie(snapshot)
+        } catch (e: Exception) {
+            Log.e(TAG, "getMovieById error: ${e.message}", e)
+            null
+        }
     }
 
     suspend fun addMovie(movie: Movie): String {
@@ -94,7 +113,6 @@ class MovieRepository {
         moviesRef.child(id).removeValue().await()
     }
 
-    // Convert Movie object to Firebase-compatible Map
     private fun movieToMap(movie: Movie): Map<String, Any?> = mapOf(
         "title"          to movie.title,
         "description"    to movie.description,

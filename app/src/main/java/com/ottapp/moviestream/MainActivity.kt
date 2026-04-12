@@ -1,6 +1,7 @@
 package com.ottapp.moviestream
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
@@ -10,24 +11,36 @@ import com.ottapp.moviestream.databinding.ActivityMainBinding
 class MainActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityMainBinding
-    private lateinit var navController: NavController
+    private var navController: NavController? = null
 
     private var currentTabId: Int = R.id.homeFragment
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        try {
+            binding = ActivityMainBinding.inflate(layoutInflater)
+            setContentView(binding.root)
 
-        val navHost = supportFragmentManager
-            .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
-        navController = navHost.navController
+            val navHost = supportFragmentManager
+                .findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
+            if (navHost == null) {
+                Log.e("MainActivity", "NavHostFragment not found")
+                return
+            }
+            navController = navHost.navController
 
-        // Handle switching between different tabs
+            setupBottomNav()
+        } catch (e: Exception) {
+            Log.e("MainActivity", "onCreate error: ${e.message}", e)
+        }
+    }
+
+    private fun setupBottomNav() {
+        val nc = navController ?: return
+
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             val destId = item.itemId
 
-            // Don't navigate if already on this tab (let reselect listener handle it)
             if (destId == currentTabId) {
                 return@setOnItemSelectedListener true
             }
@@ -38,44 +51,48 @@ class MainActivity : AppCompatActivity() {
                 .setLaunchSingleTop(true)
                 .setRestoreState(true)
                 .setPopUpTo(
-                    navController.graph.startDestinationId,
+                    nc.graph.startDestinationId,
                     inclusive = false,
                     saveState = true
                 )
                 .build()
 
             try {
-                navController.navigate(destId, null, navOptions)
+                nc.navigate(destId, null, navOptions)
             } catch (e: Exception) {
-                // fallback: ignore
+                Log.e("MainActivity", "Navigation error: ${e.message}")
             }
             true
         }
 
-        // When user taps the SAME tab they're already on: pop back to the tab root
-        // This only fires on explicit user tap of an already-selected item (not on startup)
         binding.bottomNavigation.setOnItemReselectedListener {
-            val currentDest = navController.currentDestination?.id
-            // Only pop if we're deeper than the tab root (e.g. on a detail screen)
-            if (currentDest != currentTabId) {
-                navController.popBackStack(currentTabId, false)
+            try {
+                val currentDest = nc.currentDestination?.id
+                if (currentDest != currentTabId) {
+                    nc.popBackStack(currentTabId, false)
+                }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Reselect error: ${e.message}")
             }
         }
 
-        // Keep bottom nav in sync when navigating via code (e.g. search icon in home)
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            val tabIds = setOf(
-                R.id.homeFragment, R.id.moviesFragment, R.id.searchFragment,
-                R.id.downloadFragment, R.id.profileFragment
-            )
-            if (destination.id in tabIds) {
-                currentTabId = destination.id
-                binding.bottomNavigation.selectedItemId = destination.id
+        nc.addOnDestinationChangedListener { _, destination, _ ->
+            try {
+                val tabIds = setOf(
+                    R.id.homeFragment, R.id.moviesFragment, R.id.searchFragment,
+                    R.id.downloadFragment, R.id.profileFragment
+                )
+                if (destination.id in tabIds) {
+                    currentTabId = destination.id
+                    binding.bottomNavigation.selectedItemId = destination.id
+                }
+            } catch (e: Exception) {
+                Log.e("MainActivity", "Destination changed error: ${e.message}")
             }
         }
     }
 
     override fun onSupportNavigateUp(): Boolean {
-        return navController.navigateUp() || super.onSupportNavigateUp()
+        return navController?.navigateUp() ?: false || super.onSupportNavigateUp()
     }
 }

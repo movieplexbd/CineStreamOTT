@@ -1,5 +1,6 @@
 package com.ottapp.moviestream.ui.home
 
+import android.util.Log
 import androidx.lifecycle.*
 import com.ottapp.moviestream.data.model.Movie
 import com.ottapp.moviestream.data.model.User
@@ -9,6 +10,10 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.launch
 
 class HomeViewModel : ViewModel() {
+
+    companion object {
+        private const val TAG = "HomeViewModel"
+    }
 
     private val movieRepo = MovieRepository()
     private val userRepo  = UserRepository()
@@ -49,31 +54,26 @@ class HomeViewModel : ViewModel() {
             try {
                 val all = movieRepo.getAllMovies()
 
-                // All movies
                 _allMovies.value = all
 
-                // Trending
                 val trending = all.filter { it.trending }
                 _trendingMovies.value = trending
 
-                // Banner — trending first, fallback all
                 _bannerMovies.value = trending.take(5).ifEmpty { all.take(5) }
 
-                // Bangla Dubbed — flexible matching
                 _banglaMovies.value = all.filter { movie ->
                     val cat = movie.category.lowercase().trim()
                     cat.contains("bangla") || cat.contains("বাংলা")
                 }
 
-                // Hindi Dubbed — flexible matching
                 _hindiMovies.value = all.filter { movie ->
                     val cat = movie.category.lowercase().trim()
                     cat.contains("hindi") || cat.contains("হিন্দি")
                 }
 
             } catch (e: Exception) {
+                Log.e(TAG, "loadData error: ${e.message}", e)
                 _error.value = e.message
-                // Set empty lists on error so UI shows empty state
                 _allMovies.value = emptyList()
                 _bannerMovies.value = emptyList()
                 _trendingMovies.value = emptyList()
@@ -87,9 +87,17 @@ class HomeViewModel : ViewModel() {
 
     private fun observeUser() {
         viewModelScope.launch {
-            userRepo.getCurrentUserFlow()
-                .catch { _error.value = it.message }
-                .collect { _currentUser.value = it }
+            try {
+                userRepo.getCurrentUserFlow()
+                    .catch {
+                        Log.e(TAG, "User flow error: ${it.message}")
+                        emit(null)
+                    }
+                    .collect { _currentUser.value = it }
+            } catch (e: Exception) {
+                Log.e(TAG, "observeUser error: ${e.message}")
+                _currentUser.value = null
+            }
         }
     }
 }

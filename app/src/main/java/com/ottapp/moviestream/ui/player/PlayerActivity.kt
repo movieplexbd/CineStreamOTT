@@ -7,13 +7,13 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.Log
 import android.util.Rational
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
 import android.view.WindowInsetsController
-import android.view.animation.AnimationUtils
 import androidx.annotation.OptIn
 import androidx.appcompat.app.AppCompatActivity
 import androidx.media3.common.MediaItem
@@ -21,7 +21,6 @@ import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.exoplayer.ExoPlayer
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.ottapp.moviestream.R
 import com.ottapp.moviestream.databinding.ActivityPlayerBinding
 import com.ottapp.moviestream.util.Constants
@@ -33,6 +32,10 @@ import kotlin.math.abs
 
 @OptIn(UnstableApi::class)
 class PlayerActivity : AppCompatActivity() {
+
+    companion object {
+        private const val TAG = "PlayerActivity"
+    }
 
     private lateinit var binding: ActivityPlayerBinding
     private var player: ExoPlayer? = null
@@ -66,25 +69,31 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityPlayerBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        hideSystemUI()
+        try {
+            binding = ActivityPlayerBinding.inflate(layoutInflater)
+            setContentView(binding.root)
+            hideSystemUI()
 
-        prefs      = getSharedPreferences("ott_prefs", MODE_PRIVATE)
-        movieId    = intent.getStringExtra(Constants.EXTRA_MOVIE_ID)    ?: ""
-        movieTitle = intent.getStringExtra(Constants.EXTRA_MOVIE_TITLE) ?: "Movie"
-        videoUrl   = intent.getStringExtra(Constants.EXTRA_VIDEO_URL)   ?: ""
+            prefs      = getSharedPreferences("ott_prefs", MODE_PRIVATE)
+            movieId    = intent.getStringExtra(Constants.EXTRA_MOVIE_ID)    ?: ""
+            movieTitle = intent.getStringExtra(Constants.EXTRA_MOVIE_TITLE) ?: "Movie"
+            videoUrl   = intent.getStringExtra(Constants.EXTRA_VIDEO_URL)   ?: ""
 
-        if (videoUrl.isBlank()) {
-            toast("ভিডিও URL পাওয়া যায়নি")
+            if (videoUrl.isBlank()) {
+                toast("ভিডিও URL পাওয়া যায়নি")
+                finish()
+                return
+            }
+
+            binding.tvPlayerTitle.text = movieTitle
+            setupPlayer()
+            setupControls()
+            setupGestures()
+        } catch (e: Exception) {
+            Log.e(TAG, "onCreate error: ${e.message}", e)
+            toast("Player শুরু করতে সমস্যা")
             finish()
-            return
         }
-
-        binding.tvPlayerTitle.text = movieTitle
-        setupPlayer()
-        setupControls()
-        setupGestures()
     }
 
     private fun setupPlayer() {
@@ -131,6 +140,7 @@ class PlayerActivity : AppCompatActivity() {
                 }
             })
         } catch (e: Exception) {
+            Log.e(TAG, "setupPlayer error: ${e.message}", e)
             toast("Player শুরু করতে সমস্যা: ${e.message}")
             finish()
         }
@@ -189,7 +199,8 @@ class PlayerActivity : AppCompatActivity() {
             override fun onProgressChanged(seekBar: android.widget.SeekBar?, progress: Int, fromUser: Boolean) {
                 if (fromUser) {
                     player?.let { p ->
-                        val pos = (progress.toLong() * p.duration / 1000L).coerceAtLeast(0)
+                        val dur = p.duration.coerceAtLeast(1)
+                        val pos = (progress.toLong() * dur / 1000L).coerceAtLeast(0)
                         binding.tvPosition.text = pos.toFormattedTime()
                     }
                 }
@@ -199,7 +210,8 @@ class PlayerActivity : AppCompatActivity() {
             }
             override fun onStopTrackingTouch(seekBar: android.widget.SeekBar?) {
                 player?.let { p ->
-                    val pos = (seekBar!!.progress.toLong() * p.duration / 1000L).coerceAtLeast(0)
+                    val dur = p.duration.coerceAtLeast(1)
+                    val pos = (seekBar!!.progress.toLong() * dur / 1000L).coerceAtLeast(0)
                     p.seekTo(pos)
                     startProgressLoop()
                 }
@@ -236,7 +248,6 @@ class PlayerActivity : AppCompatActivity() {
         binding.gestureArea.setOnTouchListener { _, event ->
             gestureDetector.onTouchEvent(event)
 
-            // Horizontal swipe seek
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     swipeStartX = event.x
@@ -248,7 +259,8 @@ class PlayerActivity : AppCompatActivity() {
                     if (abs(deltaX) > 20) {
                         isSeeking = true
                         val seekDelta = (deltaX * 0.3f).toLong() * 1000L
-                        val newPos = (swipeStartPos + seekDelta).coerceIn(0L, player?.duration ?: 0L)
+                        val maxDur = player?.duration?.coerceAtLeast(0L) ?: 0L
+                        val newPos = (swipeStartPos + seekDelta).coerceIn(0L, maxDur)
                         binding.tvSeekIndicator.text = if (deltaX > 0)
                             "+${(seekDelta / 1000).toInt()}s" else "${(seekDelta / 1000).toInt()}s"
                         binding.tvSeekIndicator.show()
@@ -259,7 +271,8 @@ class PlayerActivity : AppCompatActivity() {
                     if (isSeeking) {
                         val deltaX = event.x - swipeStartX
                         val seekDelta = (deltaX * 0.3f).toLong() * 1000L
-                        val newPos = (swipeStartPos + seekDelta).coerceIn(0L, player?.duration ?: 0L)
+                        val maxDur = player?.duration?.coerceAtLeast(0L) ?: 0L
+                        val newPos = (swipeStartPos + seekDelta).coerceIn(0L, maxDur)
                         player?.seekTo(newPos)
                         binding.tvSeekIndicator.hide()
                         scheduleHide()
@@ -271,13 +284,17 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun showSeekAnimation(forward: Boolean) {
-        val indicator = if (forward) binding.seekForwardIndicator else binding.seekBackIndicator
-        indicator.show()
-        indicator.animate().alpha(1f).setDuration(200).withEndAction {
-            indicator.animate().alpha(0f).setStartDelay(500).setDuration(300).withEndAction {
-                indicator.hide()
+        try {
+            val indicator = if (forward) binding.seekForwardIndicator else binding.seekBackIndicator
+            indicator.show()
+            indicator.animate().alpha(1f).setDuration(200).withEndAction {
+                indicator.animate().alpha(0f).setStartDelay(500).setDuration(300).withEndAction {
+                    indicator.hide()
+                }.start()
             }.start()
-        }.start()
+        } catch (e: Exception) {
+            Log.e(TAG, "Seek animation error: ${e.message}")
+        }
     }
 
     private fun startProgressLoop() {
@@ -331,31 +348,51 @@ class PlayerActivity : AppCompatActivity() {
 
     override fun onPictureInPictureModeChanged(inPiP: Boolean, cfg: Configuration) {
         super.onPictureInPictureModeChanged(inPiP, cfg)
-        if (inPiP) binding.controlsOverlay.hide() else binding.controlsOverlay.show()
-    }
-
-    private fun hideSystemUI() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-            window.insetsController?.let { ctrl ->
-                ctrl.hide(WindowInsets.Type.systemBars())
-                ctrl.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
-            }
-        } else {
-            @Suppress("DEPRECATION")
-            window.decorView.systemUiVisibility = (
-                View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    or View.SYSTEM_UI_FLAG_FULLSCREEN
-                    or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
-            )
+        try {
+            if (inPiP) binding.controlsOverlay.hide() else binding.controlsOverlay.show()
+        } catch (e: Exception) {
+            Log.e(TAG, "PiP mode change error: ${e.message}")
         }
     }
 
-    private fun savePosition(pos: Long) =
-        prefs.edit().putLong(Constants.PREF_PLAYBACK_POSITION + movieId, pos).apply()
+    private fun hideSystemUI() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+                window.insetsController?.let { ctrl ->
+                    ctrl.hide(WindowInsets.Type.systemBars())
+                    ctrl.systemBarsBehavior = WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE
+                }
+            } else {
+                @Suppress("DEPRECATION")
+                window.decorView.systemUiVisibility = (
+                    View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                        or View.SYSTEM_UI_FLAG_FULLSCREEN
+                        or View.SYSTEM_UI_FLAG_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                        or View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                        or View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
+                )
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "hideSystemUI error: ${e.message}")
+        }
+    }
+
+    private fun savePosition(pos: Long) {
+        try {
+            prefs.edit().putLong(Constants.PREF_PLAYBACK_POSITION + movieId, pos).apply()
+        } catch (e: Exception) {
+            Log.e(TAG, "savePosition error: ${e.message}")
+        }
+    }
 
     override fun onPause() {
         super.onPause()
-        player?.let { savePosition(it.currentPosition); it.pause() }
+        try {
+            player?.let { savePosition(it.currentPosition); it.pause() }
+        } catch (e: Exception) {
+            Log.e(TAG, "onPause error: ${e.message}")
+        }
     }
 
     override fun onStop() {
@@ -367,7 +404,11 @@ class PlayerActivity : AppCompatActivity() {
         super.onDestroy()
         hideHandler.removeCallbacks(hideRunnable)
         progressHandler.removeCallbacks(progressLoop)
-        player?.release()
+        try {
+            player?.release()
+        } catch (e: Exception) {
+            Log.e(TAG, "Player release error: ${e.message}")
+        }
         player = null
     }
 }

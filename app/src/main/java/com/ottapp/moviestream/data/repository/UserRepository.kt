@@ -1,5 +1,6 @@
 package com.ottapp.moviestream.data.repository
 
+import android.util.Log
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
@@ -13,8 +14,18 @@ import kotlinx.coroutines.tasks.await
 
 class UserRepository {
 
-    private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseDatabase.getInstance("https://movies-bee24-default-rtdb.firebaseio.com").reference
+    companion object {
+        private const val TAG = "UserRepository"
+        private const val DB_URL = "https://movies-bee24-default-rtdb.firebaseio.com"
+    }
+
+    private val auth: FirebaseAuth by lazy {
+        FirebaseAuth.getInstance()
+    }
+
+    private val db by lazy {
+        FirebaseDatabase.getInstance(DB_URL).reference
+    }
 
     @Suppress("UNCHECKED_CAST")
     private fun snapshotToUser(snapshot: DataSnapshot): User? {
@@ -30,23 +41,25 @@ class UserRepository {
                     ?: (data["subscriptionExpiry"] as? Long) ?: 0L
             )
         } catch (e: Exception) {
+            Log.e(TAG, "Parse user error: ${e.message}")
             null
         }
     }
 
-    // Suspend function to get current user once (used in MovieDetailBottomSheet)
     suspend fun getCurrentUser(): User? {
-        val uid = auth.currentUser?.uid ?: return null
+        val uid = try { auth.currentUser?.uid } catch (e: Exception) { null } ?: return null
         return try {
             val snapshot = db.child("users").child(uid).get().await()
             snapshotToUser(snapshot)
         } catch (e: Exception) {
+            Log.e(TAG, "getCurrentUser error: ${e.message}", e)
             null
         }
     }
 
     fun getCurrentUserFlow(): Flow<User?> = callbackFlow {
-        val uid = auth.currentUser?.uid ?: run {
+        val uid = try { auth.currentUser?.uid } catch (e: Exception) { null }
+        if (uid == null) {
             trySend(null)
             close()
             return@callbackFlow
@@ -58,6 +71,7 @@ class UserRepository {
                 trySend(snapshotToUser(snapshot))
             }
             override fun onCancelled(error: DatabaseError) {
+                Log.e(TAG, "User flow cancelled: ${error.message}")
                 trySend(null)
             }
         }

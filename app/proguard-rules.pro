@@ -5,11 +5,16 @@
 -keep class com.google.android.gms.** { *; }
 -dontwarn com.google.firebase.**
 -dontwarn com.google.android.gms.**
+-keep class com.google.firebase.database.** { *; }
+-keep class com.google.firebase.auth.** { *; }
 
 # Firebase Realtime Database - keep model classes
 -keepattributes Signature
 -keepattributes *Annotation*
+-keepattributes InnerClasses
+-keepattributes EnclosingMethod
 -keep class com.ottapp.moviestream.data.model.** { *; }
+-keepclassmembers class com.ottapp.moviestream.data.model.** { *; }
 
 # Kotlin
 -keep class kotlin.** { *; }
@@ -19,6 +24,8 @@
 -keepclassmembers class kotlin.Metadata {
     public <methods>;
 }
+-keep class kotlin.reflect.** { *; }
+-dontwarn kotlin.reflect.**
 
 # Coroutines
 -keepnames class kotlinx.coroutines.internal.MainDispatcherFactory {}
@@ -26,6 +33,8 @@
 -keepclassmembernames class kotlinx.** {
     volatile <fields>;
 }
+-keep class kotlinx.coroutines.** { *; }
+-dontwarn kotlinx.coroutines.**
 
 # ExoPlayer / Media3
 -keep class androidx.media3.** { *; }
@@ -40,11 +49,11 @@
 -keep class com.bumptech.glide.** { *; }
 -dontwarn com.bumptech.glide.**
 
-# Shimmer — keep entire library to prevent crash on layout inflation
+# Shimmer
 -keep class com.facebook.shimmer.** { *; }
 -dontwarn com.facebook.shimmer.**
 
-# CircleImageView — keep to prevent crash on layout inflation
+# CircleImageView
 -keep class de.hdodenhof.circleimageview.** { *; }
 -dontwarn de.hdodenhof.circleimageview.**
 
@@ -54,20 +63,26 @@
 
 # Navigation
 -keep class androidx.navigation.** { *; }
+-dontwarn androidx.navigation.**
 
-# ViewBinding
+# ViewBinding - keep all generated binding classes
 -keep class * implements androidx.viewbinding.ViewBinding {
     public static *** bind(android.view.View);
     public static *** inflate(...);
 }
+-keep class com.ottapp.moviestream.databinding.** { *; }
 
-# Keep all Fragment subclasses (NavHostFragment uses reflection to instantiate them)
+# Keep all Fragment subclasses
 -keep class * extends androidx.fragment.app.Fragment { <init>(); }
 -keep class com.ottapp.moviestream.ui.** { *; }
 
-# Keep ViewModel subclasses (ViewModelProvider uses reflection)
+# Keep ViewModel subclasses
 -keep class * extends androidx.lifecycle.ViewModel { <init>(...); }
 -keepclassmembers class * extends androidx.lifecycle.ViewModel {
+    <init>(...);
+}
+-keep class * extends androidx.lifecycle.AndroidViewModel { <init>(...); }
+-keepclassmembers class * extends androidx.lifecycle.AndroidViewModel {
     <init>(...);
 }
 
@@ -77,11 +92,49 @@
 # Keep Application class
 -keep class com.ottapp.moviestream.OTTApplication { *; }
 
-# Keep Activity/Service classes declared in manifest
+# Keep Activity/Service classes
 -keep class com.ottapp.moviestream.SplashActivity { *; }
 -keep class com.ottapp.moviestream.LoginActivity { *; }
 -keep class com.ottapp.moviestream.MainActivity { *; }
 -keep class com.ottapp.moviestream.service.DownloadService { *; }
+-keep class com.ottapp.moviestream.ui.player.PlayerActivity { *; }
+-keep class com.ottapp.moviestream.ui.admin.AdminActivity { *; }
+-keep class com.ottapp.moviestream.ui.admin.AddEditMovieActivity { *; }
+
+# Keep all repositories
+-keep class com.ottapp.moviestream.data.repository.** { *; }
+
+# Keep util classes
+-keep class com.ottapp.moviestream.util.** { *; }
+
+# Keep BottomSheetDialogFragment subclasses
+-keep class * extends com.google.android.material.bottomsheet.BottomSheetDialogFragment { *; }
+
+# AndroidX
+-keep class androidx.** { *; }
+-dontwarn androidx.**
+
+# Material Components
+-keep class com.google.android.material.** { *; }
+-dontwarn com.google.android.material.**
+
+# StateFlow / LiveData
+-keep class kotlinx.coroutines.flow.** { *; }
+-keepclassmembers class kotlinx.coroutines.flow.** { *; }
+
+# Prevent stripping of Lifecycle observers
+-keep class * implements androidx.lifecycle.LifecycleObserver { *; }
+-keepclassmembers class * implements androidx.lifecycle.LifecycleObserver { *; }
+
+# Keep Enum classes
+-keepclassmembers enum * {
+    public static **[] values();
+    public static ** valueOf(java.lang.String);
+}
+
+# Keep Parcelable/Serializable
+-keep class * implements android.os.Parcelable { *; }
+-keep class * implements java.io.Serializable { *; }
 
 # Remove debug logging in release
 -assumenosideeffects class android.util.Log {

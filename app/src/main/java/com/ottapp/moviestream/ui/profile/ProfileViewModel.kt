@@ -1,6 +1,7 @@
 package com.ottapp.moviestream.ui.profile
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.*
 import com.ottapp.moviestream.data.model.User
 import com.ottapp.moviestream.data.repository.AuthRepository
@@ -13,7 +14,11 @@ import kotlinx.coroutines.launch
 
 class ProfileViewModel(app: Application) : AndroidViewModel(app) {
 
-    private val authRepo = AuthRepository(app)
+    companion object {
+        private const val TAG = "ProfileViewModel"
+    }
+
+    private val authRepo = try { AuthRepository(app) } catch (e: Exception) { null }
     private val userRepo = UserRepository()
     private val dlRepo   = DownloadRepository(app)
 
@@ -29,16 +34,39 @@ class ProfileViewModel(app: Application) : AndroidViewModel(app) {
     init { observeUser(); loadStorage() }
 
     private fun observeUser() = viewModelScope.launch {
-        userRepo.getCurrentUserFlow().catch { emit(null) }.collect { _user.value = it }
+        try {
+            userRepo.getCurrentUserFlow()
+                .catch {
+                    Log.e(TAG, "User flow error: ${it.message}")
+                    emit(null)
+                }
+                .collect { _user.value = it }
+        } catch (e: Exception) {
+            Log.e(TAG, "observeUser error: ${e.message}")
+            _user.value = null
+        }
     }
 
     private fun loadStorage() {
-        _storageUsed.value = dlRepo.getTotalStorageUsed().toReadableSize()
+        try {
+            _storageUsed.value = dlRepo.getTotalStorageUsed().toReadableSize()
+        } catch (e: Exception) {
+            _storageUsed.value = "0 B"
+        }
     }
 
     fun signOut() = viewModelScope.launch {
-        val googleClient = authRepo.getGoogleSignInClient(Constants.WEB_CLIENT_ID)
-        authRepo.signOut(googleClient)
+        try {
+            val repo = authRepo
+            if (repo != null) {
+                val googleClient = try {
+                    repo.getGoogleSignInClient(Constants.WEB_CLIENT_ID)
+                } catch (e: Exception) { null }
+                repo.signOut(googleClient)
+            }
+        } catch (e: Exception) {
+            Log.e(TAG, "Sign out error: ${e.message}")
+        }
         _signedOut.value = true
     }
 }
