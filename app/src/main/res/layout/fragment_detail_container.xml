@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
+<FrameLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -10,17 +10,18 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="none"
-        android:overScrollMode="never">
+        android:overScrollMode="never"
+        android:fillViewport="true">
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <!-- Hero banner with play button overlay -->
+            <!-- Hero banner — scrolls with content -->
             <FrameLayout
                 android:layout_width="match_parent"
-                android:layout_height="240dp">
+                android:layout_height="260dp">
 
                 <ImageView
                     android:id="@+id/iv_banner"
@@ -63,13 +64,16 @@
                     android:background="@drawable/bg_badge_free"
                     android:visibility="gone" />
 
-                <!-- Title at bottom -->
+                <!-- Title at bottom of banner -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_gravity="bottom"
                     android:orientation="vertical"
-                    android:padding="16dp">
+                    android:paddingHorizontal="16dp"
+                    android:paddingBottom="60dp"
+                    android:paddingTop="16dp">
+
                     <TextView
                         android:id="@+id/tv_title_overlay"
                         android:layout_width="match_parent"
@@ -86,30 +90,23 @@
                         android:shadowRadius="6" />
                 </LinearLayout>
 
-                <!-- Center Play button on banner -->
-                <LinearLayout
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
+                <!-- Center Play button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_watch"
+                    android:layout_width="160dp"
+                    android:layout_height="48dp"
                     android:layout_gravity="center"
-                    android:orientation="vertical"
-                    android:gravity="center">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_watch"
-                        android:layout_width="160dp"
-                        android:layout_height="48dp"
-                        android:text="▶  দেখুন"
-                        android:textSize="15sp"
-                        android:textStyle="bold"
-                        android:textColor="@color/white"
-                        app:cornerRadius="30dp"
-                        app:backgroundTint="@color/red"
-                        app:icon="@null" />
-                </LinearLayout>
+                    android:text="▶  দেখুন"
+                    android:textSize="15sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/white"
+                    app:cornerRadius="30dp"
+                    app:backgroundTint="@color/red"
+                    app:icon="@null" />
 
             </FrameLayout>
 
-            <!-- Content area -->
+            <!-- Content area (shown after data loads) -->
             <LinearLayout
                 android:id="@+id/layout_content"
                 android:layout_width="match_parent"
@@ -123,7 +120,9 @@
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
-                    android:padding="16dp">
+                    android:paddingHorizontal="16dp"
+                    android:paddingTop="14dp"
+                    android:paddingBottom="8dp">
 
                     <TextView
                         android:id="@+id/tv_rating"
@@ -173,14 +172,14 @@
 
                 </LinearLayout>
 
-                <!-- DOWNLOAD BUTTON (prominent, below meta) -->
+                <!-- Download Button with icon -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_download"
                     android:layout_width="match_parent"
                     android:layout_height="52dp"
                     android:layout_marginHorizontal="16dp"
                     android:layout_marginBottom="16dp"
-                    android:text="⬇  ডাউনলোড করুন"
+                    android:text="ডাউনলোড করুন"
                     android:textSize="15sp"
                     android:textStyle="bold"
                     android:textColor="@color/red"
@@ -189,7 +188,10 @@
                     app:strokeWidth="1.5dp"
                     app:cornerRadius="12dp"
                     app:backgroundTint="@color/transparent"
-                    app:icon="@null" />
+                    app:icon="@drawable/ic_download"
+                    app:iconTint="@color/red"
+                    app:iconGravity="textStart"
+                    app:iconPadding="8dp" />
 
                 <!-- Divider -->
                 <View
@@ -199,7 +201,18 @@
                     android:layout_marginHorizontal="16dp"
                     android:layout_marginBottom="16dp" />
 
-                <!-- Description -->
+                <!-- Description Section Header -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="বিবরণ"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="@color/t1"
+                    android:paddingHorizontal="16dp"
+                    android:paddingBottom="8dp" />
+
+                <!-- Description Text -->
                 <TextView
                     android:id="@+id/tv_description"
                     android:layout_width="match_parent"
@@ -207,10 +220,20 @@
                     android:textSize="14sp"
                     android:textColor="@color/t2"
                     android:paddingHorizontal="16dp"
-                    android:paddingBottom="24dp"
-                    android:lineSpacingMultiplier="1.6" />
+                    android:paddingBottom="20dp"
+                    android:lineSpacingMultiplier="1.7"
+                    android:hint="এই মুভি সম্পর্কে বিস্তারিত তথ্য পাওয়া যায়নি।"
+                    android:textColorHint="@color/t3" />
 
-                <!-- Locked panel for non-premium -->
+                <!-- Divider -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/border"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Locked panel -->
                 <LinearLayout
                     android:id="@+id/layout_locked"
                     android:layout_width="match_parent"
@@ -248,16 +271,30 @@
                         android:gravity="center"
                         android:layout_marginTop="6dp"
                         android:lineSpacingMultiplier="1.5" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_go_subscribe"
+                        android:layout_width="match_parent"
+                        android:layout_height="48dp"
+                        android:layout_marginTop="14dp"
+                        android:text="🔥 সাবস্ক্রাইব করুন — ৳১০"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/white"
+                        app:cornerRadius="10dp"
+                        app:backgroundTint="@color/red"
+                        app:icon="@null" />
+
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="32dp" />
+                <View android:layout_width="match_parent" android:layout_height="40dp" />
 
             </LinearLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Center loading progress -->
+    <!-- Center loading progress — floats over scroll -->
     <ProgressBar
         android:id="@+id/progress_center"
         android:layout_width="48dp"
@@ -266,4 +303,4 @@
         android:visibility="gone"
         android:layout_gravity="center" />
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</FrameLayout>

@@ -180,6 +180,7 @@ class MovieDetailFragment : Fragment() {
         }
 
         binding.layoutLocked.setOnClickListener { goToSubscription() }
+        binding.btnGoSubscribe.setOnClickListener { goToSubscription() }
     }
 
     private fun goToSubscription() {
