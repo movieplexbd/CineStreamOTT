@@ -15,17 +15,13 @@ import kotlinx.coroutines.tasks.await
 class UserRepository {
 
     companion object {
-        private const val TAG = "UserRepository"
+        private const val TAG   = "UserRepository"
         private const val DB_URL = "https://movies-bee24-default-rtdb.firebaseio.com"
     }
 
-    private val auth: FirebaseAuth by lazy {
-        FirebaseAuth.getInstance()
-    }
+    private val auth: FirebaseAuth by lazy { FirebaseAuth.getInstance() }
 
-    private val db by lazy {
-        FirebaseDatabase.getInstance(DB_URL).reference
-    }
+    private val db by lazy { FirebaseDatabase.getInstance(DB_URL).reference }
 
     @Suppress("UNCHECKED_CAST")
     private fun snapshotToUser(snapshot: DataSnapshot): User? {
@@ -38,7 +34,10 @@ class UserRepository {
                 photoUrl           = data["photoUrl"]?.toString() ?: "",
                 subscriptionStatus = data["subscriptionStatus"]?.toString() ?: User.PLAN_FREE,
                 subscriptionExpiry = data["subscriptionExpiry"]?.toString()?.toLongOrNull()
-                    ?: (data["subscriptionExpiry"] as? Long) ?: 0L
+                    ?: (data["subscriptionExpiry"] as? Long) ?: 0L,
+                trialUsed          = data["trialUsed"]?.toString()?.toBoolean() ?: false,
+                trialExpiry        = data["trialExpiry"]?.toString()?.toLongOrNull()
+                    ?: (data["trialExpiry"] as? Long) ?: 0L
             )
         } catch (e: Exception) {
             Log.e(TAG, "Parse user error: ${e.message}")
@@ -64,12 +63,9 @@ class UserRepository {
             close()
             return@callbackFlow
         }
-
         val userRef = db.child("users").child(uid)
         val listener = object : ValueEventListener {
-            override fun onDataChange(snapshot: DataSnapshot) {
-                trySend(snapshotToUser(snapshot))
-            }
+            override fun onDataChange(snapshot: DataSnapshot) { trySend(snapshotToUser(snapshot)) }
             override fun onCancelled(error: DatabaseError) {
                 Log.e(TAG, "User flow cancelled: ${error.message}")
                 trySend(null)
@@ -82,6 +78,12 @@ class UserRepository {
     suspend fun updateSubscription(uid: String, status: String, expiry: Long) {
         db.child("users").child(uid).updateChildren(
             mapOf("subscriptionStatus" to status, "subscriptionExpiry" to expiry)
+        ).await()
+    }
+
+    suspend fun activateTrial(uid: String, expiry: Long) {
+        db.child("users").child(uid).updateChildren(
+            mapOf("trialUsed" to true, "trialExpiry" to expiry)
         ).await()
     }
 }

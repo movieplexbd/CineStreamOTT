@@ -1,0 +1,498 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.core.widget.NestedScrollView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0D0D0D"
+    android:scrollbars="none"
+    android:overScrollMode="never">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingBottom="40dp">
+
+        <!-- Header with back button and gradient -->
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="@drawable/bg_sub_header">
+
+            <ImageButton
+                android:id="@+id/btn_back"
+                android:layout_width="42dp"
+                android:layout_height="42dp"
+                android:layout_gravity="top|start"
+                android:layout_margin="16dp"
+                android:background="@drawable/bg_close_btn"
+                android:src="@drawable/ic_arrow_back"
+                android:contentDescription="Back"
+                android:padding="8dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_gravity="bottom"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <!-- Badge -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="🔥 সীমিত অফার"
+                    android:textColor="#FF6B35"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:background="@drawable/bg_offer_badge"
+                    android:paddingHorizontal="10dp"
+                    android:paddingVertical="4dp"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Package Title -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="এক্সক্লুসিভ চা প্যাক"
+                    android:textColor="#FFFFFF"
+                    android:textSize="26sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="4dp" />
+
+                <!-- Price Row -->
+                <LinearLayout
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="৳১০"
+                        android:textColor="#FF6B35"
+                        android:textSize="32sp"
+                        android:textStyle="bold" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="/এককালীন"
+                        android:textColor="#B0B0B0"
+                        android:textSize="14sp"
+                        android:layout_marginStart="4dp"
+                        android:layout_marginBottom="4dp" />
+
+                </LinearLayout>
+
+            </LinearLayout>
+        </FrameLayout>
+
+        <!-- Description Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="16dp"
+            app:cardBackgroundColor="#1A1A1A"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="সদ্য মুক্তি পাওয়া নতুন সকল মুভি গুলোর বাংলা ডাবিং পেয়ে যান মাত্র ১০ টাকায় এক মাসের অ্যাক্সেস। মাত্র একটি চায়ের দামে!🔥"
+                    android:textColor="#CCCCCC"
+                    android:textSize="14sp"
+                    android:lineSpacingMultiplier="1.6" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Features Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="#1A1A1A"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="আপনি যা পাবেন"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="14dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="✔  সকল নতুন মুভির বাংলা ডাবিং মুভি পাবেন"
+                    android:textColor="#E0E0E0"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.5"
+                    android:paddingVertical="5dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="✔  এক ক্লিকে ডাউনলোড সুবিধা"
+                    android:textColor="#E0E0E0"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.5"
+                    android:paddingVertical="5dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="✔  অনলাইন প্লে সাপোর্ট (ডাউনলোড ছাড়াই সরাসরি মুভি দেখুন)"
+                    android:textColor="#E0E0E0"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.5"
+                    android:paddingVertical="5dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="✔  শর্ট সেকশন থেকে শর্ট ভিডিও দেখে মুভি সিলেক্ট করতে পারবেন"
+                    android:textColor="#E0E0E0"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.5"
+                    android:paddingVertical="5dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="✔  সকল মুভির বাংলা ডাবিং"
+                    android:textColor="#E0E0E0"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.5"
+                    android:paddingVertical="5dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="✔  আনলিমিটেড মুভি কালেকশন"
+                    android:textColor="#E0E0E0"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.5"
+                    android:paddingVertical="5dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="✔  Animal, বাহুবালি, Spiderman, Avengers টাইপ সকল ইন্ডিয়ান, হলিউড ও কোরিয়ান মুভির বাংলা ডাবিং পাবেন"
+                    android:textColor="#E0E0E0"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.5"
+                    android:paddingVertical="5dp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Details Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="#1A1A1A"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="এই প্যাকে আপনি যা যা পাচ্ছেন"
+                    android:textColor="#FFFFFF"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="14dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🔥  স্পেশালি বাংলা ডাবিং এর জন্য সেরা সাইট"
+                    android:textColor="#E0E0E0"
+                    android:textSize="13sp"
+                    android:paddingVertical="5dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="📥  সকল মুভি ডাউনলোড সুবিধা"
+                    android:textColor="#E0E0E0"
+                    android:textSize="13sp"
+                    android:paddingVertical="5dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🔥  নতুন রিলিজ দ্রুত পাওয়া যাবে"
+                    android:textColor="#E0E0E0"
+                    android:textSize="13sp"
+                    android:paddingVertical="5dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="🎬  এক্সক্লুসিভ কন্টেন্ট লাইব্রেরি"
+                    android:textColor="#E0E0E0"
+                    android:textSize="13sp"
+                    android:paddingVertical="5dp" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="✅  কোনো হিডেন চার্জ নেই"
+                    android:textColor="#E0E0E0"
+                    android:textSize="13sp"
+                    android:paddingVertical="5dp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Payment Form Card -->
+        <androidx.cardview.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="12dp"
+            app:cardBackgroundColor="#1A1A1A"
+            app:cardCornerRadius="16dp"
+            app:cardElevation="0dp">
+
+            <LinearLayout
+                android:id="@+id/layout_form"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="20dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="💳 পেমেন্ট করুন"
+                    android:textColor="#FFFFFF"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:layout_marginBottom="16dp" />
+
+                <!-- Selected Plan Info -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:background="@drawable/bg_plan_info"
+                    android:padding="14dp"
+                    android:layout_marginBottom="16dp">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="আপনার নির্বাচিত প্ল্যান: এক্সক্লুসিভ প্যাক"
+                        android:textColor="#CCCCCC"
+                        android:textSize="13sp"
+                        android:layout_marginBottom="4dp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="প্ল্যানের মূল্য: ৳১০ টাকা"
+                        android:textColor="#FF6B35"
+                        android:textSize="14sp"
+                        android:textStyle="bold" />
+
+                </LinearLayout>
+
+                <!-- Instruction -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="অনুগ্রহ করে নিচের বিকাশ/নগদ নম্বরে ১০ টাকা Send Money করুন:"
+                    android:textColor="#BBBBBB"
+                    android:textSize="13sp"
+                    android:lineSpacingMultiplier="1.5"
+                    android:layout_marginBottom="10dp" />
+
+                <!-- Payment Number + Copy Button -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical"
+                    android:background="@drawable/bg_number_box"
+                    android:padding="12dp"
+                    android:layout_marginBottom="20dp">
+
+                    <TextView
+                        android:layout_width="0dp"
+                        android:layout_height="wrap_content"
+                        android:layout_weight="1"
+                        android:text="01913305107"
+                        android:textColor="#FFFFFF"
+                        android:textSize="20sp"
+                        android:textStyle="bold"
+                        android:letterSpacing="0.05" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_copy"
+                        android:layout_width="wrap_content"
+                        android:layout_height="36dp"
+                        android:text="📋 কপি করুন"
+                        android:textSize="12sp"
+                        android:textColor="#FFFFFF"
+                        app:cornerRadius="8dp"
+                        app:backgroundTint="#FF6B35"
+                        app:icon="@null" />
+
+                </LinearLayout>
+
+                <!-- Transaction ID Label -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Transaction ID (ট্রানজেকশন আইডি)"
+                    android:textColor="#BBBBBB"
+                    android:textSize="13sp"
+                    android:layout_marginBottom="8dp" />
+
+                <!-- Transaction ID Input -->
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                    app:boxStrokeColor="#FF6B35"
+                    app:hintTextColor="#888888"
+                    app:boxBackgroundColor="#252525"
+                    android:hint="যেমন: 9A3B2C1D0E"
+                    android:layout_marginBottom="20dp">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/et_transaction_id"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:textColor="#FFFFFF"
+                        android:textSize="14sp"
+                        android:inputType="text"
+                        android:maxLines="1"
+                        android:imeOptions="actionDone" />
+
+                </com.google.android.material.textfield.TextInputLayout>
+
+                <!-- Submit Button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_submit"
+                    android:layout_width="match_parent"
+                    android:layout_height="52dp"
+                    android:text="সাবমিট করুন"
+                    android:textSize="16sp"
+                    android:textStyle="bold"
+                    android:textColor="#FFFFFF"
+                    app:cornerRadius="12dp"
+                    app:backgroundTint="#FF6B35"
+                    app:icon="@null" />
+
+                <!-- Progress -->
+                <ProgressBar
+                    android:id="@+id/progress_bar"
+                    android:layout_width="36dp"
+                    android:layout_height="36dp"
+                    android:layout_gravity="center_horizontal"
+                    android:indeterminateTint="#FF6B35"
+                    android:layout_marginTop="12dp"
+                    android:visibility="gone" />
+
+                <!-- Note -->
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="⏳ পেমেন্ট যাচাই করার পর ৬ ঘণ্টার মধ্যে অ্যাক্সেস সক্রিয় হবে।"
+                    android:textColor="#888888"
+                    android:textSize="12sp"
+                    android:lineSpacingMultiplier="1.5"
+                    android:gravity="center"
+                    android:layout_marginTop="12dp" />
+
+            </LinearLayout>
+        </androidx.cardview.widget.CardView>
+
+        <!-- Success Card (hidden initially) -->
+        <LinearLayout
+            android:id="@+id/layout_success"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="center"
+            android:padding="32dp"
+            android:layout_marginHorizontal="16dp"
+            android:layout_marginTop="12dp"
+            android:background="@drawable/bg_success_card"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="✅"
+                android:textSize="56sp"
+                android:layout_marginBottom="16dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="সাবমিট সফল হয়েছে!"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="আপনার পেমেন্ট রিভিউ করা হচ্ছে। ইতিমধ্যে আপনি ৬ ঘণ্টার জন্য অ্যাপটি ব্যবহার করতে পারবেন। অ্যাডমিন অ্যাপ্রুভ করলে ৩০ দিনের পূর্ণ অ্যাক্সেস পাবেন।"
+                android:textColor="#BBBBBB"
+                android:textSize="14sp"
+                android:gravity="center"
+                android:lineSpacingMultiplier="1.6"
+                android:layout_marginBottom="24dp" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_done"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="মুভি দেখুন →"
+                android:textSize="15sp"
+                android:textStyle="bold"
+                android:textColor="#FFFFFF"
+                app:cornerRadius="12dp"
+                app:backgroundTint="#FF6B35"
+                app:icon="@null" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+</androidx.core.widget.NestedScrollView>

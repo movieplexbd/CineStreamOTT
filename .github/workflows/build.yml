@@ -7,10 +7,13 @@ on:
     branches: [ main, master ]
   workflow_dispatch:
 
+permissions:
+  contents: write
+
 jobs:
   build:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - name: Checkout code
@@ -59,7 +62,56 @@ jobs:
             exit 1
           fi
 
-      - name: Upload Release APK
+      - name: Get version info
+        id: version
+        run: |
+          VERSION_NAME=$(grep "versionName" app/build.gradle | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          VERSION_CODE=$(grep "versionCode" app/build.gradle | head -1 | sed 's/[^0-9]//g')
+          BUILD_DATE=$(date '+%Y-%m-%d %H:%M UTC')
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
+          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
+          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "tag_name=v${VERSION_NAME}-build${VERSION_CODE}-${SHORT_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release with APK download link
+        if: github.event_name == 'push'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.version.outputs.tag_name }}
+          name: "CineStream v${{ steps.version.outputs.version_name }} (${{ steps.version.outputs.build_date }})"
+          body: |
+            ## 🎬 CineStream OTT — Release Build
+
+            **Version:** ${{ steps.version.outputs.version_name }}
+            **Build:** ${{ steps.version.outputs.version_code }}
+            **Date:** ${{ steps.version.outputs.build_date }}
+            **Commit:** ${{ steps.version.outputs.short_sha }}
+
+            ---
+
+            ### ✅ What's Included
+            - 🆓 **২ ঘণ্টা ফ্রি ট্রায়াল** — প্রথমবার ব্যবহারে স্বয়ংক্রিয়ভাবে শুরু হবে
+            - 💳 **সাবস্ক্রিপশন সিস্টেম** — বিকাশ/নগদে মাত্র ১০ টাকায় ১ মাসের অ্যাক্সেস
+            - 🔒 **অ্যাক্সেস কন্ট্রোল** — ট্রায়াল বা সাবস্ক্রিপশন ছাড়া মুভি লক
+            - 🛡️ **অ্যাডমিন অ্যাপ্রুভাল** — পেমেন্ট যাচাই করে ৩০ দিনের অ্যাক্সেস দেওয়া
+            - 🎨 **বাংলা UI** — সম্পূর্ণ বাংলায় সাবস্ক্রিপশন পেজ
+            - 📱 Netflix-style dark subscription screen
+
+            ---
+
+            ### 📥 APK ডাউনলোড করুন
+            নিচের **Assets** সেকশন থেকে `CineStreamOTT-release.apk` ডাউনলোড করুন।
+
+            > ⚠️ ইনস্টল করার আগে Settings → Unknown Sources চালু করুন।
+          files: app/build/outputs/apk/release/CineStreamOTT-release.apk
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Upload APK as workflow artifact
         uses: actions/upload-artifact@v4
         with:
           name: CineStreamOTT-Release-APK

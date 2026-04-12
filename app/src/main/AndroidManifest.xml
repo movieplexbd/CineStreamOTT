@@ -55,6 +55,13 @@
               android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboardHidden"
               android:supportsPictureInPicture="true" />
 
+          <activity
+              android:name=".ui.subscription.SubscriptionActivity"
+              android:exported="false"
+              android:screenOrientation="portrait"
+              android:theme="@style/Theme.OTTStreamingApp.Dark"
+              android:windowSoftInputMode="adjustResize" />
+
           <!-- Admin Activities -->
           <activity
               android:name=".ui.admin.AdminActivity"
@@ -89,4 +96,3 @@
       </application>
 
   </manifest>
-  

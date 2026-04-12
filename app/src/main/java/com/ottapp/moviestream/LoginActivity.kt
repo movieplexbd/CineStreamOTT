@@ -8,6 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.ottapp.moviestream.data.repository.AuthRepository
 import com.ottapp.moviestream.databinding.ActivityLoginBinding
+import com.ottapp.moviestream.util.AccessManager
 import com.ottapp.moviestream.util.hide
 import com.ottapp.moviestream.util.show
 import com.ottapp.moviestream.util.toast
@@ -52,14 +53,14 @@ class LoginActivity : AppCompatActivity() {
             binding.tilConfirmPassword.show()
             binding.tilName.show()
             binding.btnEmailAction.text = getString(R.string.btn_signup)
-            binding.tvToggleMode.text = getString(R.string.toggle_to_signin)
-            binding.tvAuthTitle.text = getString(R.string.title_signup)
+            binding.tvToggleMode.text   = getString(R.string.toggle_to_signin)
+            binding.tvAuthTitle.text    = getString(R.string.title_signup)
         } else {
             binding.tilConfirmPassword.hide()
             binding.tilName.hide()
             binding.btnEmailAction.text = getString(R.string.btn_signin)
-            binding.tvToggleMode.text = getString(R.string.toggle_to_signup)
-            binding.tvAuthTitle.text = getString(R.string.title_signin)
+            binding.tvToggleMode.text   = getString(R.string.toggle_to_signup)
+            binding.tvAuthTitle.text    = getString(R.string.title_signin)
         }
     }
 
@@ -70,7 +71,7 @@ class LoginActivity : AppCompatActivity() {
             return
         }
 
-        val email = binding.etEmail.text.toString().trim()
+        val email    = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
 
         if (email.isEmpty() || password.isEmpty()) {
@@ -84,7 +85,7 @@ class LoginActivity : AppCompatActivity() {
 
         if (isSignUpMode) {
             val confirmPassword = binding.etConfirmPassword.text.toString().trim()
-            val name = binding.etName.text.toString().trim()
+            val name            = binding.etName.text.toString().trim()
             if (password != confirmPassword) {
                 showError("পাসওয়ার্ড মিলছে না")
                 return
@@ -114,20 +115,27 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun goToMain() {
-        startActivity(Intent(this, MainActivity::class.java))
-        finish()
+        lifecycleScope.launch {
+            try {
+                AccessManager(this@LoginActivity).checkAccess()
+            } catch (e: Exception) {
+                Log.e("LoginActivity", "Trial activation error: ${e.message}")
+            }
+            startActivity(Intent(this@LoginActivity, MainActivity::class.java))
+            finish()
+        }
     }
 
     private fun friendlyError(msg: String?): String {
         return when {
-            msg == null -> "অজানা সমস্যা হয়েছে"
-            msg.contains("password") -> "পাসওয়ার্ড ভুল আছে"
+            msg == null                           -> "অজানা সমস্যা হয়েছে"
+            msg.contains("password")              -> "পাসওয়ার্ড ভুল আছে"
             msg.contains("no user") || msg.contains("identifier") -> "এই ইমেইলে কোনো অ্যাকাউন্ট নেই"
-            msg.contains("already in use") -> "এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট আছে"
+            msg.contains("already in use")        -> "এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট আছে"
             msg.contains("badly formatted") || msg.contains("format") -> "ইমেইল সঠিক নয়"
-            msg.contains("network") -> "ইন্টারনেট সংযোগ নেই"
+            msg.contains("network")               -> "ইন্টারনেট সংযোগ নেই"
             msg.contains("CONFIGURATION_NOT_FOUND") || msg.contains("API_NOT_AVAILABLE") -> "Firebase কনফিগারেশন সমস্যা"
-            else -> msg
+            else                                  -> msg
         }
     }
 

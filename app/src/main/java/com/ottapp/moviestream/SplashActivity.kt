@@ -7,7 +7,10 @@ import android.os.Handler
 import android.os.Looper
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
+import com.ottapp.moviestream.util.AccessManager
+import kotlinx.coroutines.launch
 
 @SuppressLint("CustomSplashScreen")
 class SplashActivity : AppCompatActivity() {
@@ -32,11 +35,11 @@ class SplashActivity : AppCompatActivity() {
                     }
 
                     if (isLoggedIn) {
-                        startActivity(Intent(this, MainActivity::class.java))
+                        checkAccessThenNavigate()
                     } else {
                         startActivity(Intent(this, LoginActivity::class.java))
+                        finish()
                     }
-                    finish()
                 }
             } catch (e: Exception) {
                 Log.e("SplashActivity", "Navigation error: ${e.message}", e)
@@ -49,5 +52,25 @@ class SplashActivity : AppCompatActivity() {
                 }
             }
         }, 1500)
+    }
+
+    private fun checkAccessThenNavigate() {
+        lifecycleScope.launch {
+            try {
+                val access = AccessManager(this@SplashActivity).checkAccess()
+                when (access) {
+                    is AccessManager.AccessResult.Blocked -> {
+                        startActivity(Intent(this@SplashActivity, LoginActivity::class.java))
+                    }
+                    else -> {
+                        startActivity(Intent(this@SplashActivity, MainActivity::class.java))
+                    }
+                }
+            } catch (e: Exception) {
+                Log.e("SplashActivity", "Access check error: ${e.message}", e)
+                startActivity(Intent(this@SplashActivity, MainActivity::class.java))
+            }
+            finish()
+        }
     }
 }

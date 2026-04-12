@@ -13,10 +13,11 @@ import com.ottapp.moviestream.R
 import com.ottapp.moviestream.data.model.Movie
 import com.ottapp.moviestream.data.repository.DownloadRepository
 import com.ottapp.moviestream.data.repository.MovieRepository
-import com.ottapp.moviestream.data.repository.UserRepository
 import com.ottapp.moviestream.databinding.FragmentDetailContainerBinding
 import com.ottapp.moviestream.service.DownloadService
 import com.ottapp.moviestream.ui.player.PlayerActivity
+import com.ottapp.moviestream.ui.subscription.SubscriptionActivity
+import com.ottapp.moviestream.util.AccessManager
 import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.hide
 import com.ottapp.moviestream.util.loadImage
@@ -30,8 +31,8 @@ class MovieDetailFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val movieRepo = MovieRepository()
-    private val userRepo  = UserRepository()
     private lateinit var dlRepo: DownloadRepository
+    private lateinit var accessManager: AccessManager
 
     private var currentMovie: Movie? = null
 
@@ -44,7 +45,8 @@ class MovieDetailFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        dlRepo = DownloadRepository(requireContext())
+        dlRepo        = DownloadRepository(requireContext())
+        accessManager = AccessManager(requireContext())
 
         binding.btnBack.setOnClickListener {
             findNavController().navigateUp()
@@ -94,8 +96,8 @@ class MovieDetailFragment : Fragment() {
 
         if (movie.testMovie) binding.tvFreeBadge.show() else binding.tvFreeBadge.hide()
 
-        binding.tvRating.text = "⭐ ${movie.imdbRating}"
-        binding.tvCategory.text = movie.category.orEmpty()
+        binding.tvRating.text    = "⭐ ${movie.imdbRating}"
+        binding.tvCategory.text  = movie.category.orEmpty()
         binding.tvDescription.text = movie.description.orEmpty()
 
         if (movie.year > 0) {
@@ -107,53 +109,82 @@ class MovieDetailFragment : Fragment() {
             binding.tvDuration.show()
         }
 
-        // Download button state
         if (dlRepo.isDownloaded(movie.id)) {
-            binding.btnDownload.text = "ডাউনলোড হয়েছে ✓"
+            binding.btnDownload.text      = "ডাউনলোড হয়েছে ✓"
             binding.btnDownload.isEnabled = false
         } else {
-            binding.btnDownload.text = "ডাউনলোড করুন"
+            binding.btnDownload.text      = "ডাউনলোড করুন"
             binding.btnDownload.isEnabled = true
         }
 
-        // Watch button — opens player directly
         binding.btnWatch.setOnClickListener {
             lifecycleScope.launch {
-                val user = try { userRepo.getCurrentUser() } catch (e: Exception) { null }
+                if (_binding == null) return@launch
+                if (movie.testMovie) {
+                    val url = if (dlRepo.isDownloaded(movie.id)) dlRepo.getLocalFilePath(movie.id)
+                              else movie.videoStreamUrl
+                    openPlayer(movie, url)
+                    return@launch
+                }
+                val access = try { accessManager.checkAccess() } catch (e: Exception) { null }
                 if (_binding == null) return@launch
 
-                if (movie.testMovie || user?.isPremium == true) {
-                    val url = if (dlRepo.isDownloaded(movie.id)) {
-                        dlRepo.getLocalFilePath(movie.id)
-                    } else {
-                        movie.videoStreamUrl
+                when (access) {
+                    is AccessManager.AccessResult.Allowed,
+                    is AccessManager.AccessResult.Trial,
+                    is AccessManager.AccessResult.Premium,
+                    is AccessManager.AccessResult.Pending -> {
+                        val url = if (dlRepo.isDownloaded(movie.id)) dlRepo.getLocalFilePath(movie.id)
+                                  else movie.videoStreamUrl
+                        openPlayer(movie, url)
                     }
-                    openPlayer(movie, url)
-                } else {
-                    binding.layoutLocked.show()
+                    is AccessManager.AccessResult.Blocked -> {
+                        requireContext().toast("আপনার অ্যাকাউন্ট ব্লক করা হয়েছে")
+                    }
+                    else -> {
+                        goToSubscription()
+                    }
                 }
             }
         }
 
-        // Download button — starts download and navigates to download page
         binding.btnDownload.setOnClickListener {
             lifecycleScope.launch {
-                val user = try { userRepo.getCurrentUser() } catch (e: Exception) { null }
+                if (_binding == null) return@launch
+                if (movie.testMovie) {
+                    startDownload(movie)
+                    try { findNavController().navigate(R.id.action_global_to_download) }
+                    catch (e: Exception) { requireContext().toast("ডাউনলোড শুরু হয়েছে") }
+                    return@launch
+                }
+                val access = try { accessManager.checkAccess() } catch (e: Exception) { null }
                 if (_binding == null) return@launch
 
-                if (movie.testMovie || user?.isPremium == true) {
-                    startDownload(movie)
-                    // Navigate to download tab
-                    try {
-                        findNavController().navigate(R.id.action_global_to_download)
-                    } catch (e: Exception) {
-                        requireContext().toast("ডাউনলোড শুরু হয়েছে")
+                when (access) {
+                    is AccessManager.AccessResult.Allowed,
+                    is AccessManager.AccessResult.Trial,
+                    is AccessManager.AccessResult.Premium,
+                    is AccessManager.AccessResult.Pending -> {
+                        startDownload(movie)
+                        try { findNavController().navigate(R.id.action_global_to_download) }
+                        catch (e: Exception) { requireContext().toast("ডাউনলোড শুরু হয়েছে") }
                     }
-                } else {
-                    binding.layoutLocked.show()
+                    is AccessManager.AccessResult.Blocked -> {
+                        requireContext().toast("আপনার অ্যাকাউন্ট ব্লক করা হয়েছে")
+                    }
+                    else -> {
+                        goToSubscription()
+                    }
                 }
             }
         }
+
+        binding.layoutLocked.setOnClickListener { goToSubscription() }
+    }
+
+    private fun goToSubscription() {
+        binding.layoutLocked.show()
+        startActivity(Intent(requireContext(), SubscriptionActivity::class.java))
     }
 
     private fun openPlayer(movie: Movie, url: String) {
@@ -162,7 +193,7 @@ class MovieDetailFragment : Fragment() {
             return
         }
         val isLocal = dlRepo.isDownloaded(movie.id)
-        val intent = Intent(requireContext(), PlayerActivity::class.java).apply {
+        val intent  = Intent(requireContext(), PlayerActivity::class.java).apply {
             putExtra(Constants.EXTRA_MOVIE_ID,    movie.id)
             putExtra(Constants.EXTRA_MOVIE_TITLE, movie.title)
             putExtra(Constants.EXTRA_VIDEO_URL,   url)

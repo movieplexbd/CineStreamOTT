@@ -359,6 +359,21 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <!-- Subscribe button -->
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_subscribe"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginHorizontal="14dp"
+            android:layout_marginBottom="10dp"
+            android:text="🔥 সাবস্ক্রিপশন নিন — মাত্র ৳১০"
+            android:textSize="15sp"
+            android:textStyle="bold"
+            android:textColor="@color/white"
+            app:cornerRadius="13dp"
+            app:backgroundTint="@color/red"
+            app:icon="@null" />
+
         <!-- Admin button (hidden by default) -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btn_admin"

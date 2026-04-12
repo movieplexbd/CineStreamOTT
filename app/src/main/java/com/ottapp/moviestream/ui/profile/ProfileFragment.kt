@@ -13,8 +13,11 @@ import androidx.fragment.app.viewModels
 import com.google.firebase.auth.FirebaseAuth
 import com.ottapp.moviestream.LoginActivity
 import com.ottapp.moviestream.R
+import com.ottapp.moviestream.data.model.User
 import com.ottapp.moviestream.databinding.FragmentProfileBinding
 import com.ottapp.moviestream.ui.admin.AdminActivity
+import com.ottapp.moviestream.ui.subscription.SubscriptionActivity
+import com.ottapp.moviestream.util.TrialManager
 import com.ottapp.moviestream.util.loadImage
 import java.text.SimpleDateFormat
 import java.util.*
@@ -40,9 +43,16 @@ class ProfileFragment : Fragment() {
         val authEmail = FirebaseAuth.getInstance().currentUser?.email
         if (authEmail == ADMIN_EMAIL) binding.btnAdmin.visibility = View.VISIBLE
 
+        val trialManager = TrialManager(requireContext())
+
         viewModel.user.observe(viewLifecycleOwner) { user ->
             if (user == null) {
                 if (authEmail == ADMIN_EMAIL) binding.btnAdmin.visibility = View.VISIBLE
+
+                if (trialManager.isLocalTrialActive()) {
+                    binding.tvPlanLabel.text = "ট্রায়াল চলছে 🕐 — ${trialManager.getRemainingTrialText()}"
+                    binding.tvPlanLabel.setBackgroundResource(R.drawable.bg_free_badge)
+                }
                 return@observe
             }
 
@@ -51,18 +61,39 @@ class ProfileFragment : Fragment() {
 
             if (user.photoUrl.isNotEmpty()) binding.ivAvatar.loadImage(user.photoUrl)
 
-            if (user.isPremium) {
-                binding.tvPlanLabel.text = "প্রিমিয়াম সদস্য ⭐"
-                binding.tvPlanLabel.setBackgroundResource(R.drawable.bg_premium_badge)
-                if (user.subscriptionExpiry > 0) {
-                    val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
-                    binding.tvExpiry.text = "মেয়াদ শেষ: ${sdf.format(Date(user.subscriptionExpiry))}"
-                    binding.tvExpiry.visibility = View.VISIBLE
+            val sdf = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+            when {
+                user.isBlocked -> {
+                    binding.tvPlanLabel.text = "অ্যাকাউন্ট ব্লক হয়েছে ⛔"
+                    binding.tvPlanLabel.setBackgroundResource(R.drawable.bg_free_badge)
+                    binding.tvExpiry.visibility = View.GONE
                 }
-            } else {
-                binding.tvPlanLabel.text = "ফ্রি প্ল্যান"
-                binding.tvPlanLabel.setBackgroundResource(R.drawable.bg_free_badge)
-                binding.tvExpiry.visibility = View.GONE
+                user.subscriptionStatus == User.PLAN_PREMIUM && user.isPremium -> {
+                    binding.tvPlanLabel.text = "প্রিমিয়াম সদস্য ⭐"
+                    binding.tvPlanLabel.setBackgroundResource(R.drawable.bg_premium_badge)
+                    if (user.subscriptionExpiry > 0) {
+                        binding.tvExpiry.text = "মেয়াদ শেষ: ${sdf.format(Date(user.subscriptionExpiry))}"
+                        binding.tvExpiry.visibility = View.VISIBLE
+                    }
+                }
+                user.subscriptionStatus == User.PLAN_PENDING -> {
+                    binding.tvPlanLabel.text = "পেমেন্ট রিভিউয়ে আছে ⏳"
+                    binding.tvPlanLabel.setBackgroundResource(R.drawable.bg_free_badge)
+                    if (user.subscriptionExpiry > 0) {
+                        binding.tvExpiry.text = "অস্থায়ী অ্যাক্সেস শেষ: ${sdf.format(Date(user.subscriptionExpiry))}"
+                        binding.tvExpiry.visibility = View.VISIBLE
+                    }
+                }
+                user.isTrialActive -> {
+                    binding.tvPlanLabel.text = "ট্রায়াল চলছে 🕐 — ${trialManager.getRemainingTrialText()}"
+                    binding.tvPlanLabel.setBackgroundResource(R.drawable.bg_free_badge)
+                    binding.tvExpiry.visibility = View.GONE
+                }
+                else -> {
+                    binding.tvPlanLabel.text = "ফ্রি প্ল্যান"
+                    binding.tvPlanLabel.setBackgroundResource(R.drawable.bg_free_badge)
+                    binding.tvExpiry.visibility = View.GONE
+                }
             }
 
             if (user.email == ADMIN_EMAIL || authEmail == ADMIN_EMAIL) {
@@ -82,7 +113,6 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        // Buttons
         binding.btnSignOut.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setTitle("লগআউট করবেন?")
@@ -143,9 +173,13 @@ class ProfileFragment : Fragment() {
         binding.btnAbout.setOnClickListener {
             AlertDialog.Builder(requireContext())
                 .setTitle("CineStream সম্পর্কে")
-                .setMessage("Version 2.0\n\nCineStream - আপনার পছন্দের বাংলা, হিন্দি ও আন্তর্জাতিক মুভি দেখুন একটি জায়গায়।\n\nDeveloped by MoviePlexBD\n© 2024 সর্বস্বত্ব সংরক্ষিত")
+                .setMessage("Version 2.4.0\n\nCineStream - আপনার পছন্দের বাংলা, হিন্দি ও আন্তর্জাতিক মুভি দেখুন একটি জায়গায়।\n\nDeveloped by MoviePlexBD\n© 2024 সর্বস্বত্ব সংরক্ষিত")
                 .setPositiveButton("ঠিক আছে", null)
                 .show()
+        }
+
+        binding.btnSubscribe.setOnClickListener {
+            startActivity(Intent(requireContext(), SubscriptionActivity::class.java))
         }
     }
 
