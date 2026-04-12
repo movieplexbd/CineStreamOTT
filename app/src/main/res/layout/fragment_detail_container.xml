@@ -100,7 +100,6 @@
                 android:layout_gravity="center_horizontal"
                 android:indeterminateTint="@color/red"
                 android:layout_marginVertical="32dp"
-                android:layout_marginStart="auto"
                 android:visibility="gone" />
 
             <!-- Content body -->
