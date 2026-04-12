@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
@@ -178,7 +179,7 @@ class MovieDetailFragment : Fragment() {
             putExtra(Constants.EXTRA_VIDEO_URL,   movie.downloadUrl.ifEmpty { movie.videoStreamUrl })
             putExtra(Constants.EXTRA_BANNER_URL,  movie.bannerImageUrl)
         }
-        requireContext().startForegroundService(intent)
+        ContextCompat.startForegroundService(requireContext(), intent)
         requireContext().toast("ডাউনলোড শুরু হয়েছে...")
     }
 

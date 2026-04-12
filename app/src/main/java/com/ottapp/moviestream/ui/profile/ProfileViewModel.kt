@@ -16,7 +16,6 @@ class ProfileViewModel(app: Application) : AndroidViewModel(app) {
     private val authRepo = AuthRepository(app)
     private val userRepo = UserRepository()
     private val dlRepo   = DownloadRepository(app)
-    private val app      = app
 
     private val _user        = MutableLiveData<User?>()
     val user: LiveData<User?> = _user

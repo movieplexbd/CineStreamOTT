@@ -125,14 +125,11 @@ jobs:
           body: |
             ## CineStream v${{ steps.version.outputs.version_name }} — Build #${{ github.run_number }}
 
-            ### UI Upgrades in this build
-            - Floating search button (minimal, top-right only, no heavy header)
-            - Full-width banner with ViewPager2 auto-scroll + dot indicators
-            - Fixed navigation back stack (Home button always returns home)
-            - Bottom navigation: compact icon+text, clean divider
-            - Smooth scale animation on button press
-            - Premium light theme with soft shadows and spacing
-            - Back button on all internal detail pages
+            ### Bug Fixes in this build
+            - Fixed crash on Android 7.0-7.1 (API 24-25) when starting download service
+            - Fixed SwipeRefreshLayout dismissing immediately without waiting for data
+            - Fixed ProfileViewModel parameter shadowing warning
+            - Improved download service compatibility using ContextCompat
 
             ### APK Download
             | File | Type |
@@ -161,15 +158,15 @@ jobs:
           echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
           if [ -f "dist/CineStream-v${VER}-debug.apk" ]; then
             SZ=$(du -sh "dist/CineStream-v${VER}-debug.apk" | cut -f1)
-            echo "| Debug APK ($SZ) | SUCCESS |" >> $GITHUB_STEP_SUMMARY
+            echo "| Debug APK ($SZ) | ✅ SUCCESS |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| Debug APK | FAILED |" >> $GITHUB_STEP_SUMMARY
+            echo "| Debug APK | ❌ FAILED |" >> $GITHUB_STEP_SUMMARY
           fi
           if [ -f "dist/CineStream-v${VER}-release.apk" ]; then
             SZ=$(du -sh "dist/CineStream-v${VER}-release.apk" | cut -f1)
-            echo "| Release APK ($SZ) | SUCCESS |" >> $GITHUB_STEP_SUMMARY
+            echo "| Release APK ($SZ) | ✅ SUCCESS |" >> $GITHUB_STEP_SUMMARY
           else
-            echo "| Release APK | FAILED |" >> $GITHUB_STEP_SUMMARY
+            echo "| Release APK | ❌ FAILED |" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "**Releases:** https://github.com/${{ github.repository }}/releases" >> $GITHUB_STEP_SUMMARY

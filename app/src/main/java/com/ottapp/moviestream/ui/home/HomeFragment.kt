@@ -227,7 +227,12 @@ class HomeFragment : Fragment() {
     private fun setupSwipeRefresh() {
         binding.swipeRefresh.setOnRefreshListener {
             viewModel.loadData()
-            binding.swipeRefresh.isRefreshing = false
+        }
+
+        viewModel.loading.observe(viewLifecycleOwner) { loading ->
+            if (!loading && binding.swipeRefresh.isRefreshing) {
+                binding.swipeRefresh.isRefreshing = false
+            }
         }
     }
 

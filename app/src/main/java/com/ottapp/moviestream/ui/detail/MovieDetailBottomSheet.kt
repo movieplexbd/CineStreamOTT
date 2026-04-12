@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
 import com.ottapp.moviestream.R
@@ -173,7 +174,7 @@ class MovieDetailBottomSheet : BottomSheetDialogFragment() {
                     putExtra(Constants.EXTRA_VIDEO_URL,   downloadUrl)
                     putExtra(Constants.EXTRA_BANNER_URL,  movie.bannerImageUrl)
                 }
-                requireContext().startForegroundService(intent)
+                ContextCompat.startForegroundService(requireContext(), intent)
                 context?.toast("ডাউনলোড শুরু হয়েছে...")
                 if (_binding != null) {
                     binding.btnDownload.text = "ডাউনলোড হচ্ছে..."
