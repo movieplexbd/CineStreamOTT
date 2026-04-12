@@ -3,10 +3,14 @@ package com.ottapp.moviestream
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.common.api.ApiException
 import com.ottapp.moviestream.data.repository.AuthRepository
 import com.ottapp.moviestream.databinding.ActivityLoginBinding
+import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.hide
 import com.ottapp.moviestream.util.show
 import com.ottapp.moviestream.util.toast
@@ -19,6 +23,31 @@ class LoginActivity : AppCompatActivity() {
 
     private var isSignUpMode = false
 
+    // Google Sign-In launcher
+    private val googleSignInLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+        try {
+            val account = task.getResult(ApiException::class.java)
+            val idToken  = account.idToken
+            if (!idToken.isNullOrEmpty()) {
+                setLoading(true)
+                lifecycleScope.launch {
+                    val res = authRepository.signInWithGoogle(idToken)
+                    res.fold(
+                        onSuccess = { goToMain() },
+                        onFailure = { showError(friendlyError(it.message)) }
+                    )
+                }
+            } else {
+                showError("Google token পাওয়া যায়নি। Firebase Console-এ SHA-1 যোগ করুন।")
+            }
+        } catch (e: ApiException) {
+            showError("Google সাইন-ইন ব্যর্থ (কোড: ${e.statusCode})")
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityLoginBinding.inflate(layoutInflater)
@@ -26,8 +55,8 @@ class LoginActivity : AppCompatActivity() {
 
         authRepository = AuthRepository(this)
 
-        // Hide Google Sign-In button — only email/password login supported
-        binding.btnGoogleSignIn.hide()
+        // Google Sign-In button দেখান
+        binding.btnGoogleSignIn.show()
 
         setupClickListeners()
     }
@@ -39,6 +68,18 @@ class LoginActivity : AppCompatActivity() {
 
         binding.tvToggleMode.setOnClickListener {
             toggleMode()
+        }
+
+        binding.btnGoogleSignIn.setOnClickListener {
+            launchGoogleSignIn()
+        }
+    }
+
+    private fun launchGoogleSignIn() {
+        val signInClient = authRepository.getGoogleSignInClient(Constants.WEB_CLIENT_ID)
+        // Sign out first to always show account picker
+        signInClient.signOut().addOnCompleteListener {
+            googleSignInLauncher.launch(signInClient.signInIntent)
         }
     }
 
@@ -60,7 +101,7 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun handleEmailAuth() {
-        val email = binding.etEmail.text.toString().trim()
+        val email    = binding.etEmail.text.toString().trim()
         val password = binding.etPassword.text.toString().trim()
 
         if (email.isEmpty() || password.isEmpty()) {
@@ -110,19 +151,21 @@ class LoginActivity : AppCompatActivity() {
 
     private fun friendlyError(msg: String?): String {
         return when {
-            msg == null -> "অজানা সমস্যা হয়েছে"
-            msg.contains("password") -> "পাসওয়ার্ড ভুল আছে"
-            msg.contains("no user") || msg.contains("identifier") -> "এই ইমেইলে কোনো অ্যাকাউন্ট নেই"
-            msg.contains("already in use") -> "এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট আছে"
+            msg == null                                           -> "অজানা সমস্যা হয়েছে"
+            msg.contains("password")                             -> "পাসওয়ার্ড ভুল আছে"
+            msg.contains("no user") || msg.contains("identifier")-> "এই ইমেইলে কোনো অ্যাকাউন্ট নেই"
+            msg.contains("already in use")                       -> "এই ইমেইল দিয়ে আগেই অ্যাকাউন্ট আছে"
             msg.contains("badly formatted") || msg.contains("format") -> "ইমেইল সঠিক নয়"
-            msg.contains("network") -> "ইন্টারনেট সংযোগ নেই"
-            else -> msg
+            msg.contains("network")                              -> "ইন্টারনেট সংযোগ নেই"
+            msg.contains("12501") || msg.contains("sign_in_failed") -> "Google সাইন-ইন কনফিগারেশন সমস্যা। SHA-1 যোগ করুন।"
+            else                                                 -> msg
         }
     }
 
     private fun setLoading(loading: Boolean) {
-        binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
+        binding.progressBar.visibility  = if (loading) View.VISIBLE else View.GONE
         binding.btnEmailAction.isEnabled = !loading
+        binding.btnGoogleSignIn.isEnabled = !loading
     }
 
     private fun showError(msg: String) {

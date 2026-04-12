@@ -18,11 +18,20 @@ import java.net.URL
 
 class DownloadService : Service() {
 
+    companion object {
+        const val ACTION_START  = "action_start_download"
+        const val ACTION_CANCEL = "action_cancel_download"
+        const val EXTRA_MOVIE_ID_CANCEL = "extra_movie_id_cancel"
+    }
+
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private lateinit var repo: DownloadRepository
     private lateinit var notificationManager: NotificationManager
 
+    // movieId → active coroutine Job
     private val activeJobs = mutableMapOf<String, Job>()
+    // movieId → title (for notification updates)
+    private val activeTitles = mutableMapOf<String, String>()
 
     override fun onCreate() {
         super.onCreate()
@@ -31,14 +40,26 @@ class DownloadService : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        when (intent?.action) {
+            ACTION_CANCEL -> {
+                val movieId = intent.getStringExtra(EXTRA_MOVIE_ID_CANCEL) ?: return START_NOT_STICKY
+                cancelDownload(movieId)
+                return START_NOT_STICKY
+            }
+        }
+
         val movieId    = intent?.getStringExtra(Constants.EXTRA_MOVIE_ID)    ?: return START_NOT_STICKY
         val movieTitle = intent.getStringExtra(Constants.EXTRA_MOVIE_TITLE) ?: "Movie"
         val videoUrl   = intent.getStringExtra(Constants.EXTRA_VIDEO_URL)   ?: return START_NOT_STICKY
         val bannerUrl  = intent.getStringExtra(Constants.EXTRA_BANNER_URL)  ?: ""
 
+        // Skip if already downloading this movie
+        if (activeJobs.containsKey(movieId)) return START_NOT_STICKY
+
+        activeTitles[movieId] = movieTitle
         startForeground(
-            Constants.DOWNLOAD_NOTIFICATION_ID,
-            buildNotification(movieTitle, 0)
+            notificationId(movieId),
+            buildNotification(movieId, movieTitle, 0)
         )
 
         val job = scope.launch {
@@ -49,10 +70,19 @@ class DownloadService : Service() {
         return START_NOT_STICKY
     }
 
+    private fun cancelDownload(movieId: String) {
+        activeJobs[movieId]?.cancel()
+        activeJobs.remove(movieId)
+        activeTitles.remove(movieId)
+        repo.getTempFile(movieId).delete()
+        notificationManager.cancel(notificationId(movieId))
+        if (activeJobs.isEmpty()) stopSelf()
+    }
+
     private suspend fun downloadFile(
-        movieId: String,
-        title: String,
-        url: String,
+        movieId:   String,
+        title:     String,
+        url:       String,
         bannerUrl: String
     ) {
         val tempFile = repo.getTempFile(movieId)
@@ -65,7 +95,7 @@ class DownloadService : Service() {
                 connect()
             }
 
-            val totalBytes = connection.contentLengthLong
+            val totalBytes     = connection.contentLengthLong
             var downloadedBytes = 0L
             var lastNotifyTime  = 0L
 
@@ -79,7 +109,7 @@ class DownloadService : Service() {
                 inputStream.use { inp ->
                     while (inp.read(buffer).also { bytesRead = it } != -1) {
                         if (!coroutineContext.isActive) {
-                            tempFile.delete()
+                            // Cancelled — keep partial file for potential resume
                             return
                         }
                         out.write(buffer, 0, bytesRead)
@@ -90,7 +120,9 @@ class DownloadService : Service() {
                             val progress = if (totalBytes > 0)
                                 ((downloadedBytes * 100) / totalBytes).toInt()
                             else -1
-                            updateNotification(title, progress)
+                            withContext(Dispatchers.Main) {
+                                updateNotification(movieId, title, progress)
+                            }
                             lastNotifyTime = now
                         }
                     }
@@ -102,29 +134,52 @@ class DownloadService : Service() {
             val success = repo.finalizeTempFile(movieId)
             if (success) {
                 val meta = DownloadedMovie(
-                    movieId      = movieId,
-                    title        = title,
+                    movieId        = movieId,
+                    title          = title,
                     bannerImageUrl = bannerUrl,
                     localFilePath  = repo.getLocalFilePath(movieId),
                     fileSize       = downloadedBytes,
                     downloadedAt   = System.currentTimeMillis()
                 )
                 repo.saveMetadata(meta)
-                showCompleteNotification(title)
+                showCompleteNotification(movieId, title)
             } else {
-                showErrorNotification(title)
+                showErrorNotification(movieId, title)
             }
 
+        } catch (e: CancellationException) {
+            // Cancelled by user — silently exit
         } catch (e: Exception) {
             tempFile.delete()
-            showErrorNotification(title)
+            showErrorNotification(movieId, title)
         } finally {
             activeJobs.remove(movieId)
-            if (activeJobs.isEmpty()) stopSelf()
+            activeTitles.remove(movieId)
+            notificationManager.cancel(notificationId(movieId))
+            withContext(Dispatchers.Main) {
+                if (activeJobs.isEmpty()) stopSelf()
+            }
         }
     }
 
-    private fun buildNotification(title: String, progress: Int): Notification {
+    // ── Notification helpers ───────────────────────────────────────────────────
+
+    private fun notificationId(movieId: String): Int = movieId.hashCode().and(0x7FFFFFFF)
+
+    private fun cancelPendingIntent(movieId: String): PendingIntent {
+        val cancelIntent = Intent(this, DownloadService::class.java).apply {
+            action = ACTION_CANCEL
+            putExtra(EXTRA_MOVIE_ID_CANCEL, movieId)
+        }
+        return PendingIntent.getService(
+            this,
+            movieId.hashCode(),
+            cancelIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    private fun buildNotification(movieId: String, title: String, progress: Int): Notification {
         return NotificationCompat.Builder(this, OTTApplication.DOWNLOAD_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_download_notif)
             .setContentTitle("ডাউনলোড হচ্ছে")
@@ -132,34 +187,39 @@ class DownloadService : Service() {
             .setProgress(100, progress, progress < 0)
             .setOngoing(true)
             .setSilent(true)
+            .addAction(
+                R.drawable.ic_close,
+                "বাতিল করুন",
+                cancelPendingIntent(movieId)
+            )
             .build()
     }
 
-    private fun updateNotification(title: String, progress: Int) {
+    private fun updateNotification(movieId: String, title: String, progress: Int) {
         notificationManager.notify(
-            Constants.DOWNLOAD_NOTIFICATION_ID,
-            buildNotification(title, progress)
+            notificationId(movieId),
+            buildNotification(movieId, title, progress)
         )
     }
 
-    private fun showCompleteNotification(title: String) {
+    private fun showCompleteNotification(movieId: String, title: String) {
         val notif = NotificationCompat.Builder(this, OTTApplication.DOWNLOAD_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_download_notif)
-            .setContentTitle("ডাউনলোড সম্পন্ন")
+            .setContentTitle("✓ ডাউনলোড সম্পন্ন")
             .setContentText("$title ডাউনলোড হয়েছে")
             .setAutoCancel(true)
             .build()
-        notificationManager.notify(title.hashCode(), notif)
+        notificationManager.notify(notificationId(movieId), notif)
     }
 
-    private fun showErrorNotification(title: String) {
+    private fun showErrorNotification(movieId: String, title: String) {
         val notif = NotificationCompat.Builder(this, OTTApplication.DOWNLOAD_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_download_notif)
-            .setContentTitle("ডাউনলোড ব্যর্থ")
+            .setContentTitle("✗ ডাউনলোড ব্যর্থ")
             .setContentText("$title ডাউনলোড করা যায়নি")
             .setAutoCancel(true)
             .build()
-        notificationManager.notify(title.hashCode() + 1, notif)
+        notificationManager.notify(notificationId(movieId), notif)
     }
 
     override fun onDestroy() {
