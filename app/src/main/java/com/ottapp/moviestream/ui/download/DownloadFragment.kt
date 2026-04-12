@@ -194,6 +194,10 @@ class DownloadFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        try {
+            _binding?.rvActive?.adapter = null
+            _binding?.rvDownloads?.adapter = null
+        } catch (e: Exception) { }
         activeAdapter = null
         downloadAdapter = null
         _binding = null

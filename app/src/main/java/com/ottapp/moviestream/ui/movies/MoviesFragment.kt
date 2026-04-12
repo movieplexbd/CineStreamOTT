@@ -116,6 +116,7 @@ class MoviesFragment : Fragment() {
 
     override fun onDestroyView() {
         try { _binding?.shimmer?.stopShimmer() } catch (e: Exception) { }
+        try { _binding?.rvMovies?.adapter = null } catch (e: Exception) { }
         adapter = null
         _binding = null
         super.onDestroyView()

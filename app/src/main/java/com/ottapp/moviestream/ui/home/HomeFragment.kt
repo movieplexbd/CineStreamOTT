@@ -288,6 +288,13 @@ class HomeFragment : Fragment() {
         try {
             _binding?.shimmerLayout?.stopShimmer()
         } catch (e: Exception) { }
+        try {
+            _binding?.bannerPager?.adapter = null
+            _binding?.rvTrending?.adapter = null
+            _binding?.rvBangla?.adapter = null
+            _binding?.rvHindi?.adapter = null
+            _binding?.rvAll?.adapter = null
+        } catch (e: Exception) { }
         bannerAdapter = null
         trendingAdapter = null
         banglaAdapter = null

@@ -130,6 +130,7 @@ class SearchFragment : Fragment() {
     }
 
     override fun onDestroyView() {
+        try { _binding?.rvResults?.adapter = null } catch (e: Exception) { }
         adapter = null
         _binding = null
         super.onDestroyView()
