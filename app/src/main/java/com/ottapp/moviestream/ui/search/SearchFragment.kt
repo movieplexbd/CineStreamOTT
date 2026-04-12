@@ -6,11 +6,12 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
+import com.google.android.material.button.MaterialButton
 import com.ottapp.moviestream.R
 import com.ottapp.moviestream.adapter.MovieGridAdapter
 import com.ottapp.moviestream.data.model.Movie
@@ -60,20 +61,32 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupFilters() {
-        val filters = listOf(
+        val chips = listOf(
             binding.chipAll      to Constants.CAT_ALL,
             binding.chipBangla   to Constants.CAT_BANGLA,
             binding.chipHindi    to Constants.CAT_HINDI,
             binding.chipTrending to Constants.CAT_TRENDING
         )
-        filters.forEach { (chip, cat) ->
+        chips.forEach { (chip, cat) ->
             chip.setOnClickListener {
-                filters.forEach { (c, _) -> c.isSelected = false }
-                chip.isSelected = true
+                chips.forEach { (c, _) -> setChipSelected(c, false) }
+                setChipSelected(chip, true)
                 viewModel.setFilter(cat)
             }
         }
-        binding.chipAll.isSelected = true
+        setChipSelected(binding.chipAll, true)
+    }
+
+    private fun setChipSelected(chip: MaterialButton, selected: Boolean) {
+        if (selected) {
+            chip.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.red))
+            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.white))
+            chip.strokeWidth = 0
+        } else {
+            chip.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.surface2))
+            chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.t2))
+            chip.strokeWidth = 2
+        }
     }
 
     private fun observeViewModel() {
@@ -85,9 +98,9 @@ class SearchFragment : Fragment() {
             adapter.submitList(movies)
             val query = binding.etSearch.text.toString()
             when {
-                query.isBlank()   -> { binding.layoutEmpty.hide(); binding.layoutSearchHint.show() }
-                movies.isEmpty()  -> { binding.layoutEmpty.show(); binding.layoutSearchHint.hide() }
-                else              -> { binding.layoutEmpty.hide(); binding.layoutSearchHint.hide() }
+                query.isBlank()  -> { binding.layoutEmpty.hide(); binding.layoutSearchHint.show() }
+                movies.isEmpty() -> { binding.layoutEmpty.show(); binding.layoutSearchHint.hide() }
+                else             -> { binding.layoutEmpty.hide(); binding.layoutSearchHint.hide() }
             }
         }
     }
@@ -95,11 +108,9 @@ class SearchFragment : Fragment() {
     private fun openDetail(movie: Movie) {
         if (!isAdded || _binding == null) return
         try {
-            val bundle = bundleOf(Constants.EXTRA_MOVIE_ID to movie.id)
+            val bundle = android.os.Bundle().apply { putString(Constants.EXTRA_MOVIE_ID, movie.id) }
             findNavController().navigate(R.id.action_search_to_detail, bundle)
-        } catch (e: Exception) {
-            // Prevent duplicate navigation crash
-        }
+        } catch (e: Exception) { }
     }
 
     override fun onDestroyView() { _binding = null; super.onDestroyView() }

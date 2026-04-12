@@ -78,6 +78,8 @@ class PlayerActivity : AppCompatActivity() {
             movieId    = intent.getStringExtra(Constants.EXTRA_MOVIE_ID)    ?: ""
             movieTitle = intent.getStringExtra(Constants.EXTRA_MOVIE_TITLE) ?: "Movie"
             videoUrl   = intent.getStringExtra(Constants.EXTRA_VIDEO_URL)   ?: ""
+            val passedPos = intent.getLongExtra(Constants.EXTRA_START_POS, -1L)
+            if (passedPos > 0L) prefs.edit().putLong(Constants.PREF_PLAYBACK_POSITION + movieId, passedPos).apply()
 
             if (videoUrl.isBlank()) {
                 toast("ভিডিও URL পাওয়া যায়নি")

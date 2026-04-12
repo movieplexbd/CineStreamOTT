@@ -12,6 +12,7 @@ object Constants {
     const val EXTRA_VIDEO_URL   = "extra_video_url"
     const val EXTRA_BANNER_URL  = "extra_banner_url"
     const val EXTRA_IS_LOCAL    = "extra_is_local"
+    const val EXTRA_START_POS   = "extra_start_pos"
 
     // Shared prefs
     const val PREF_PLAYBACK_POSITION = "pref_playback_position_"
