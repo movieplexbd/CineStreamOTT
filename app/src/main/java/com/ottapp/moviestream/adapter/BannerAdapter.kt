@@ -18,7 +18,7 @@ class BannerAdapter(
             b.ivBanner.loadImage(movie.bannerImageUrl.orEmpty())
             b.tvBannerTitle.text = movie.title.orEmpty()
             b.tvBannerCategory.text = movie.category.orEmpty()
-            b.tvBannerRating.text = "⭐ ${movie.imdbRating}"
+            b.tvBannerRating.text = "\u2B50 ${movie.imdbRating}"
             b.btnBannerPlay.setOnClickListener { onClick(movie) }
             b.root.setOnClickListener { onClick(movie) }
             if (movie.testMovie) b.tvFreeBadge.visibility = android.view.View.VISIBLE
