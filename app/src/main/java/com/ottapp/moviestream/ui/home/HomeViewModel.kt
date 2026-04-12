@@ -33,13 +33,13 @@ class HomeViewModel : ViewModel() {
     private val _allMovies      = MutableLiveData<List<Movie>>(emptyList())
     val allMovies: LiveData<List<Movie>> = _allMovies
 
-    private val _currentUser    = MutableLiveData<User?>()
+    private val _currentUser    = MutableLiveData<User?>(null)
     val currentUser: LiveData<User?> = _currentUser
 
-    private val _loading = MutableLiveData(true)
+    private val _loading = MutableLiveData(false)
     val loading: LiveData<Boolean> = _loading
 
-    private val _error = MutableLiveData<String?>()
+    private val _error = MutableLiveData<String?>(null)
     val error: LiveData<String?> = _error
 
     init {
@@ -52,7 +52,12 @@ class HomeViewModel : ViewModel() {
             _loading.value = true
             _error.value = null
             try {
-                val all = movieRepo.getAllMovies()
+                val all = try {
+                    movieRepo.getAllMovies()
+                } catch (e: Exception) {
+                    Log.e(TAG, "getAllMovies exception: ${e.message}", e)
+                    emptyList()
+                }
 
                 _allMovies.value = all
 
@@ -73,12 +78,12 @@ class HomeViewModel : ViewModel() {
 
             } catch (e: Exception) {
                 Log.e(TAG, "loadData error: ${e.message}", e)
-                _error.value = e.message
-                _allMovies.value = emptyList()
-                _bannerMovies.value = emptyList()
+                _error.value = "ডেটা লোড ব্যর্থ"
+                _allMovies.value     = emptyList()
+                _bannerMovies.value  = emptyList()
                 _trendingMovies.value = emptyList()
-                _banglaMovies.value = emptyList()
-                _hindiMovies.value = emptyList()
+                _banglaMovies.value  = emptyList()
+                _hindiMovies.value   = emptyList()
             } finally {
                 _loading.value = false
             }
@@ -89,11 +94,17 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 userRepo.getCurrentUserFlow()
-                    .catch {
-                        Log.e(TAG, "User flow error: ${it.message}")
+                    .catch { e ->
+                        Log.e(TAG, "User flow error: ${e.message}")
                         emit(null)
                     }
-                    .collect { _currentUser.value = it }
+                    .collect { user ->
+                        try {
+                            _currentUser.value = user
+                        } catch (e: Exception) {
+                            Log.e(TAG, "Set currentUser error: ${e.message}")
+                        }
+                    }
             } catch (e: Exception) {
                 Log.e(TAG, "observeUser error: ${e.message}")
                 _currentUser.value = null

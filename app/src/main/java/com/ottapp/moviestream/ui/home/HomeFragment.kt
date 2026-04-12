@@ -31,11 +31,11 @@ class HomeFragment : Fragment() {
 
     private val viewModel: HomeViewModel by viewModels()
 
-    private lateinit var bannerAdapter: BannerAdapter
-    private lateinit var trendingAdapter: MovieGridAdapter
-    private lateinit var banglaAdapter: MovieGridAdapter
-    private lateinit var hindiAdapter: MovieGridAdapter
-    private lateinit var allAdapter: MovieGridAdapter
+    private var bannerAdapter: BannerAdapter? = null
+    private var trendingAdapter: MovieGridAdapter? = null
+    private var banglaAdapter: MovieGridAdapter? = null
+    private var hindiAdapter: MovieGridAdapter? = null
+    private var allAdapter: MovieGridAdapter? = null
 
     private val bannerHandler = Handler(Looper.getMainLooper())
     private var bannerRunnable: Runnable? = null
@@ -50,13 +50,21 @@ class HomeFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        try {
+            setupBanner()
+            setupAdapters()
+            observeViewModel()
+            setupSwipeRefresh()
+            setupSearchButton()
+        } catch (e: Exception) {
+            android.util.Log.e("HomeFragment", "onViewCreated error: ${e.message}", e)
+        }
+    }
 
-        setupBanner()
-        setupAdapters()
-        observeViewModel()
-        setupSwipeRefresh()
+    // ── Search ───────────────────────────────────────────────────────────────
 
-        binding.btnSearch.setOnClickListener {
+    private fun setupSearchButton() {
+        _binding?.btnSearch?.setOnClickListener {
             try {
                 val navOptions = NavOptions.Builder()
                     .setLaunchSingleTop(true)
@@ -68,54 +76,70 @@ class HomeFragment : Fragment() {
                     )
                     .build()
                 findNavController().navigate(R.id.searchFragment, null, navOptions)
-            } catch (e: Exception) { /* ignore */ }
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "Search nav error: ${e.message}")
+            }
         }
     }
 
-    // ── Banner ──────────────────────────────────────────────────────────────
+    // ── Banner ───────────────────────────────────────────────────────────────
 
     private fun setupBanner() {
-        bannerAdapter = BannerAdapter { movie -> openMovieDetail(movie) }
-        binding.bannerPager.adapter = bannerAdapter
-        binding.bannerPager.offscreenPageLimit = 1
-
-        binding.bannerPager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
-            override fun onPageSelected(position: Int) {
-                updateDots(position)
-            }
-        })
+        val adapter = BannerAdapter { movie -> openMovieDetail(movie) }
+        bannerAdapter = adapter
+        _binding?.bannerPager?.let { pager ->
+            pager.adapter = adapter
+            pager.offscreenPageLimit = 1
+            pager.registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    if (_binding != null) updateDots(position)
+                }
+            })
+        }
     }
 
     private fun setupDots(count: Int) {
         bannerCount = count
-        binding.bannerDots.removeAllViews()
+        val dotsLayout = _binding?.bannerDots ?: return
+        dotsLayout.removeAllViews()
         if (count <= 1) return
 
+        val density = resources.displayMetrics.density
         repeat(count) { i ->
-            val isActive = i == 0
-            val dot = ImageView(requireContext()).apply {
-                val sizeDp = if (isActive) 10 else 7
-                val sizePx = (sizeDp * resources.displayMetrics.density).toInt()
-                layoutParams = ViewGroup.MarginLayoutParams(sizePx, sizePx).also { lp ->
-                    lp.setMargins(4, 0, 4, 0)
+            val isActive = (i == 0)
+            val sizeDp = if (isActive) 10 else 7
+            val sizePx = (sizeDp * density).toInt()
+            try {
+                val dot = ImageView(requireContext()).apply {
+                    layoutParams = ViewGroup.MarginLayoutParams(sizePx, sizePx).also { lp ->
+                        lp.setMargins(4, 0, 4, 0)
+                    }
+                    setImageResource(if (isActive) R.drawable.dot_active else R.drawable.dot_inactive)
                 }
-                setImageResource(if (isActive) R.drawable.dot_active else R.drawable.dot_inactive)
+                dotsLayout.addView(dot)
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "setupDots error: ${e.message}")
             }
-            binding.bannerDots.addView(dot)
         }
     }
 
     private fun updateDots(selected: Int) {
-        val count = binding.bannerDots.childCount
+        val dotsLayout = _binding?.bannerDots ?: return
+        val count = dotsLayout.childCount
+        val density = resources.displayMetrics.density
         for (i in 0 until count) {
-            val dot = binding.bannerDots.getChildAt(i) as? ImageView ?: continue
+            val dot = dotsLayout.getChildAt(i) as? ImageView ?: continue
             val isActive = (i == selected)
             val sizeDp = if (isActive) 10 else 7
-            val sizePx = (sizeDp * resources.displayMetrics.density).toInt()
-            dot.layoutParams = ViewGroup.MarginLayoutParams(sizePx, sizePx).also { lp ->
-                lp.setMargins(4, 0, 4, 0)
+            val sizePx = (sizeDp * density).toInt()
+            try {
+                dot.layoutParams = ViewGroup.MarginLayoutParams(sizePx, sizePx).also { lp ->
+                    lp.setMargins(4, 0, 4, 0)
+                }
+                dot.setImageResource(if (isActive) R.drawable.dot_active else R.drawable.dot_inactive)
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "updateDots error: ${e.message}")
             }
-            dot.setImageResource(if (isActive) R.drawable.dot_active else R.drawable.dot_inactive)
         }
     }
 
@@ -124,9 +148,13 @@ class HomeFragment : Fragment() {
         if (count <= 1) return
         bannerRunnable = object : Runnable {
             override fun run() {
-                if (_binding == null) return
-                val next = (binding.bannerPager.currentItem + 1) % count
-                binding.bannerPager.setCurrentItem(next, true)
+                val b = _binding ?: return
+                try {
+                    val next = (b.bannerPager.currentItem + 1) % count
+                    b.bannerPager.setCurrentItem(next, true)
+                } catch (e: Exception) {
+                    android.util.Log.e("HomeFragment", "Auto-scroll error: ${e.message}")
+                }
                 bannerHandler.postDelayed(this, 4000)
             }
         }
@@ -143,31 +171,31 @@ class HomeFragment : Fragment() {
     private fun setupAdapters() {
         val onClick: (Movie) -> Unit = { openMovieDetail(it) }
 
-        trendingAdapter = MovieGridAdapter(onClick)
-        binding.rvTrending.apply {
+        val tAdp = MovieGridAdapter(onClick).also { trendingAdapter = it }
+        _binding?.rvTrending?.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)
-            adapter = trendingAdapter
+            adapter = tAdp
             isNestedScrollingEnabled = false
         }
 
-        banglaAdapter = MovieGridAdapter(onClick)
-        binding.rvBangla.apply {
+        val bAdp = MovieGridAdapter(onClick).also { banglaAdapter = it }
+        _binding?.rvBangla?.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)
-            adapter = banglaAdapter
+            adapter = bAdp
             isNestedScrollingEnabled = false
         }
 
-        hindiAdapter = MovieGridAdapter(onClick)
-        binding.rvHindi.apply {
+        val hAdp = MovieGridAdapter(onClick).also { hindiAdapter = it }
+        _binding?.rvHindi?.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)
-            adapter = hindiAdapter
+            adapter = hAdp
             isNestedScrollingEnabled = false
         }
 
-        allAdapter = MovieGridAdapter(onClick)
-        binding.rvAll.apply {
+        val aAdp = MovieGridAdapter(onClick).also { allAdapter = it }
+        _binding?.rvAll?.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)
-            adapter = allAdapter
+            adapter = aAdp
             isNestedScrollingEnabled = false
         }
     }
@@ -176,65 +204,101 @@ class HomeFragment : Fragment() {
 
     private fun observeViewModel() {
         viewModel.loading.observe(viewLifecycleOwner) { loading ->
-            if (loading) {
-                binding.shimmerLayout.startShimmer()
-                binding.shimmerLayout.show()
-                binding.contentWrapper.hide()
-            } else {
-                binding.shimmerLayout.stopShimmer()
-                binding.shimmerLayout.hide()
-                binding.contentWrapper.show()
+            val b = _binding ?: return@observe
+            try {
+                if (loading) {
+                    b.shimmerLayout.startShimmer()
+                    b.shimmerLayout.show()
+                    b.contentWrapper.hide()
+                } else {
+                    b.shimmerLayout.stopShimmer()
+                    b.shimmerLayout.hide()
+                    b.contentWrapper.show()
+                    if (b.swipeRefresh.isRefreshing) {
+                        b.swipeRefresh.isRefreshing = false
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "loading observer error: ${e.message}")
             }
         }
 
         viewModel.bannerMovies.observe(viewLifecycleOwner) { movies ->
-            if (movies.isNotEmpty()) {
-                bannerAdapter.submitList(movies)
-                setupDots(movies.size)
-                startAutoScroll(movies.size)
+            val b = _binding ?: return@observe
+            try {
+                if (movies.isNotEmpty()) {
+                    bannerAdapter?.submitList(movies)
+                    setupDots(movies.size)
+                    startAutoScroll(movies.size)
+                } else {
+                    bannerAdapter?.submitList(emptyList())
+                    b.bannerDots.removeAllViews()
+                    stopAutoScroll()
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "bannerMovies observer error: ${e.message}")
             }
         }
 
         viewModel.trendingMovies.observe(viewLifecycleOwner) { movies ->
-            trendingAdapter.submitList(movies)
-            binding.sectionTrending.visibility = if (movies.isEmpty()) View.GONE else View.VISIBLE
+            val b = _binding ?: return@observe
+            try {
+                trendingAdapter?.submitList(movies)
+                b.sectionTrending.visibility = if (movies.isEmpty()) View.GONE else View.VISIBLE
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "trendingMovies observer error: ${e.message}")
+            }
         }
 
         viewModel.banglaMovies.observe(viewLifecycleOwner) { movies ->
-            banglaAdapter.submitList(movies)
-            binding.sectionBangla.visibility = if (movies.isEmpty()) View.GONE else View.VISIBLE
+            val b = _binding ?: return@observe
+            try {
+                banglaAdapter?.submitList(movies)
+                b.sectionBangla.visibility = if (movies.isEmpty()) View.GONE else View.VISIBLE
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "banglaMovies observer error: ${e.message}")
+            }
         }
 
         viewModel.hindiMovies.observe(viewLifecycleOwner) { movies ->
-            hindiAdapter.submitList(movies)
-            binding.sectionHindi.visibility = if (movies.isEmpty()) View.GONE else View.VISIBLE
+            val b = _binding ?: return@observe
+            try {
+                hindiAdapter?.submitList(movies)
+                b.sectionHindi.visibility = if (movies.isEmpty()) View.GONE else View.VISIBLE
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "hindiMovies observer error: ${e.message}")
+            }
         }
 
         viewModel.allMovies.observe(viewLifecycleOwner) { movies ->
-            allAdapter.submitList(movies)
-            binding.sectionAll.visibility = if (movies.isEmpty()) View.GONE else View.VISIBLE
+            val b = _binding ?: return@observe
+            try {
+                allAdapter?.submitList(movies)
+                b.sectionAll.visibility = if (movies.isEmpty()) View.GONE else View.VISIBLE
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "allMovies observer error: ${e.message}")
+            }
         }
 
         viewModel.currentUser.observe(viewLifecycleOwner) { user ->
-            if (user != null) {
-                val initial = user.displayName.firstOrNull()?.uppercaseChar()?.toString() ?: "U"
-                binding.tvAvatarInitial.text = initial
-                if (user.photoUrl.isNotEmpty()) binding.ivAvatar.loadImage(user.photoUrl)
-                binding.tvSubscriptionBadge.text = if (user.isPremium) "PREMIUM" else "FREE"
-                binding.tvSubscriptionBadge.visibility = View.VISIBLE
+            val b = _binding ?: return@observe
+            try {
+                if (user != null) {
+                    val initial = user.displayName.firstOrNull()?.uppercaseChar()?.toString() ?: "U"
+                    b.tvAvatarInitial.text = initial
+                    if (user.photoUrl.isNotEmpty()) b.ivAvatar.loadImage(user.photoUrl)
+                    b.tvSubscriptionBadge.text = if (user.isPremium) "PREMIUM" else "FREE"
+                    b.tvSubscriptionBadge.visibility = View.VISIBLE
+                }
+            } catch (e: Exception) {
+                android.util.Log.e("HomeFragment", "currentUser observer error: ${e.message}")
             }
         }
     }
 
     private fun setupSwipeRefresh() {
-        binding.swipeRefresh.setOnRefreshListener {
+        _binding?.swipeRefresh?.setOnRefreshListener {
             viewModel.loadData()
-        }
-
-        viewModel.loading.observe(viewLifecycleOwner) { loading ->
-            if (!loading && binding.swipeRefresh.isRefreshing) {
-                binding.swipeRefresh.isRefreshing = false
-            }
         }
     }
 
@@ -243,7 +307,9 @@ class HomeFragment : Fragment() {
         try {
             val bundle = bundleOf(Constants.EXTRA_MOVIE_ID to movie.id)
             findNavController().navigate(R.id.action_home_to_detail, bundle)
-        } catch (e: Exception) { /* ignore duplicate */ }
+        } catch (e: Exception) {
+            android.util.Log.e("HomeFragment", "Navigate to detail error: ${e.message}")
+        }
     }
 
     // ── Lifecycle ─────────────────────────────────────────────────────────────
@@ -251,6 +317,7 @@ class HomeFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         stopAutoScroll()
+        try { _binding?.shimmerLayout?.stopShimmer() } catch (e: Exception) { /* ignore */ }
     }
 
     override fun onResume() {
@@ -260,7 +327,13 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         stopAutoScroll()
-        _binding?.shimmerLayout?.stopShimmer()
+        try { _binding?.shimmerLayout?.stopShimmer() } catch (e: Exception) { /* ignore */ }
+        try { _binding?.bannerPager?.adapter = null } catch (e: Exception) { /* ignore */ }
+        bannerAdapter = null
+        trendingAdapter = null
+        banglaAdapter = null
+        hindiAdapter = null
+        allAdapter = null
         _binding = null
         super.onDestroyView()
     }
