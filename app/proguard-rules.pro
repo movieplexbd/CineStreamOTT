@@ -37,9 +37,20 @@
 -keep public enum com.bumptech.glide.load.ImageHeaderParser$** {
     **[] $VALUES; public *;
 }
+-keep class com.bumptech.glide.** { *; }
+-dontwarn com.bumptech.glide.**
+
+# Shimmer — keep entire library to prevent crash on layout inflation
+-keep class com.facebook.shimmer.** { *; }
+-dontwarn com.facebook.shimmer.**
+
+# CircleImageView — keep to prevent crash on layout inflation
+-keep class de.hdodenhof.circleimageview.** { *; }
+-dontwarn de.hdodenhof.circleimageview.**
 
 # WorkManager
 -keep class androidx.work.** { *; }
+-dontwarn androidx.work.**
 
 # Navigation
 -keep class androidx.navigation.** { *; }
@@ -50,7 +61,29 @@
     public static *** inflate(...);
 }
 
-# Remove logging in release
+# Keep all Fragment subclasses (NavHostFragment uses reflection to instantiate them)
+-keep class * extends androidx.fragment.app.Fragment { <init>(); }
+-keep class com.ottapp.moviestream.ui.** { *; }
+
+# Keep ViewModel subclasses (ViewModelProvider uses reflection)
+-keep class * extends androidx.lifecycle.ViewModel { <init>(...); }
+-keepclassmembers class * extends androidx.lifecycle.ViewModel {
+    <init>(...);
+}
+
+# Keep RecyclerView Adapter subclasses
+-keep class com.ottapp.moviestream.adapter.** { *; }
+
+# Keep Application class
+-keep class com.ottapp.moviestream.OTTApplication { *; }
+
+# Keep Activity/Service classes declared in manifest
+-keep class com.ottapp.moviestream.SplashActivity { *; }
+-keep class com.ottapp.moviestream.LoginActivity { *; }
+-keep class com.ottapp.moviestream.MainActivity { *; }
+-keep class com.ottapp.moviestream.service.DownloadService { *; }
+
+# Remove debug logging in release
 -assumenosideeffects class android.util.Log {
     public static boolean isLoggable(java.lang.String, int);
     public static int v(...);

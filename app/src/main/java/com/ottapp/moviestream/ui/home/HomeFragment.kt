@@ -177,9 +177,11 @@ class HomeFragment : Fragment() {
     private fun observeViewModel() {
         viewModel.loading.observe(viewLifecycleOwner) { loading ->
             if (loading) {
+                binding.shimmerLayout.startShimmer()
                 binding.shimmerLayout.show()
                 binding.contentWrapper.hide()
             } else {
+                binding.shimmerLayout.stopShimmer()
                 binding.shimmerLayout.hide()
                 binding.contentWrapper.show()
             }
@@ -258,6 +260,7 @@ class HomeFragment : Fragment() {
 
     override fun onDestroyView() {
         stopAutoScroll()
+        _binding?.shimmerLayout?.stopShimmer()
         _binding = null
         super.onDestroyView()
     }

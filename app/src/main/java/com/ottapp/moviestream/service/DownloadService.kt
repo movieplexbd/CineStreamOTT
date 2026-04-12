@@ -2,6 +2,8 @@ package com.ottapp.moviestream.service
 
 import android.app.*
 import android.content.Intent
+import android.content.pm.ServiceInfo
+import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import com.ottapp.moviestream.OTTApplication
@@ -52,7 +54,15 @@ class DownloadService : Service() {
 
         DownloadTracker.start(movieId, movieTitle, bannerUrl)
 
-        startForeground(notifId(movieId), buildNotif(movieId, movieTitle, -1))
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            startForeground(
+                notifId(movieId),
+                buildNotif(movieId, movieTitle, -1),
+                ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
+            )
+        } else {
+            startForeground(notifId(movieId), buildNotif(movieId, movieTitle, -1))
+        }
 
         val job = scope.launch { downloadFile(movieId, movieTitle, videoUrl, bannerUrl) }
         activeJobs[movieId] = job

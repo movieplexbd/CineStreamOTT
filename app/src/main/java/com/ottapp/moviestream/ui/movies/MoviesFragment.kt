@@ -60,9 +60,11 @@ class MoviesFragment : Fragment() {
     private fun observeViewModel() {
         viewModel.loading.observe(viewLifecycleOwner) { loading ->
             if (loading) {
+                binding.shimmer.startShimmer()
                 binding.shimmer.show()
                 binding.rvMovies.hide()
             } else {
+                binding.shimmer.stopShimmer()
                 binding.shimmer.hide()
                 binding.rvMovies.show()
             }
@@ -89,5 +91,9 @@ class MoviesFragment : Fragment() {
         }
     }
 
-    override fun onDestroyView() { _binding = null; super.onDestroyView() }
+    override fun onDestroyView() {
+        _binding?.shimmer?.stopShimmer()
+        _binding = null
+        super.onDestroyView()
+    }
 }
