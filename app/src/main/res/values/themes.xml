@@ -13,6 +13,7 @@
         <item name="android:statusBarColor">@color/bg</item>
         <item name="android:navigationBarColor">@color/surface</item>
         <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowActivityTransitions">true</item>
     </style>
 
     <style name="Theme.OTTStreamingApp.NoActionBar" parent="Theme.OTTStreamingApp">
@@ -35,18 +36,17 @@
         <item name="android:windowLayoutInDisplayCutoutMode">shortEdges</item>
     </style>
 
-    <!-- Category tab chip -->
     <style name="CategoryChip" parent="Widget.MaterialComponents.Button.OutlinedButton">
         <item name="cornerRadius">20dp</item>
         <item name="android:textSize">12sp</item>
-        <item name="android:paddingStart">14dp</item>
-        <item name="android:paddingEnd">14dp</item>
+        <item name="android:paddingStart">16dp</item>
+        <item name="android:paddingEnd">16dp</item>
         <item name="strokeColor">@color/border</item>
         <item name="android:backgroundTint">@color/chip_bg_selector</item>
         <item name="android:textColor">@color/chip_text_selector</item>
+        <item name="android:stateListAnimator">@null</item>
     </style>
 
-    <!-- Bottom sheet rounded top corners -->
     <style name="RoundedBottomSheet" parent="Widget.MaterialComponents.BottomSheet">
         <item name="shapeAppearanceOverlay">@style/ShapeRoundedTop</item>
     </style>
