@@ -23,12 +23,12 @@ class MainActivity : AppCompatActivity() {
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
         navController = navHost.navController
 
+        // Handle switching between different tabs
         binding.bottomNavigation.setOnItemSelectedListener { item ->
             val destId = item.itemId
 
+            // Don't navigate if already on this tab (let reselect listener handle it)
             if (destId == currentTabId) {
-                // Same tab tapped again: pop everything back to the tab root
-                navController.popBackStack(destId, false)
                 return@setOnItemSelectedListener true
             }
 
@@ -52,10 +52,17 @@ class MainActivity : AppCompatActivity() {
             true
         }
 
-        // Prevent reselect from doing anything extra — handled above
-        binding.bottomNavigation.setOnItemReselectedListener { /* handled in setOnItemSelectedListener */ }
+        // When user taps the SAME tab they're already on: pop back to the tab root
+        // This only fires on explicit user tap of an already-selected item (not on startup)
+        binding.bottomNavigation.setOnItemReselectedListener {
+            val currentDest = navController.currentDestination?.id
+            // Only pop if we're deeper than the tab root (e.g. on a detail screen)
+            if (currentDest != currentTabId) {
+                navController.popBackStack(currentTabId, false)
+            }
+        }
 
-        // Keep bottom nav in sync when navigating via code
+        // Keep bottom nav in sync when navigating via code (e.g. search icon in home)
         navController.addOnDestinationChangedListener { _, destination, _ ->
             val tabIds = setOf(
                 R.id.homeFragment, R.id.moviesFragment, R.id.searchFragment,
