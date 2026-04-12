@@ -7,7 +7,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
-import androidx.core.content.ContextCompat
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -40,14 +39,18 @@ class HomeFragment : Fragment() {
 
     private val bannerHandler = Handler(Looper.getMainLooper())
     private var bannerRunnable: Runnable? = null
+    private var bannerCount = 0
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
+    override fun onCreateView(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): View {
         _binding = FragmentHomeBinding.inflate(inflater, container, false)
         return binding.root
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
         setupBanner()
         setupAdapters()
         observeViewModel()
@@ -58,12 +61,18 @@ class HomeFragment : Fragment() {
                 val navOptions = NavOptions.Builder()
                     .setLaunchSingleTop(true)
                     .setRestoreState(true)
-                    .setPopUpTo(findNavController().graph.startDestinationId, inclusive = false, saveState = true)
+                    .setPopUpTo(
+                        findNavController().graph.startDestinationId,
+                        inclusive = false,
+                        saveState = true
+                    )
                     .build()
                 findNavController().navigate(R.id.searchFragment, null, navOptions)
             } catch (e: Exception) { /* ignore */ }
         }
     }
+
+    // ── Banner ──────────────────────────────────────────────────────────────
 
     private fun setupBanner() {
         bannerAdapter = BannerAdapter { movie -> openMovieDetail(movie) }
@@ -78,16 +87,19 @@ class HomeFragment : Fragment() {
     }
 
     private fun setupDots(count: Int) {
+        bannerCount = count
         binding.bannerDots.removeAllViews()
         if (count <= 1) return
+
         repeat(count) { i ->
+            val isActive = i == 0
             val dot = ImageView(requireContext()).apply {
-                val size = if (i == 0) 10 else 7
-                val px = (size * resources.displayMetrics.density).toInt()
-                layoutParams = ViewGroup.MarginLayoutParams(px, px).apply {
-                    setMargins(4, 0, 4, 0)
+                val sizeDp = if (isActive) 10 else 7
+                val sizePx = (sizeDp * resources.displayMetrics.density).toInt()
+                layoutParams = ViewGroup.MarginLayoutParams(sizePx, sizePx).also { lp ->
+                    lp.setMargins(4, 0, 4, 0)
                 }
-                setImageResource(if (i == 0) R.drawable.dot_active else R.drawable.dot_inactive)
+                setImageResource(if (isActive) R.drawable.dot_active else R.drawable.dot_inactive)
             }
             binding.bannerDots.addView(dot)
         }
@@ -97,13 +109,13 @@ class HomeFragment : Fragment() {
         val count = binding.bannerDots.childCount
         for (i in 0 until count) {
             val dot = binding.bannerDots.getChildAt(i) as? ImageView ?: continue
-            val isActive = i == selected
-            dot.setImageResource(if (isActive) R.drawable.dot_active else R.drawable.dot_inactive)
-            val size = if (isActive) 10 else 7
-            val px = (size * resources.displayMetrics.density).toInt()
-            dot.layoutParams = ViewGroup.MarginLayoutParams(px, px).apply {
-                setMargins(4, 0, 4, 0)
+            val isActive = (i == selected)
+            val sizeDp = if (isActive) 10 else 7
+            val sizePx = (sizeDp * resources.displayMetrics.density).toInt()
+            dot.layoutParams = ViewGroup.MarginLayoutParams(sizePx, sizePx).also { lp ->
+                lp.setMargins(4, 0, 4, 0)
             }
+            dot.setImageResource(if (isActive) R.drawable.dot_active else R.drawable.dot_inactive)
         }
     }
 
@@ -112,6 +124,7 @@ class HomeFragment : Fragment() {
         if (count <= 1) return
         bannerRunnable = object : Runnable {
             override fun run() {
+                if (_binding == null) return
                 val next = (binding.bannerPager.currentItem + 1) % count
                 binding.bannerPager.setCurrentItem(next, true)
                 bannerHandler.postDelayed(this, 4000)
@@ -125,31 +138,33 @@ class HomeFragment : Fragment() {
         bannerRunnable = null
     }
 
-    private fun setupAdapters() {
-        val onMovieClick: (Movie) -> Unit = { movie -> openMovieDetail(movie) }
+    // ── Adapters ─────────────────────────────────────────────────────────────
 
-        trendingAdapter = MovieGridAdapter(onMovieClick)
+    private fun setupAdapters() {
+        val onClick: (Movie) -> Unit = { openMovieDetail(it) }
+
+        trendingAdapter = MovieGridAdapter(onClick)
         binding.rvTrending.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)
             adapter = trendingAdapter
             isNestedScrollingEnabled = false
         }
 
-        banglaAdapter = MovieGridAdapter(onMovieClick)
+        banglaAdapter = MovieGridAdapter(onClick)
         binding.rvBangla.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)
             adapter = banglaAdapter
             isNestedScrollingEnabled = false
         }
 
-        hindiAdapter = MovieGridAdapter(onMovieClick)
+        hindiAdapter = MovieGridAdapter(onClick)
         binding.rvHindi.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)
             adapter = hindiAdapter
             isNestedScrollingEnabled = false
         }
 
-        allAdapter = MovieGridAdapter(onMovieClick)
+        allAdapter = MovieGridAdapter(onClick)
         binding.rvAll.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)
             adapter = allAdapter
@@ -157,27 +172,30 @@ class HomeFragment : Fragment() {
         }
     }
 
+    // ── ViewModel ─────────────────────────────────────────────────────────────
+
     private fun observeViewModel() {
         viewModel.loading.observe(viewLifecycleOwner) { loading ->
-            if (loading) binding.shimmerLayout.show() else binding.shimmerLayout.hide()
-            if (!loading) binding.scrollContent.show() else binding.scrollContent.hide()
+            if (loading) {
+                binding.shimmerLayout.show()
+                binding.contentWrapper.hide()
+            } else {
+                binding.shimmerLayout.hide()
+                binding.contentWrapper.show()
+            }
+        }
+
+        viewModel.bannerMovies.observe(viewLifecycleOwner) { movies ->
+            if (movies.isNotEmpty()) {
+                bannerAdapter.submitList(movies)
+                setupDots(movies.size)
+                startAutoScroll(movies.size)
+            }
         }
 
         viewModel.trendingMovies.observe(viewLifecycleOwner) { movies ->
-            // Use trending movies for banner
-            if (movies.isNotEmpty()) {
-                val bannerMovies = movies.take(5)
-                bannerAdapter.submitList(bannerMovies)
-                setupDots(bannerMovies.size)
-                startAutoScroll(bannerMovies.size)
-            }
             trendingAdapter.submitList(movies)
             binding.sectionTrending.visibility = if (movies.isEmpty()) View.GONE else View.VISIBLE
-        }
-
-        viewModel.allMovies.observe(viewLifecycleOwner) { movies ->
-            allAdapter.submitList(movies)
-            binding.sectionAll.visibility = if (movies.isEmpty()) View.GONE else View.VISIBLE
         }
 
         viewModel.banglaMovies.observe(viewLifecycleOwner) { movies ->
@@ -188,6 +206,11 @@ class HomeFragment : Fragment() {
         viewModel.hindiMovies.observe(viewLifecycleOwner) { movies ->
             hindiAdapter.submitList(movies)
             binding.sectionHindi.visibility = if (movies.isEmpty()) View.GONE else View.VISIBLE
+        }
+
+        viewModel.allMovies.observe(viewLifecycleOwner) { movies ->
+            allAdapter.submitList(movies)
+            binding.sectionAll.visibility = if (movies.isEmpty()) View.GONE else View.VISIBLE
         }
 
         viewModel.currentUser.observe(viewLifecycleOwner) { user ->
@@ -213,8 +236,10 @@ class HomeFragment : Fragment() {
         try {
             val bundle = bundleOf(Constants.EXTRA_MOVIE_ID to movie.id)
             findNavController().navigate(R.id.action_home_to_detail, bundle)
-        } catch (e: Exception) { /* duplicate navigation ignore */ }
+        } catch (e: Exception) { /* ignore duplicate */ }
     }
+
+    // ── Lifecycle ─────────────────────────────────────────────────────────────
 
     override fun onPause() {
         super.onPause()
@@ -223,8 +248,7 @@ class HomeFragment : Fragment() {
 
     override fun onResume() {
         super.onResume()
-        val count = bannerAdapter.itemCount
-        if (count > 1) startAutoScroll(count)
+        if (bannerCount > 1) startAutoScroll(bannerCount)
     }
 
     override fun onDestroyView() {
