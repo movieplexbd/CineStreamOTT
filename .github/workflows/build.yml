@@ -32,8 +32,8 @@ jobs:
             -keysize 2048 \
             -validity 10000 \
             -keystore keystore/cinestream-release.jks \
-            -storepass "CineStream@2024SecureBD" \
-            -keypass "CineStream@2024SecureBD" \
+            -storepass "${{ secrets.RELEASE_STORE_PASSWORD || 'CineStream@2024SecureBD' }}" \
+            -keypass "${{ secrets.RELEASE_KEY_PASSWORD || 'CineStream@2024SecureBD' }}" \
             -dname "CN=CineStream, OU=Development, O=CineStream, L=Dhaka, ST=Dhaka, C=BD"
 
       - name: Grant execute permission for gradlew
@@ -42,9 +42,9 @@ jobs:
       - name: Build Release APK
         run: ./gradlew assembleRelease --no-daemon --stacktrace
         env:
-          RELEASE_STORE_PASSWORD: "CineStream@2024SecureBD"
-          RELEASE_KEY_ALIAS: "cinestream_release"
-          RELEASE_KEY_PASSWORD: "CineStream@2024SecureBD"
+          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD || 'CineStream@2024SecureBD' }}
+          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS || 'cinestream_release' }}
+          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD || 'CineStream@2024SecureBD' }}
 
       - name: Find and rename APK
         run: |

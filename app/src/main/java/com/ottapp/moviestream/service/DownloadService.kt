@@ -57,24 +57,22 @@ class DownloadService : Service() {
         DownloadTracker.start(movieId, movieTitle, bannerUrl)
 
         try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
                 startForeground(
                     notifId(movieId),
                     buildNotif(movieId, movieTitle, -1),
                     ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-                )
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                startForeground(
-                    notifId(movieId),
-                    buildNotif(movieId, movieTitle, -1),
-                    0
                 )
             } else {
                 startForeground(notifId(movieId), buildNotif(movieId, movieTitle, -1))
             }
         } catch (e: Exception) {
             Log.e(TAG, "startForeground failed: ${e.message}", e)
-            startForeground(notifId(movieId), buildNotif(movieId, movieTitle, -1))
+            try {
+                startForeground(notifId(movieId), buildNotif(movieId, movieTitle, -1))
+            } catch (e2: Exception) {
+                Log.e(TAG, "startForeground fallback failed: ${e2.message}", e2)
+            }
         }
 
         val job = scope.launch { downloadFile(movieId, movieTitle, videoUrl, bannerUrl) }

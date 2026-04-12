@@ -27,7 +27,7 @@ class OTTApplication : Application(), Configuration.Provider {
             if (FirebaseApp.getApps(this).isEmpty()) {
                 FirebaseApp.initializeApp(this)
             }
-            firebaseReady = true
+            firebaseReady = FirebaseApp.getApps(this).isNotEmpty()
         } catch (e: Exception) {
             Log.e("OTTApplication", "Firebase init failed: ${e.message}", e)
             firebaseReady = false
