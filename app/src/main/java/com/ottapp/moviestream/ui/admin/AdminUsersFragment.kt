@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.auth.FirebaseAuth
 import com.ottapp.moviestream.data.model.User
 import com.ottapp.moviestream.data.repository.UserRepository
 import com.ottapp.moviestream.databinding.FragmentAdminUsersBinding
@@ -35,7 +36,9 @@ class AdminUsersFragment : Fragment() {
 
         adapter = AdminUserAdapter(
             onBlock = { user -> confirmBlock(user) },
-            onMakePremium = { user -> confirmPremium(user) }
+            onMakePremium = { user -> confirmPremium(user) },
+            onExtend = { user -> showExtendDialog(user) },
+            onResetPassword = { user -> confirmResetPassword(user) }
         )
         binding.rvUsers.layoutManager = LinearLayoutManager(requireContext())
         binding.rvUsers.adapter = adapter
@@ -112,6 +115,35 @@ class AdminUsersFragment : Fragment() {
                 updateUserStatus(user.uid, Constants.SUB_PREMIUM, expiry)
             }
             .setNegativeButton("না", null)
+            .show()
+    }
+
+    private fun showExtendDialog(user: User) {
+        val options = arrayOf("7 Days", "30 Days", "90 Days", "365 Days")
+        val days = longArrayOf(7, 30, 90, 365)
+        
+        AlertDialog.Builder(requireContext())
+            .setTitle("Extend Subscription")
+            .setItems(options) { _, which ->
+                val currentExpiry = if (user.subscriptionExpiry > System.currentTimeMillis()) user.subscriptionExpiry else System.currentTimeMillis()
+                val newExpiry = currentExpiry + (days[which] * 24 * 60 * 60 * 1000L)
+                updateUserStatus(user.uid, Constants.SUB_PREMIUM, newExpiry)
+            }
+            .show()
+    }
+
+    private fun confirmResetPassword(user: User) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("Reset Password?")
+            .setMessage("Send password reset email to ${user.email}?")
+            .setPositiveButton("Send") { _, _ ->
+                FirebaseAuth.getInstance().sendPasswordResetEmail(user.email)
+                    .addOnCompleteListener { task ->
+                        if (task.isSuccessful) requireContext().toast("Reset email sent")
+                        else requireContext().toast("Failed: ${task.exception?.message}")
+                    }
+            }
+            .setNegativeButton("Cancel", null)
             .show()
     }
 

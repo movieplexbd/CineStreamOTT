@@ -14,7 +14,9 @@ import java.util.*
 
 class AdminUserAdapter(
     private val onBlock: (User) -> Unit,
-    private val onMakePremium: (User) -> Unit
+    private val onMakePremium: (User) -> Unit,
+    private val onExtend: (User) -> Unit,
+    private val onResetPassword: (User) -> Unit
 ) : ListAdapter<User, AdminUserAdapter.VH>(Diff()) {
 
     inner class VH(private val b: ItemAdminUserBinding) : RecyclerView.ViewHolder(b.root) {
@@ -41,6 +43,8 @@ class AdminUserAdapter(
             b.btnBlock.text = if (user.subscriptionStatus == Constants.SUB_BLOCKED) "আনব্লক" else "ব্লক"
             b.btnBlock.setOnClickListener { onBlock(user) }
             b.btnMakePremium.setOnClickListener { onMakePremium(user) }
+            b.btnExtend.setOnClickListener { onExtend(user) }
+            b.btnResetPassword.setOnClickListener { onResetPassword(user) }
         }
     }
 

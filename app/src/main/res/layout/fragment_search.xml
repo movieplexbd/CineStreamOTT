@@ -173,33 +173,55 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical">
+        android:orientation="vertical"
+        android:padding="16dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🔍"
-            android:textSize="56sp" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/search_hint_title"
-            android:textSize="17sp"
+            android:text="Trending Searches"
+            android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="@color/t2"
-            android:gravity="center"
-            android:layout_marginTop="14dp" />
+            android:textColor="@color/t1"
+            android:layout_marginBottom="12dp" />
 
-        <TextView
-            android:layout_width="wrap_content"
+        <com.google.android.material.chip.ChipGroup
+            android:id="@+id/cg_trending_searches"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="বাংলা, হিন্দি বা ইংলিশ মুভি খুঁজুন"
-            android:textSize="13sp"
-            android:textColor="@color/t3"
+            app:chipSpacingHorizontal="8dp"
+            app:chipSpacingVertical="4dp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
             android:gravity="center"
-            android:layout_marginTop="6dp" />
+            android:orientation="vertical">
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔍"
+                android:textSize="56sp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/search_hint_title"
+                android:textSize="17sp"
+                android:textStyle="bold"
+                android:textColor="@color/t2"
+                android:gravity="center"
+                android:layout_marginTop="14dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="বাংলা, হিন্দি বা ইংলিশ মুভি খুঁজুন"
+                android:textSize="13sp"
+                android:textColor="@color/t3"
+                android:gravity="center"
+                android:layout_marginTop="6dp" />
+        </LinearLayout>
 
     </LinearLayout>
 

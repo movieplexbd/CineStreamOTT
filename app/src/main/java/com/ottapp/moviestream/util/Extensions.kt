@@ -5,6 +5,7 @@ import android.view.View
 import android.widget.ImageView
 import android.widget.Toast
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
 import com.bumptech.glide.request.RequestOptions
 import java.util.concurrent.TimeUnit
@@ -17,11 +18,18 @@ fun Context.toast(msg: String) =
     Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 
 fun ImageView.loadImage(url: String, placeholder: Int? = null) {
+    val requestOptions = RequestOptions()
+        .diskCacheStrategy(DiskCacheStrategy.ALL) // Cache both original & resized images
+        .skipMemoryCache(false) // Use memory cache for faster access
+        .centerCrop()
+
     var builder = Glide.with(context)
         .load(url.ifBlank { null })
-        .transition(DrawableTransitionOptions.withCrossFade(200))
+        .apply(requestOptions)
+        .transition(DrawableTransitionOptions.withCrossFade(300))
+
     if (placeholder != null) {
-        builder = builder.apply(RequestOptions().placeholder(placeholder).error(placeholder))
+        builder = builder.placeholder(placeholder).error(placeholder)
     }
     builder.into(this)
 }

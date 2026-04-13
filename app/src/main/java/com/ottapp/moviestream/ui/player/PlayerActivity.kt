@@ -7,6 +7,8 @@ import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.content.Context
+import android.media.AudioManager
 import android.util.Log
 import android.util.Rational
 import android.view.GestureDetector
@@ -67,6 +69,10 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private lateinit var gestureDetector: GestureDetectorCompat
+    private lateinit var audioManager: AudioManager
+    private var maxVolume = 0
+    private var currentVolume = 0
+    private var currentBrightness = 0.5f
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,6 +95,9 @@ class PlayerActivity : AppCompatActivity() {
 
             binding.tvPlayerTitle.text = movieTitle
 
+            audioManager = getSystemService(Context.AUDIO_SERVICE) as AudioManager
+            maxVolume = audioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC)
+
             setupGestureDetector()
             setupPlayer()
             setupButtons()
@@ -104,7 +113,6 @@ class PlayerActivity : AppCompatActivity() {
 
     private fun setupGestureDetector() {
         gestureDetector = GestureDetectorCompat(this, object : GestureDetector.SimpleOnGestureListener() {
-
             override fun onSingleTapConfirmed(e: MotionEvent): Boolean {
                 toggleControls()
                 return true
@@ -112,8 +120,7 @@ class PlayerActivity : AppCompatActivity() {
 
             override fun onDoubleTap(e: MotionEvent): Boolean {
                 val screenWidth = binding.root.width
-                val x = e.x
-                if (x < screenWidth / 2) {
+                if (e.x < screenWidth / 2) {
                     seekBy(-10_000)
                     showSeekAnimation(forward = false)
                 } else {
@@ -124,41 +131,85 @@ class PlayerActivity : AppCompatActivity() {
             }
         })
 
-        var swipeStartX = 0f
-        var swipeStartPos = 0L
+        var isHorizontalSwipe = false
+        var isVerticalSwipe = false
+        var startX = 0f
+        var startY = 0f
+        var startPos = 0L
+        var startVolume = 0
+        var startBrightness = 0f
 
         binding.gestureArea.setOnTouchListener { _, event ->
             gestureDetector.onTouchEvent(event)
+            val screenWidth = binding.root.width
+            val screenHeight = binding.root.height
 
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
-                    swipeStartX = event.x
-                    swipeStartPos = player?.currentPosition ?: 0L
+                    startX = event.x
+                    startY = event.y
+                    startPos = player?.currentPosition ?: 0L
+                    startVolume = audioManager.getStreamVolume(AudioManager.STREAM_MUSIC)
+                    startBrightness = window.attributes.screenBrightness.let { if (it < 0) 0.5f else it }
+                    isHorizontalSwipe = false
+                    isVerticalSwipe = false
                 }
                 MotionEvent.ACTION_MOVE -> {
-                    val deltaX = event.x - swipeStartX
-                    if (abs(deltaX) > 30f) {
+                    val deltaX = event.x - startX
+                    val deltaY = startY - event.y // Up is positive
+
+                    if (!isHorizontalSwipe && !isVerticalSwipe) {
+                        if (abs(deltaX) > 30f && abs(deltaX) > abs(deltaY)) {
+                            isHorizontalSwipe = true
+                        } else if (abs(deltaY) > 30f && abs(deltaY) > abs(deltaX)) {
+                            isVerticalSwipe = true
+                        }
+                    }
+
+                    if (isHorizontalSwipe) {
                         val seekDelta = (deltaX * 200L).toLong()
                         val maxDur = player?.duration?.coerceAtLeast(0L) ?: 0L
-                        val newPos = (swipeStartPos + seekDelta).coerceIn(0L, maxDur)
+                        val newPos = (startPos + seekDelta).coerceIn(0L, maxDur)
                         val sign = if (deltaX > 0) "+" else ""
                         binding.tvSeekIndicator.text = "$sign${seekDelta / 1000}s"
                         binding.tvSeekIndicator.show()
                         binding.tvPosition.text = newPos.toFormattedTime()
+                    } else if (isVerticalSwipe) {
+                        val percent = deltaY / screenHeight
+                        if (startX < screenWidth / 2) {
+                            // Brightness (Left side)
+                            val newBrightness = (startBrightness + percent).coerceIn(0f, 1f)
+                            val lp = window.attributes
+                            lp.screenBrightness = newBrightness
+                            window.attributes = lp
+                            binding.brightnessContainer.show()
+                            binding.brightnessProgress.progress = (newBrightness * 100).toInt()
+                        } else {
+                            // Volume (Right side)
+                            val volumeDelta = (percent * maxVolume).toInt()
+                            val newVolume = (startVolume + volumeDelta).coerceIn(0, maxVolume)
+                            audioManager.setStreamVolume(AudioManager.STREAM_MUSIC, newVolume, 0)
+                            binding.volumeContainer.show()
+                            binding.volumeProgress.progress = (newVolume.toFloat() / maxVolume * 100).toInt()
+                        }
                     }
                 }
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> {
-                    val deltaX = event.x - swipeStartX
-                    if (abs(deltaX) > 30f && event.action == MotionEvent.ACTION_UP) {
+                    if (isHorizontalSwipe) {
+                        val deltaX = event.x - startX
                         val seekDelta = (deltaX * 200L).toLong()
                         val maxDur = player?.duration?.coerceAtLeast(0L) ?: 0L
-                        val newPos = (swipeStartPos + seekDelta).coerceIn(0L, maxDur)
+                        val newPos = (startPos + seekDelta).coerceIn(0L, maxDur)
                         player?.seekTo(newPos)
                     }
                     binding.tvSeekIndicator.hide()
+                    binding.brightnessContainer.hide()
+                    binding.volumeContainer.hide()
+                    isHorizontalSwipe = false
+                    isVerticalSwipe = false
                 }
             }
-            false
+            true
         }
     }
 

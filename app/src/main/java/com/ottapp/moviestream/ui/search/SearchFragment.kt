@@ -19,6 +19,7 @@ import com.google.android.material.button.MaterialButton
 import com.ottapp.moviestream.R
 import com.ottapp.moviestream.adapter.MovieGridAdapter
 import com.ottapp.moviestream.data.model.Movie
+import com.google.android.material.chip.Chip
 import com.ottapp.moviestream.databinding.FragmentSearchBinding
 import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.hide
@@ -51,6 +52,7 @@ class SearchFragment : Fragment() {
         setupSearch()
         setupFilters()
         setupVoiceSearch()
+        setupTrendingSearches()
         observeViewModel()
 
         // Handle incoming search query from Reels
@@ -100,6 +102,25 @@ class SearchFragment : Fragment() {
         try {
             binding.ivMic.setOnClickListener { startVoiceSearch() }
         } catch (e: Exception) { }
+    }
+
+    private fun setupTrendingSearches() {
+        val trending = listOf("Action", "Drama", "Thriller", "Comedy", "Bangla", "Hindi")
+        trending.forEach { query ->
+            val chip = Chip(requireContext()).apply {
+                text = query
+                isClickable = true
+                isCheckable = false
+                setChipBackgroundColorResource(R.color.surface2)
+                setTextColor(ContextCompat.getColor(requireContext(), R.color.t2))
+                setOnClickListener {
+                    binding.etSearch.setText(query)
+                    binding.etSearch.setSelection(query.length)
+                    viewModel.search(query)
+                }
+            }
+            binding.cgTrendingSearches.addView(chip)
+        }
     }
 
     private fun startVoiceSearch() {

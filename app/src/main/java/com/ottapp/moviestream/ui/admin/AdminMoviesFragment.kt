@@ -9,11 +9,14 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.database.FirebaseDatabase
 import com.ottapp.moviestream.data.model.Movie
 import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.databinding.FragmentAdminMoviesBinding
+import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.toast
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class AdminMoviesFragment : Fragment() {
 
@@ -56,6 +59,17 @@ class AdminMoviesFragment : Fragment() {
                 allMovies = repo.getAllMovies()
                 adapter.submitList(allMovies)
                 binding.tvCount.text = "মোট ${allMovies.size}টি মুভি"
+                
+                // Analytics
+                binding.tvTotal_movies.text = allMovies.size.toString()
+                
+                val db = FirebaseDatabase.getInstance().reference
+                val usersSnapshot = db.child(Constants.DB_USERS).get().await()
+                binding.tvActive_users.text = usersSnapshot.childrenCount.toString()
+                
+                val trendingMovie = allMovies.maxByOrNull { it.views }?.title ?: "N/A"
+                binding.tvTrending_movie.text = trendingMovie
+                
             } catch (e: Exception) {
                 requireContext().toast("লোড করতে সমস্যা: ${e.message}")
             } finally {
