@@ -5,7 +5,6 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.EditText
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
@@ -47,16 +46,17 @@ class AdminActorsFragment : Fragment() {
     }
 
     private fun loadActors() {
-        binding.progressBar.visibility = View.VISIBLE
+        _binding?.progressBar?.visibility = View.VISIBLE
         lifecycleScope.launch {
             try {
                 val actors = repo.getAllActors()
+                if (_binding == null) return@launch
                 adapter.submitList(actors)
                 binding.tvCount.text = "${actors.size} জন"
             } catch (e: Exception) {
-                requireContext().toast("লোড করতে সমস্যা হয়েছে")
+                context?.toast("লোড করতে সমস্যা হয়েছে")
             } finally {
-                binding.progressBar.visibility = View.GONE
+                if (_binding != null) binding.progressBar.visibility = View.GONE
             }
         }
     }
@@ -64,7 +64,7 @@ class AdminActorsFragment : Fragment() {
     private fun showAddEditDialog(actor: Actor?) {
         val dialogBinding = DialogAddEditActorBinding.inflate(layoutInflater)
         val isEdit = actor != null
-        
+
         if (isEdit) {
             dialogBinding.etName.setText(actor?.name)
             dialogBinding.etImageUrl.setText(actor?.imageUrl)
@@ -76,9 +76,9 @@ class AdminActorsFragment : Fragment() {
             .setPositiveButton("সেভ") { _, _ ->
                 val name = dialogBinding.etName.text.toString().trim()
                 val imageUrl = dialogBinding.etImageUrl.text.toString().trim()
-                
+
                 if (name.isEmpty()) {
-                    requireContext().toast("নাম দিন")
+                    context?.toast("নাম দিন")
                     return@setPositiveButton
                 }
 
@@ -91,10 +91,10 @@ class AdminActorsFragment : Fragment() {
                 lifecycleScope.launch {
                     try {
                         if (isEdit) repo.updateActor(newActor) else repo.addActor(newActor)
-                        requireContext().toast("সফল হয়েছে ✓")
-                        loadActors()
+                        context?.toast("সফল হয়েছে ✓")
+                        if (_binding != null) loadActors()
                     } catch (e: Exception) {
-                        requireContext().toast("সমস্যা হয়েছে: ${e.message}")
+                        context?.toast("সমস্যা হয়েছে: ${e.message}")
                     }
                 }
             }
@@ -110,10 +110,10 @@ class AdminActorsFragment : Fragment() {
                 lifecycleScope.launch {
                     try {
                         repo.deleteActor(actor.id)
-                        requireContext().toast("ডিলিট হয়েছে ✓")
-                        loadActors()
+                        context?.toast("ডিলিট হয়েছে ✓")
+                        if (_binding != null) loadActors()
                     } catch (e: Exception) {
-                        requireContext().toast("সমস্যা হয়েছে: ${e.message}")
+                        context?.toast("সমস্যা হয়েছে: ${e.message}")
                     }
                 }
             }
