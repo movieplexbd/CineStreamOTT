@@ -1,4 +1,4 @@
-name: Android CI/CD — Build & Release APK
+name: Android CI/CD APK Build
 
 on:
   push:
@@ -12,11 +12,11 @@ permissions:
 
 jobs:
   build:
-    name: Build Debug & Signed Release APK
+    name: Build Debug and Release APK
     runs-on: ubuntu-latest
+    timeout-minutes: 45
 
     steps:
-
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -27,8 +27,19 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v3
+
       - name: Create local.properties
         run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
+
+      - name: Restore Firebase config from secret
+        run: |
+          if [ -n "$GOOGLE_SERVICES_JSON" ]; then
+            echo "$GOOGLE_SERVICES_JSON" | base64 --decode > app/google-services.json
+          fi
+        env:
+          GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
 
       - name: Cache Gradle packages
         uses: actions/cache@v4
@@ -97,7 +108,7 @@ jobs:
           echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
           echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
           echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
-          echo "tag_name=v${VERSION_NAME}-build${VERSION_CODE}-${SHORT_SHA}" >> $GITHUB_OUTPUT
+          echo "tag_name=v${VERSION_NAME}-build${VERSION_CODE}-${SHORT_SHA}-run${{ github.run_number }}" >> $GITHUB_OUTPUT
 
       - name: Rename APKs for release
         run: |
@@ -134,6 +145,7 @@ jobs:
             **Build:** ${{ steps.version.outputs.version_code }}
             **Date:** ${{ steps.version.outputs.build_date }}
             **Commit:** ${{ steps.version.outputs.short_sha }}
+            **Run:** ${{ github.run_number }}
 
             ---
 

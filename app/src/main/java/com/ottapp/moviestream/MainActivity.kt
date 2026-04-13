@@ -1,8 +1,13 @@
 package com.ottapp.moviestream
 
+import android.Manifest
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.navigation.NavController
 import androidx.navigation.NavOptions
 import androidx.navigation.fragment.NavHostFragment
@@ -30,9 +35,17 @@ class MainActivity : AppCompatActivity() {
             navController = navHost.navController
 
             setupBottomNav()
+            requestNotificationPermissionIfNeeded()
         } catch (e: Exception) {
             Log.e("MainActivity", "onCreate error: ${e.message}", e)
         }
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        val permission = Manifest.permission.POST_NOTIFICATIONS
+        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) return
+        ActivityCompat.requestPermissions(this, arrayOf(permission), 1002)
     }
 
     private fun setupBottomNav() {
