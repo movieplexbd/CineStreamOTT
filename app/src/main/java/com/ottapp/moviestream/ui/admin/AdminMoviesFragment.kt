@@ -61,14 +61,14 @@ class AdminMoviesFragment : Fragment() {
                 binding.tvCount.text = "মোট ${allMovies.size}টি মুভি"
                 
                 // Analytics
-                binding.tvTotal_movies.text = allMovies.size.toString()
+                binding.tvTotalMovies.text = allMovies.size.toString()
                 
                 val db = FirebaseDatabase.getInstance().reference
                 val usersSnapshot = db.child(Constants.DB_USERS).get().await()
-                binding.tvActive_users.text = usersSnapshot.childrenCount.toString()
+                binding.tvActiveUsers.text = usersSnapshot.childrenCount.toString()
                 
-                val trendingMovie = allMovies.maxByOrNull { it.views }?.title ?: "N/A"
-                binding.tvTrending_movie.text = trendingMovie
+                val trendingMovie = allMovies.maxByOrNull { it.imdbRating }?.title ?: "N/A"
+                binding.tvTrendingMovie.text = trendingMovie
                 
             } catch (e: Exception) {
                 requireContext().toast("লোড করতে সমস্যা: ${e.message}")
