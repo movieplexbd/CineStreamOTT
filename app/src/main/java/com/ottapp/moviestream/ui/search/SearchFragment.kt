@@ -89,8 +89,7 @@ class SearchFragment : Fragment() {
 
     private fun setupVoiceSearch() {
         try {
-            val micBtn = binding.root.findViewById<View>(R.id.btn_voice_search)
-            micBtn?.setOnClickListener { startVoiceSearch() }
+            binding.ivMic.setOnClickListener { startVoiceSearch() }
         } catch (e: Exception) { }
     }
 

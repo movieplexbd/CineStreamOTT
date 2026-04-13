@@ -143,14 +143,6 @@ class ProfileFragment : Fragment() {
                 .show()
         }
 
-        // Navigate to watchlist
-        try {
-            val wlBtn = binding.root.findViewById<android.view.View>(R.id.btn_my_watchlist)
-            wlBtn?.setOnClickListener {
-                try { findNavController().navigate(com.ottapp.moviestream.R.id.watchlistFragment) } catch (e: Exception) {}
-            }
-        } catch (e: Exception) {}
-
         binding.btnShareApp.setOnClickListener {
             val shareIntent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
