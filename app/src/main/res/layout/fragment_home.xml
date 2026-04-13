@@ -81,7 +81,38 @@
 
                 </FrameLayout>
 
-                <!-- TRENDING SECTION -->
+                
+                  <!-- CONTINUE WATCHING SECTION -->
+                  <LinearLayout
+                      android:id="@+id/section_continue_watching"
+                      android:layout_width="match_parent"
+                      android:layout_height="wrap_content"
+                      android:orientation="vertical"
+                      android:visibility="gone">
+
+                      <TextView
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:text="যেখানে ছেড়েছিলেন"
+                          android:textSize="16sp"
+                          android:textStyle="bold"
+                          android:textColor="@color/t1"
+                          android:paddingHorizontal="12dp"
+                          android:paddingTop="16dp"
+                          android:paddingBottom="8dp" />
+
+                      <androidx.recyclerview.widget.RecyclerView
+                          android:id="@+id/rv_continue_watching"
+                          android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:orientation="horizontal"
+                          android:nestedScrollingEnabled="false"
+                          android:clipToPadding="false"
+                          android:paddingHorizontal="8dp" />
+
+                  </LinearLayout>
+
+  <!-- TRENDING SECTION -->
                 <LinearLayout
                     android:id="@+id/section_trending"
                     android:layout_width="match_parent"

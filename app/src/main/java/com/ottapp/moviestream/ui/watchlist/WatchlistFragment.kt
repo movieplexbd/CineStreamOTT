@@ -98,8 +98,8 @@ class WatchlistAdapter(
     }
 
     inner class VH(view: View) : RecyclerView.ViewHolder(view) {
-        val iv: ImageView = view.findViewById(R.id.iv_movie_thumb)
-        val tvTitle: TextView = view.findViewById(R.id.tv_movie_title)
+        val iv: ImageView = view.findViewById(R.id.iv_thumb)
+        val tvTitle: TextView = view.findViewById(R.id.tv_title)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): VH {
