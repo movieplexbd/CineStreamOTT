@@ -16,7 +16,7 @@ class AdminSubAdapter(
 
     inner class VH(private val b: ItemAdminSubBinding) : RecyclerView.ViewHolder(b.root) {
         fun bind(sub: SubscriptionRequest) {
-            b.tvTransaction_id.text = "Transaction ID: ${sub.transactionId}"
+            b.tvTransactionId.text = "Transaction ID: ${sub.transactionId}"
             b.tvUid.text = "UID: ${sub.uid}"
             b.tvStatus.text = sub.status.uppercase()
             
