@@ -44,6 +44,9 @@ package com.ottapp.moviestream.ui.admin
           binding.rvMovies.adapter = adapter
 
           binding.fabAdd.setOnClickListener { openAddEdit(null) }
+          binding.btnManageBanners.setOnClickListener {
+              startActivity(Intent(this, AdminBannersActivity::class.java))
+          }
           binding.btnManageReels.setOnClickListener {
               startActivity(Intent(this, AdminReelsActivity::class.java))
           }

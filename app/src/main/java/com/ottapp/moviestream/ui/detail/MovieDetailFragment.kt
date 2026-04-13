@@ -93,8 +93,8 @@ class MovieDetailFragment : Fragment() {
     private fun populateUI(movie: Movie) {
         if (_binding == null) return
 
-        val thumb = if (movie.detailThumbnailUrl.isNotEmpty()) movie.detailThumbnailUrl else movie.bannerImageUrl
-        binding.ivBanner.loadImage(thumb)
+        // Strictly use detailThumbnailUrl for the detail page hero image
+        binding.ivBanner.loadImage(movie.detailThumbnailUrl)
         binding.tvTitleOverlay.text = movie.title.orEmpty()
 
         if (movie.testMovie) binding.tvFreeBadge.show() else binding.tvFreeBadge.hide()

@@ -11,6 +11,8 @@ import com.ottapp.moviestream.util.WatchHistoryManager
 import com.ottapp.moviestream.util.WatchHistoryEntry
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
+import com.ottapp.moviestream.data.model.Banner
+import com.ottapp.moviestream.data.repository.BannerRepository
 import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.data.repository.UserRepository
 import kotlinx.coroutines.launch
@@ -25,6 +27,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     private val movieRepo = MovieRepository()
     private val userRepo = UserRepository()
+    private val bannerRepo = BannerRepository()
 
     // loading starts TRUE so shimmer shows immediately
     private val _continueWatching = MutableLiveData<List<WatchHistoryEntry>>(emptyList())
@@ -33,8 +36,8 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val _loading = MutableLiveData(true)
     val loading: LiveData<Boolean> = _loading
 
-    private val _bannerMovies = MutableLiveData<List<Movie>>(emptyList())
-    val bannerMovies: LiveData<List<Movie>> = _bannerMovies
+    private val _banners = MutableLiveData<List<Banner>>(emptyList())
+    val banners: LiveData<List<Banner>> = _banners
 
     private val _trendingMovies = MutableLiveData<List<Movie>>(emptyList())
     val trendingMovies: LiveData<List<Movie>> = _trendingMovies
@@ -68,7 +71,9 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
                 val trending = all.filter { it.trending }
                 _trendingMovies.value = trending
-                _bannerMovies.value = if (trending.isNotEmpty()) trending.take(5) else all.take(5)
+                
+                val banners = bannerRepo.getAllBanners()
+                _banners.value = banners
 
                 _banglaMovies.value = all.filter { m ->
                     m.category.lowercase().let { it.contains("bangla") || it.contains("বাংলা") }

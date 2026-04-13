@@ -98,6 +98,20 @@
               android:theme="@style/Theme.OTTStreamingApp.NoActionBar"
               android:windowSoftInputMode="adjustResize" />
 
+          <activity
+              android:name=".ui.admin.AdminBannersActivity"
+              android:exported="false"
+              android:screenOrientation="portrait"
+              android:theme="@style/Theme.OTTStreamingApp.NoActionBar"
+              android:windowSoftInputMode="adjustResize" />
+
+          <activity
+              android:name=".ui.admin.AddEditBannerActivity"
+              android:exported="false"
+              android:screenOrientation="portrait"
+              android:theme="@style/Theme.OTTStreamingApp.NoActionBar"
+              android:windowSoftInputMode="adjustResize" />
+
           <service
               android:name=".service.DownloadService"
               android:exported="false"

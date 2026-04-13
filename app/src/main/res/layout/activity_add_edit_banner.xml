@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/bg">
+
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/surface"
+        app:elevation="2dp">
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:layout_width="match_parent"
+            android:layout_height="?attr/actionBarSize"
+            android:background="@color/surface"
+            app:titleTextColor="@color/t1" />
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <ProgressBar
+        android:id="@+id/progress_bar"
+        android:layout_width="32dp"
+        android:layout_height="32dp"
+        android:layout_gravity="center_horizontal"
+        android:indeterminateTint="@color/red"
+        android:visibility="gone" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:scrollbars="none"
+        android:overScrollMode="never">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="14dp">
+
+            <!-- Title -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="ব্যানার শিরোনাম *" android:textSize="13sp"
+                android:textColor="@color/t2" android:layout_marginBottom="4dp"/>
+            <EditText android:id="@+id/et_title"
+                android:layout_width="match_parent" android:layout_height="50dp"
+                android:background="@color/surface" android:padding="12dp"
+                android:textColor="@color/t1" android:textSize="14sp"
+                android:hint="ব্যানারের নাম লিখুন" android:textColorHint="@color/t3"
+                android:inputType="textCapWords" android:layout_marginBottom="12dp"/>
+
+            <!-- Image URL -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="ব্যানার ছবির URL *" android:textSize="13sp"
+                android:textColor="@color/t2" android:layout_marginBottom="4dp"/>
+            <EditText android:id="@+id/et_image_url"
+                android:layout_width="match_parent" android:layout_height="50dp"
+                android:background="@color/surface" android:padding="12dp"
+                android:textColor="@color/t1" android:textSize="13sp"
+                android:hint="https://..." android:textColorHint="@color/t3"
+                android:inputType="textUri" android:layout_marginBottom="12dp"/>
+
+            <!-- Category -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="ক্যাটাগরি" android:textSize="13sp"
+                android:textColor="@color/t2" android:layout_marginBottom="4dp"/>
+            <EditText android:id="@+id/et_category"
+                android:layout_width="match_parent" android:layout_height="50dp"
+                android:background="@color/surface" android:padding="12dp"
+                android:textColor="@color/t1" android:textSize="14sp"
+                android:hint="যেমন: অ্যাকশন, ড্রামা" android:textColorHint="@color/t3"
+                android:inputType="text" android:layout_marginBottom="12dp"/>
+
+            <!-- IMDB Rating -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="IMDb রেটিং (0-10)" android:textSize="13sp"
+                android:textColor="@color/t2" android:layout_marginBottom="4dp"/>
+            <EditText android:id="@+id/et_rating"
+                android:layout_width="match_parent" android:layout_height="50dp"
+                android:background="@color/surface" android:padding="12dp"
+                android:textColor="@color/t1" android:textSize="14sp"
+                android:hint="যেমন: 7.5" android:textColorHint="@color/t3"
+                android:inputType="numberDecimal" android:layout_marginBottom="16dp"/>
+
+            <!-- Movie ID Link (Optional) -->
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                android:text="মুভি আইডি (ঐচ্ছিক)" android:textSize="13sp"
+                android:textColor="@color/t2" android:layout_marginBottom="4dp"/>
+            <EditText android:id="@+id/et_movie_id"
+                android:layout_width="match_parent" android:layout_height="50dp"
+                android:background="@color/surface" android:padding="12dp"
+                android:textColor="@color/t1" android:textSize="13sp"
+                android:hint="মুভি আইডি দিন" android:textColorHint="@color/t3"
+                android:inputType="text" android:layout_marginBottom="12dp"/>
+
+            <!-- Free Switch -->
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:gravity="center_vertical"
+                android:background="@color/surface" android:padding="14dp"
+                android:layout_marginBottom="20dp">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="ফ্রি ব্যানার" android:textSize="14sp" android:textColor="@color/t1"/>
+                <androidx.appcompat.widget.SwitchCompat
+                    android:id="@+id/switch_free"
+                    android:layout_width="wrap_content" android:layout_height="wrap_content" />
+            </LinearLayout>
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btn_save"
+                android:layout_width="match_parent"
+                android:layout_height="52dp"
+                android:text="সংরক্ষণ করুন"
+                android:textSize="16sp"
+                android:textColor="@color/white"
+                android:backgroundTint="@color/red"
+                app:cornerRadius="13dp" />
+        </LinearLayout>
+    </ScrollView>
+</LinearLayout>

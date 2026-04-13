@@ -51,11 +51,21 @@
                   android:layout_marginStart="10dp" />
 
               <com.google.android.material.button.MaterialButton
-                  android:id="@+id/btn_manage_reels"
+                  android:id="@+id/btn_manage_banners"
                   style="@style/Widget.MaterialComponents.Button.TextButton"
                   android:layout_width="wrap_content"
                   android:layout_height="wrap_content"
                   android:layout_marginStart="8dp"
+                  android:text="ব্যানার"
+                  android:textColor="@color/red"
+                  android:textSize="12sp" />
+
+              <com.google.android.material.button.MaterialButton
+                  android:id="@+id/btn_manage_reels"
+                  style="@style/Widget.MaterialComponents.Button.TextButton"
+                  android:layout_width="wrap_content"
+                  android:layout_height="wrap_content"
+                  android:layout_marginStart="4dp"
                   android:text="রিলস"
                   android:textColor="@color/red"
                   android:textSize="12sp" />

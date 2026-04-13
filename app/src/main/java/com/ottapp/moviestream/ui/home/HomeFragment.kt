@@ -132,7 +132,11 @@ class HomeFragment : Fragment() {
     }
 
     private fun initBanner() {
-        val adp = BannerAdapter { goToDetail(it) }
+        val adp = BannerAdapter { banner ->
+            if (banner.movieId.isNotEmpty()) {
+                goToDetailById(banner.movieId)
+            }
+        }
         bannerAdapter = adp
         _binding?.bannerPager?.let { pager ->
             pager.adapter = adp
@@ -142,6 +146,15 @@ class HomeFragment : Fragment() {
                     updateDots(position)
                 }
             })
+        }
+    }
+
+    private fun goToDetailById(movieId: String) {
+        try {
+            findNavController().navigate(R.id.action_home_to_detail,
+                bundleOf(Constants.EXTRA_MOVIE_ID to movieId))
+        } catch (e: Exception) {
+            log("nav to detail error: ${e.message}")
         }
     }
 
@@ -200,7 +213,7 @@ class HomeFragment : Fragment() {
             }
         }
 
-        vm.bannerMovies.observe(viewLifecycleOwner) { list ->
+        vm.banners.observe(viewLifecycleOwner) { list ->
             if (_binding == null) return@observe
             runCatching {
                 bannerAdapter?.submitList(list)
