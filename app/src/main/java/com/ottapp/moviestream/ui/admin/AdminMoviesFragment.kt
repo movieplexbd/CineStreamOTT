@@ -53,27 +53,33 @@ class AdminMoviesFragment : Fragment() {
     }
 
     private fun loadMovies() {
-        binding.progressBar.visibility = View.VISIBLE
+        _binding?.progressBar?.visibility = View.VISIBLE
         lifecycleScope.launch {
             try {
                 allMovies = repo.getAllMovies()
+                if (_binding == null) return@launch
                 adapter.submitList(allMovies)
                 binding.tvCount.text = "মোট ${allMovies.size}টি মুভি"
-                
-                // Analytics
                 binding.tvTotalMovies.text = allMovies.size.toString()
-                
-                val db = FirebaseDatabase.getInstance().reference
-                val usersSnapshot = db.child(Constants.DB_USERS).get().await()
-                binding.tvActiveUsers.text = usersSnapshot.childrenCount.toString()
-                
+
+                try {
+                    val db = FirebaseDatabase
+                        .getInstance("https://movies-bee24-default-rtdb.firebaseio.com")
+                        .reference
+                    val usersSnapshot = db.child(Constants.DB_USERS).get().await()
+                    if (_binding == null) return@launch
+                    binding.tvActiveUsers.text = usersSnapshot.childrenCount.toString()
+                } catch (e: Exception) {
+                    if (_binding != null) binding.tvActiveUsers.text = "—"
+                }
+
                 val trendingMovie = allMovies.maxByOrNull { it.imdbRating }?.title ?: "N/A"
-                binding.tvTrendingMovie.text = trendingMovie
-                
+                if (_binding != null) binding.tvTrendingMovie.text = trendingMovie
+
             } catch (e: Exception) {
-                requireContext().toast("লোড করতে সমস্যা: ${e.message}")
+                context?.toast("লোড করতে সমস্যা: ${e.message}")
             } finally {
-                binding.progressBar.visibility = View.GONE
+                if (_binding != null) binding.progressBar.visibility = View.GONE
             }
         }
     }
@@ -107,10 +113,10 @@ class AdminMoviesFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 repo.deleteMovie(movie.id)
-                requireContext().toast("মুছে ফেলা হয়েছে")
-                loadMovies()
+                context?.toast("মুছে ফেলা হয়েছে")
+                if (_binding != null) loadMovies()
             } catch (e: Exception) {
-                requireContext().toast("মুছতে সমস্যা: ${e.message}")
+                context?.toast("মুছতে সমস্যা: ${e.message}")
             }
         }
     }
