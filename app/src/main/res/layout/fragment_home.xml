@@ -237,6 +237,44 @@
             </LinearLayout>
         </androidx.core.widget.NestedScrollView>
 
+        <LinearLayout
+            android:id="@+id/layout_empty_home"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:orientation="vertical"
+            android:padding="28dp"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/home_empty_title"
+                android:textColor="@color/t1"
+                android:textSize="20sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:gravity="center"
+                android:text="@string/home_empty_sub"
+                android:textColor="@color/t2"
+                android:textSize="14sp" />
+
+            <Button
+                android:id="@+id/btn_retry_home"
+                android:layout_width="wrap_content"
+                android:layout_height="48dp"
+                android:layout_marginTop="18dp"
+                android:backgroundTint="@color/red"
+                android:text="@string/home_retry"
+                android:textColor="@color/white" />
+
+        </LinearLayout>
+
         <!-- Hidden user info views (kept for binding compatibility) -->
         <TextView
             android:id="@+id/tv_subscription_badge"

@@ -14,6 +14,7 @@ import androidx.lifecycle.AndroidViewModel
 import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.data.repository.UserRepository
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withTimeoutOrNull
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val watchHistoryManager = WatchHistoryManager(app.applicationContext)
@@ -89,7 +90,9 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
     private suspend fun safeGetMovies(): List<Movie> {
         return try {
-            movieRepo.getAllMovies()
+            withTimeoutOrNull(12000) {
+                movieRepo.getAllMovies()
+            } ?: emptyList()
         } catch (e: Exception) {
             Log.e(TAG, "getAllMovies error: ${e.message}", e)
             emptyList()

@@ -29,6 +29,9 @@
     <string name="section_bangla">বাংলা ডাবড</string>
     <string name="section_hindi">হিন্দি ডাবড</string>
     <string name="see_all">সব দেখো</string>
+    <string name="home_empty_title">কোনো কনটেন্ট দেখা যাচ্ছে না</string>
+    <string name="home_empty_sub">ইন্টারনেট বা সার্ভার কানেকশন সমস্যা হতে পারে। আবার চেষ্টা করুন।</string>
+    <string name="home_retry">আবার চেষ্টা করুন</string>
 
     <!-- Categories -->
     <string name="cat_all">সব</string>
