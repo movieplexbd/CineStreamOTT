@@ -69,6 +69,7 @@ class AddEditMovieActivity : AppCompatActivity() {
         binding.etTitle.setText(movie.title)
         binding.etDescription.setText(movie.description)
         binding.etBannerUrl.setText(movie.bannerImageUrl)
+        binding.etDetailThumbnailUrl.setText(movie.detailThumbnailUrl)
         binding.etVideoUrl.setText(movie.videoStreamUrl)
         binding.etDownloadUrl.setText(movie.downloadUrl)
         binding.etYear.setText(if (movie.year > 0) movie.year.toString() else "")
@@ -104,6 +105,7 @@ class AddEditMovieActivity : AppCompatActivity() {
             title          = title,
             description    = binding.etDescription.text.toString().trim(),
             bannerImageUrl = binding.etBannerUrl.text.toString().trim(),
+            detailThumbnailUrl = binding.etDetailThumbnailUrl.text.toString().trim(),
             videoStreamUrl = videoUrl,
             downloadUrl    = binding.etDownloadUrl.text.toString().trim(),
             category       = category,

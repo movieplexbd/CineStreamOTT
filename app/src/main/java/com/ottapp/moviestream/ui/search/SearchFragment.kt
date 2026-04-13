@@ -52,6 +52,15 @@ class SearchFragment : Fragment() {
         setupFilters()
         setupVoiceSearch()
         observeViewModel()
+
+        // Handle incoming search query from Reels
+        arguments?.getString("query")?.let { query ->
+            if (query.isNotEmpty()) {
+                binding.etSearch.setText(query)
+                binding.etSearch.setSelection(query.length)
+                viewModel.search(query)
+            }
+        }
     }
 
     private fun setupSearch() {

@@ -64,7 +64,7 @@ class MainActivity : AppCompatActivity() {
                 .setLaunchSingleTop(true)
                 .setRestoreState(true)
                 .setPopUpTo(
-                    nc.graph.startDestinationId,
+                    R.id.homeFragment,
                     inclusive = false,
                     saveState = true
                 )

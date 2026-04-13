@@ -37,6 +37,7 @@ class MovieRepository {
                 bannerImageUrl = data["bannerImageUrl"]?.toString()
                     ?: data["imageUrl"]?.toString()
                     ?: data["banner"]?.toString() ?: "",
+                detailThumbnailUrl = data["detailThumbnailUrl"]?.toString() ?: "",
                 videoStreamUrl = data["videoStreamUrl"]?.toString()
                     ?: data["streamUrl"]?.toString()
                     ?: data["videoUrl"]?.toString() ?: "",
@@ -117,6 +118,7 @@ class MovieRepository {
         "title"          to movie.title,
         "description"    to movie.description,
         "bannerImageUrl" to movie.bannerImageUrl,
+        "detailThumbnailUrl" to movie.detailThumbnailUrl,
         "videoStreamUrl" to movie.videoStreamUrl,
         "downloadUrl"    to movie.downloadUrl,
         "category"       to movie.category,

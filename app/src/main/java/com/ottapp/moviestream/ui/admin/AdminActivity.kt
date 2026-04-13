@@ -44,6 +44,9 @@ package com.ottapp.moviestream.ui.admin
           binding.rvMovies.adapter = adapter
 
           binding.fabAdd.setOnClickListener { openAddEdit(null) }
+          binding.btnManageReels.setOnClickListener {
+              startActivity(Intent(this, AdminReelsActivity::class.java))
+          }
 
           binding.etSearch.addTextChangedListener(object : TextWatcher {
               override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}

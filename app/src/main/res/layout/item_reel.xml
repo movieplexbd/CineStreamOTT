@@ -1,47 +1,98 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#000">
 
-    <ImageView
-        android:id="@+id/iv_reel_bg"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:scaleType="centerCrop"
-        android:visibility="gone" />
-
+    <!-- Video Player / WebView -->
     <WebView
         android:id="@+id/webview_reel"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:visibility="visible" />
+        android:visibility="gone" />
 
+    <VideoView
+        android:id="@+id/videoview_reel"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:layout_gravity="center"
+        android:visibility="gone" />
+
+    <!-- Loading State -->
+    <ProgressBar
+        android:id="@+id/progress_reel"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
+        android:indeterminateTint="@color/red" />
+
+    <!-- Bottom Info Overlay -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
+        android:background="@drawable/gradient_bottom"
         android:orientation="vertical"
-        android:padding="20dp"
-        android:background="@drawable/gradient_bottom">
+        android:padding="16dp">
 
         <TextView
             android:id="@+id/tv_reel_title"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textColor="@color/white"
-            android:textSize="18sp"
-            android:textStyle="bold"
+            android:ellipsize="end"
             android:maxLines="2"
-            android:ellipsize="end" />
+            android:textColor="@color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <TextView
-            android:id="@+id/tv_reel_category"
+            android:id="@+id/tv_movie_name"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/t3"
+            android:textSize="13sp" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btn_search_movie"
+            style="@style/Widget.MaterialComponents.Button.TextButton"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textColor="@color/t2"
-            android:textSize="13sp"
-            android:layout_marginTop="4dp" />
+            android:layout_marginTop="8dp"
+            android:text="মুভিটি খুঁজুন"
+            android:textColor="@color/white"
+            app:icon="@drawable/ic_nav_search"
+            app:iconTint="@color/white" />
+
+    </LinearLayout>
+
+    <!-- Right Side Actions -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="bottom|end"
+        android:layout_marginBottom="100dp"
+        android:layout_marginEnd="12dp"
+        android:gravity="center_horizontal"
+        android:orientation="vertical">
+
+        <ImageButton
+            android:id="@+id/btn_download_reel"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:background="@drawable/bg_search_float"
+            android:padding="10dp"
+            android:src="@drawable/ic_nav_download"
+            app:tint="@color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="ডাউনলোড"
+            android:textColor="@color/white"
+            android:textSize="10sp" />
 
     </LinearLayout>
 

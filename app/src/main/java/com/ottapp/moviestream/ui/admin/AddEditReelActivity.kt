@@ -1,0 +1,99 @@
+package com.ottapp.moviestream.ui.admin
+
+import android.os.Bundle
+import android.view.View
+import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.lifecycleScope
+import com.ottapp.moviestream.data.model.Reel
+import com.ottapp.moviestream.data.repository.ReelRepository
+import com.ottapp.moviestream.databinding.ActivityAddEditReelBinding
+import com.ottapp.moviestream.util.toast
+import kotlinx.coroutines.launch
+
+class AddEditReelActivity : AppCompatActivity() {
+
+    private lateinit var binding: ActivityAddEditReelBinding
+    private val repo = ReelRepository()
+    private var reelId: String? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityAddEditReelBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        setSupportActionBar(binding.toolbar)
+        supportActionBar?.setDisplayHomeAsUpEnabled(true)
+
+        reelId = intent.getStringExtra("reel_id")
+
+        if (reelId != null) {
+            supportActionBar?.title = "রিল এডিট করুন"
+            loadExistingReel(reelId!!)
+        } else {
+            supportActionBar?.title = "নতুন রিল যোগ করুন"
+        }
+
+        binding.btnSaveReel.setOnClickListener { saveReel() }
+    }
+
+    private fun loadExistingReel(id: String) {
+        lifecycleScope.launch {
+            try {
+                val all = repo.getAllReels()
+                val reel = all.find { it.id == id }
+                reel?.let { populateForm(it) }
+            } catch (e: Exception) {
+                toast("লোড করতে সমস্যা হয়েছে")
+            }
+        }
+    }
+
+    private fun populateForm(reel: Reel) {
+        binding.etReelTitle.setText(reel.title)
+        binding.etReelVideoUrl.setText(reel.videoUrl)
+        binding.etReelMovieTitle.setText(reel.movieTitle)
+    }
+
+    private fun saveReel() {
+        val title = binding.etReelTitle.text.toString().trim()
+        if (title.isEmpty()) {
+            binding.etReelTitle.error = "শিরোনাম দিন"
+            return
+        }
+        val videoUrl = binding.etReelVideoUrl.text.toString().trim()
+        if (videoUrl.isEmpty()) {
+            binding.etReelVideoUrl.error = "ভিডিও URL দিন"
+            return
+        }
+
+        val reel = Reel(
+            id         = reelId ?: "",
+            title      = title,
+            videoUrl   = videoUrl,
+            movieTitle = binding.etReelMovieTitle.text.toString().trim()
+        )
+
+        binding.btnSaveReel.isEnabled = false
+
+        lifecycleScope.launch {
+            try {
+                if (reelId != null) {
+                    repo.updateReel(reel)
+                    toast("রিল আপডেট হয়েছে ✓")
+                } else {
+                    repo.addReel(reel)
+                    toast("রিল যোগ হয়েছে ✓")
+                }
+                finish()
+            } catch (e: Exception) {
+                toast("সমস্যা হয়েছে: ${e.message}")
+                binding.btnSaveReel.isEnabled = true
+            }
+        }
+    }
+
+    override fun onSupportNavigateUp(): Boolean {
+        finish()
+        return true
+    }
+}

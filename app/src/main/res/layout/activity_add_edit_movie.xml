@@ -66,9 +66,20 @@
 
               <!-- Banner Image URL -->
               <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
-                  android:text="ব্যানার ছবির URL" android:textSize="13sp"
+                  android:text="ব্যানার ছবির URL (মুভি কার্ডের জন্য)" android:textSize="13sp"
                   android:textColor="@color/t2" android:layout_marginBottom="4dp"/>
               <EditText android:id="@+id/et_banner_url"
+                  android:layout_width="match_parent" android:layout_height="50dp"
+                  android:background="@color/surface" android:padding="12dp"
+                  android:textColor="@color/t1" android:textSize="13sp"
+                  android:hint="https://..." android:textColorHint="@color/t3"
+                  android:inputType="textUri" android:layout_marginBottom="12dp"/>
+
+              <!-- Detail Thumbnail URL -->
+              <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                  android:text="ডিটেইল থাম্বনেইল URL (16:9 রেশিও)" android:textSize="13sp"
+                  android:textColor="@color/t2" android:layout_marginBottom="4dp"/>
+              <EditText android:id="@+id/et_detail_thumbnail_url"
                   android:layout_width="match_parent" android:layout_height="50dp"
                   android:background="@color/surface" android:padding="12dp"
                   android:textColor="@color/t1" android:textSize="13sp"

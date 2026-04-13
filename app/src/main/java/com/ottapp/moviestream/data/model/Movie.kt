@@ -5,6 +5,7 @@ package com.ottapp.moviestream.data.model
       var title: String = "",
       var description: String = "",
       var bannerImageUrl: String = "",
+      var detailThumbnailUrl: String = "",
       var videoStreamUrl: String = "",
       var downloadUrl: String = "",
       var category: String = "",
@@ -14,7 +15,7 @@ package com.ottapp.moviestream.data.model
       var year: Int = 0,
       var duration: String = ""
   ) {
-      constructor() : this("", "", "", "", "", "", "", 0.0, false, false, 0, "")
+      constructor() : this("", "", "", "", "", "", "", "", 0.0, false, false, 0, "")
 
       companion object {
           const val CATEGORY_BANGLA  = "Bangla Dubbed"
