@@ -49,7 +49,7 @@ class AddEditMovieActivity : AppCompatActivity() {
         }
 
         binding.btnSave.setOnClickListener { saveMovie() }
-        binding.btnSelect_actors.setOnClickListener { showActorSelectionDialog() }
+        binding.btnSelectActors.setOnClickListener { showActorSelectionDialog() }
         loadAllActors()
 
         // Show hint about test movie limit
@@ -61,7 +61,7 @@ class AddEditMovieActivity : AppCompatActivity() {
     }
 
     private fun loadExistingMovie(id: String) {
-        binding.progress_bar.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.VISIBLE
         lifecycleScope.launch {
             try {
                 val movie = repo.getMovieById(id)
@@ -69,7 +69,7 @@ class AddEditMovieActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 toast("লোড করতে সমস্যা হয়েছে")
             } finally {
-                binding.progress_bar.visibility = View.GONE
+                binding.progressBar.visibility = View.GONE
             }
         }
     }
@@ -203,7 +203,7 @@ class AddEditMovieActivity : AppCompatActivity() {
         )
 
         binding.btnSave.isEnabled = false
-        binding.progress_bar.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.VISIBLE
 
         lifecycleScope.launch {
             try {
@@ -217,7 +217,7 @@ class AddEditMovieActivity : AppCompatActivity() {
                     if (existingTestCount >= Constants.MAX_TEST_MOVIES) {
                         toast("❌ সর্বোচ্চ ${Constants.MAX_TEST_MOVIES}টি ফ্রি (Test) মুভি রাখা যাবে। আগে অন্য একটি মুভির ফ্রি টগল বন্ধ করুন।")
                         binding.btnSave.isEnabled = true
-                        binding.progress_bar.visibility = View.GONE
+                        binding.progressBar.visibility = View.GONE
                         return@launch
                     }
                 }
@@ -235,7 +235,7 @@ class AddEditMovieActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 toast("সমস্যা হয়েছে: ${e.message}")
                 binding.btnSave.isEnabled = true
-                binding.progress_bar.visibility = View.GONE
+                binding.progressBar.visibility = View.GONE
             }
         }
     }
