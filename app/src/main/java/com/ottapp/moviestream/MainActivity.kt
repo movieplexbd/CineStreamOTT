@@ -5,8 +5,6 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.util.Log
-import android.view.Gravity
-import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -32,7 +30,6 @@ class MainActivity : AppCompatActivity() {
                 .findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
             if (navHost == null) {
                 Log.e("MainActivity", "NavHostFragment not found")
-                showFatalError()
                 return
             }
             navController = navHost.navController
@@ -41,7 +38,6 @@ class MainActivity : AppCompatActivity() {
             requestNotificationPermissionIfNeeded()
         } catch (e: Exception) {
             Log.e("MainActivity", "onCreate error: ${e.message}", e)
-            showFatalError()
         }
     }
 
@@ -111,17 +107,5 @@ class MainActivity : AppCompatActivity() {
 
     override fun onSupportNavigateUp(): Boolean {
         return navController?.navigateUp() ?: false || super.onSupportNavigateUp()
-    }
-
-    private fun showFatalError() {
-        val messageView = TextView(this).apply {
-            text = "অ্যাপ চালু করতে সমস্যা হয়েছে। অনুগ্রহ করে অ্যাপটি বন্ধ করে আবার খুলুন।"
-            gravity = Gravity.CENTER
-            setPadding(32, 32, 32, 32)
-            textSize = 16f
-            setTextColor(ContextCompat.getColor(this@MainActivity, R.color.t1))
-            setBackgroundColor(ContextCompat.getColor(this@MainActivity, R.color.bg))
-        }
-        setContentView(messageView)
     }
 }
