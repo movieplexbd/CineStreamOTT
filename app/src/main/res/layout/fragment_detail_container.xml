@@ -92,7 +92,7 @@
                         android:fontFamily="serif"
                         android:maxLines="2"
                         android:ellipsize="end"
-                        android:shadowColor="#88000000"
+                        android:shadowColor="#44000000"
                         android:shadowDx="0"
                         android:shadowDy="2"
                         android:shadowRadius="6" />
