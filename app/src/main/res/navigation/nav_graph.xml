@@ -69,6 +69,17 @@
         android:label="মুভি বিবরণ"
         tools:layout="@layout/fragment_detail_container">
         <argument android:name="extra_movie_id" app:argType="string" android:defaultValue="" />
+        <action android:id="@+id/action_detail_to_actor" app:destination="@id/actorProfileFragment"
+            app:enterAnim="@anim/slide_in_right" app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left" app:popExitAnim="@anim/slide_out_right" />
+    </fragment>
+
+    <fragment
+        android:id="@+id/actorProfileFragment"
+        android:name="com.ottapp.moviestream.ui.detail.ActorProfileFragment"
+        android:label="অভিনেতা প্রোফাইল"
+        tools:layout="@layout/fragment_actor_profile">
+        <argument android:name="actor_id" app:argType="string" />
     </fragment>
 
     <action

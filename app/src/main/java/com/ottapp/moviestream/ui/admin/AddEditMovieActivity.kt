@@ -5,7 +5,9 @@ import android.view.View
 import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.ottapp.moviestream.data.model.Actor
 import com.ottapp.moviestream.data.model.Movie
+import com.ottapp.moviestream.data.repository.ActorRepository
 import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.databinding.ActivityAddEditMovieBinding
 import com.ottapp.moviestream.util.Constants
@@ -16,7 +18,10 @@ class AddEditMovieActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddEditMovieBinding
     private val repo = MovieRepository()
+    private val actorRepo = ActorRepository()
     private var movieId: String? = null
+    private var allActors = listOf<Actor>()
+    private var selectedActorIds = mutableListOf<String>()
 
     private val categories = listOf("Bangla Dubbed", "Hindi Dubbed", "English")
 
@@ -42,6 +47,8 @@ class AddEditMovieActivity : AppCompatActivity() {
         }
 
         binding.btnSave.setOnClickListener { saveMovie() }
+        binding.btnSelect_actors.setOnClickListener { showActorSelectionDialog() }
+        loadAllActors()
 
         // Show hint about test movie limit
         binding.switchFree.setOnCheckedChangeListener { _, isChecked ->
@@ -81,6 +88,53 @@ class AddEditMovieActivity : AppCompatActivity() {
 
         binding.switchTrending.isChecked = movie.trending
         binding.switchFree.isChecked     = movie.testMovie
+        
+        selectedActorIds = movie.actorIds.toMutableList()
+        updateSelectedActorsText()
+    }
+
+    private fun loadAllActors() {
+        lifecycleScope.launch {
+            try {
+                allActors = actorRepo.getAllActors()
+                updateSelectedActorsText()
+            } catch (e: Exception) {
+                toast("অভিনেতা লোড করতে সমস্যা হয়েছে")
+            }
+        }
+    }
+
+    private fun showActorSelectionDialog() {
+        if (allActors.isEmpty()) {
+            toast("আগে অভিনেতা যোগ করুন")
+            return
+        }
+
+        val actorNames = allActors.map { it.name }.toTypedArray()
+        val checkedItems = allActors.map { selectedActorIds.contains(it.id) }.toBooleanArray()
+
+        AlertDialog.Builder(this)
+            .setTitle("অভিনেতা নির্বাচন করুন")
+            .setMultiChoiceItems(actorNames, checkedItems) { _, which, isChecked ->
+                val actorId = allActors[which].id
+                if (isChecked) {
+                    if (!selectedActorIds.contains(actorId)) selectedActorIds.add(actorId)
+                } else {
+                    selectedActorIds.remove(actorId)
+                }
+            }
+            .setPositiveButton("ঠিক আছে") { _, _ -> updateSelectedActorsText() }
+            .setNegativeButton("বাতিল", null)
+            .show()
+    }
+
+    private fun updateSelectedActorsText() {
+        if (selectedActorIds.isEmpty()) {
+            binding.tvSelectedActors.text = "কোনো অভিনেতা সিলেক্ট করা নেই"
+        } else {
+            val names = allActors.filter { selectedActorIds.contains(it.id) }.map { it.name }
+            binding.tvSelectedActors.text = if (names.isEmpty()) "সিলেক্ট করা হয়েছে (${selectedActorIds.size})" else names.joinToString(", ")
+        }
     }
 
     private fun saveMovie() {
@@ -111,10 +165,11 @@ class AddEditMovieActivity : AppCompatActivity() {
             category       = category,
             imdbRating     = rating,
             year           = year,
-            duration       = binding.etDuration.text.toString().trim(),
-            trending       = binding.switchTrending.isChecked,
-            testMovie      = isTestMov
-        )
+	            duration       = binding.etDuration.text.toString().trim(),
+	            trending       = binding.switchTrending.isChecked,
+	            testMovie      = isTestMov,
+	            actorIds       = selectedActorIds
+	        )
 
         binding.btnSave.isEnabled = false
         binding.progressBar.visibility = View.VISIBLE

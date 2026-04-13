@@ -160,6 +160,33 @@
                   android:hint="যেমন: 7.5" android:textColorHint="@color/t3"
                   android:inputType="numberDecimal" android:layout_marginBottom="16dp"/>
 
+              <!-- Actors Selection -->
+              <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
+                  android:text="অভিনেতা নির্বাচন করুন" android:textSize="13sp"
+                  android:textColor="@color/t2" android:layout_marginBottom="4dp"/>
+              <com.google.android.material.button.MaterialButton
+                  android:id="@+id/btn_select_actors"
+                  style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                  android:layout_width="match_parent"
+                  android:layout_height="50dp"
+                  android:text="অভিনেতা সিলেক্ট করুন"
+                  android:textColor="@color/t1"
+                  app:strokeColor="@color/surface"
+                  android:layout_marginBottom="4dp"
+                  android:gravity="start|center_vertical"
+                  android:paddingStart="12dp"
+                  app:icon="@android:drawable/ic_input_add"
+                  app:iconTint="@color/t2" />
+              <TextView
+                  android:id="@+id/tv_selected_actors"
+                  android:layout_width="match_parent"
+                  android:layout_height="wrap_content"
+                  android:text="কোনো অভিনেতা সিলেক্ট করা নেই"
+                  android:textSize="12sp"
+                  android:textColor="@color/t3"
+                  android:layout_marginBottom="16dp"
+                  android:paddingHorizontal="4dp"/>
+
               <!-- Switches -->
               <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
                   android:orientation="horizontal" android:gravity="center_vertical"

@@ -206,6 +206,37 @@
                     app:backgroundTint="@color/transparent"
                     app:icon="@null" />
 
+                <!-- Actors / Cast Section -->
+                <LinearLayout
+                    android:id="@+id/layout_actors"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginBottom="16dp"
+                    android:visibility="gone">
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="অভিনয়ে / Cast"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/t1"
+                        android:layout_marginStart="16dp"
+                        android:layout_marginBottom="12dp" />
+
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_actors"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                        android:paddingStart="12dp"
+                        android:paddingEnd="12dp"
+                        android:clipToPadding="false"
+                        android:overScrollMode="never" />
+                </LinearLayout>
+
                 
                 <!-- WATCHLIST BUTTON -->
                 <com.google.android.material.button.MaterialButton

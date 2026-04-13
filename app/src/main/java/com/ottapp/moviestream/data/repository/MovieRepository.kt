@@ -67,7 +67,8 @@ class MovieRepository {
                     is Boolean -> f
                     is String  -> f.equals("true", ignoreCase = true)
                     else       -> false
-                }
+                },
+                actorIds       = (data["actorIds"] as? List<*>)?.mapNotNull { it?.toString() } ?: emptyList()
             )
         } catch (e: Exception) {
             Log.e(TAG, "Parse movie error: ${e.message}")
@@ -125,7 +126,8 @@ class MovieRepository {
         "imdbRating"     to movie.imdbRating,
         "year"           to movie.year,
         "duration"       to movie.duration,
-        "trending"       to movie.trending,
-        "testMovie"      to movie.testMovie
-    )
+	        "trending"       to movie.trending,
+	        "testMovie"      to movie.testMovie,
+	        "actorIds"       to movie.actorIds
+	    )
 }

@@ -13,9 +13,10 @@ package com.ottapp.moviestream.data.model
       var trending: Boolean = false,
       var testMovie: Boolean = false,
       var year: Int = 0,
-      var duration: String = ""
+      var duration: String = "",
+      var actorIds: List<String> = emptyList()
   ) {
-      constructor() : this("", "", "", "", "", "", "", "", 0.0, false, false, 0, "")
+      constructor() : this("", "", "", "", "", "", "", "", 0.0, false, false, 0, "", emptyList())
 
       companion object {
           const val CATEGORY_BANGLA  = "Bangla Dubbed"

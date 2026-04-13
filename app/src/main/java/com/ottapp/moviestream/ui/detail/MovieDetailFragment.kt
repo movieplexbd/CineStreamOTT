@@ -10,7 +10,9 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.ottapp.moviestream.R
+import com.ottapp.moviestream.data.model.Actor
 import com.ottapp.moviestream.data.model.Movie
+import com.ottapp.moviestream.data.repository.ActorRepository
 import com.ottapp.moviestream.data.repository.DownloadRepository
 import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.data.repository.UserRepository
@@ -32,6 +34,7 @@ class MovieDetailFragment : Fragment() {
     private val binding get() = _binding!!
 
     private val movieRepo = MovieRepository()
+    private val actorRepo = ActorRepository()
     private val userRepo  = UserRepository()
     private lateinit var dlRepo: DownloadRepository
 
@@ -110,6 +113,13 @@ class MovieDetailFragment : Fragment() {
         if (movie.duration.isNotEmpty()) {
             binding.tvDuration.text = movie.duration
             binding.tvDuration.show()
+        }
+
+        // Load Actors
+        if (movie.actorIds.isNotEmpty()) {
+            loadActors(movie.actorIds)
+        } else {
+            binding.layoutActors.hide()
         }
 
         // Download button state
@@ -211,6 +221,29 @@ class MovieDetailFragment : Fragment() {
         }
         ContextCompat.startForegroundService(requireContext(), intent)
         requireContext().toast("ডাউনলোড শুরু হয়েছে...")
+    }
+
+    private fun loadActors(actorIds: List<String>) {
+        lifecycleScope.launch {
+            try {
+                val actors = actorRepo.getActorsByIds(actorIds)
+                if (_binding == null) return@launch
+                
+                if (actors.isNotEmpty()) {
+                    binding.layoutActors.show()
+                    val adapter = MovieActorAdapter { actor ->
+                        val bundle = Bundle().apply { putString("actor_id", actor.id) }
+                        findNavController().navigate(R.id.action_detail_to_actor, bundle)
+                    }
+                    binding.rvActors.adapter = adapter
+                    adapter.submitList(actors)
+                } else {
+                    binding.layoutActors.hide()
+                }
+            } catch (e: Exception) {
+                binding.layoutActors.hide()
+            }
+        }
     }
 
     override fun onDestroyView() {

@@ -20,4 +20,8 @@
         android:id="@+id/adminSubsFragment"
         android:icon="@drawable/ic_nav_download"
         android:title="পেমেন্ট" />
+    <item
+        android:id="@+id/adminActorsFragment"
+        android:icon="@drawable/ic_nav_profile"
+        android:title="অভিনেতা" />
 </menu>

@@ -35,4 +35,10 @@
         android:label="পেমেন্ট রিকোয়েস্ট"
         tools:layout="@layout/fragment_admin_subs" />
 
+    <fragment
+        android:id="@+id/adminActorsFragment"
+        android:name="com.ottapp.moviestream.ui.admin.AdminActorsFragment"
+        android:label="অভিনেতা ম্যানেজমেন্ট"
+        tools:layout="@layout/fragment_admin_actors" />
+
 </navigation>
