@@ -15,28 +15,35 @@
         app:resize_mode="fit"
         android:background="@color/black" />
 
-    <!-- Loading / Buffering overlay -->
+    <!-- Full-screen tap/gesture capture — BELOW controls -->
+    <View
+        android:id="@+id/gesture_area"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/transparent"
+        android:clickable="true"
+        android:focusable="true" />
+
+    <!-- Loading / Buffering overlay — does NOT block controls -->
     <FrameLayout
         android:id="@+id/loading_overlay"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="#55000000"
+        android:clickable="false"
+        android:focusable="false"
         android:visibility="visible">
-
         <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:orientation="vertical"
             android:gravity="center">
-
             <ProgressBar
                 android:id="@+id/progress_buffering"
                 android:layout_width="60dp"
                 android:layout_height="60dp"
-                android:layout_gravity="center"
                 android:indeterminateTint="@color/red" />
-
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -47,28 +54,20 @@
         </LinearLayout>
     </FrameLayout>
 
-    <!-- Transparent gesture capture area (above player, below controls) -->
-    <View
-        android:id="@+id/gesture_area"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:background="@color/transparent"
-        android:clickable="true"
-        android:focusable="true" />
-
     <!-- Seek forward indicator (double-tap right) -->
     <LinearLayout
         android:id="@+id/seek_forward_indicator"
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_gravity="center_vertical|end"
-        android:layout_marginEnd="60dp"
+        android:layout_marginRight="60dp"
         android:orientation="vertical"
         android:gravity="center"
         android:background="@drawable/bg_seek_indicator"
         android:visibility="gone"
-        android:alpha="0">
-
+        android:alpha="0"
+        android:clickable="false"
+        android:focusable="false">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -90,13 +89,14 @@
         android:layout_width="100dp"
         android:layout_height="100dp"
         android:layout_gravity="center_vertical|start"
-        android:layout_marginStart="60dp"
+        android:layout_marginLeft="60dp"
         android:orientation="vertical"
         android:gravity="center"
         android:background="@drawable/bg_seek_indicator"
         android:visibility="gone"
-        android:alpha="0">
-
+        android:alpha="0"
+        android:clickable="false"
+        android:focusable="false">
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -118,15 +118,20 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        android:paddingHorizontal="20dp"
-        android:paddingVertical="10dp"
+        android:paddingLeft="20dp"
+        android:paddingRight="20dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="10dp"
         android:background="@drawable/bg_speed_btn"
         android:textColor="@color/white"
         android:textSize="16sp"
         android:textStyle="bold"
+        android:clickable="false"
+        android:focusable="false"
         android:visibility="gone" />
 
-    <!-- Controls overlay -->
+    <!-- Controls overlay — ALWAYS VISIBLE, alpha toggles show/hide -->
+    <!-- NOT clickable itself; only child buttons are clickable -->
     <LinearLayout
         android:id="@+id/controls_overlay"
         android:layout_width="match_parent"
@@ -143,53 +148,71 @@
             android:orientation="horizontal"
             android:gravity="center_vertical"
             android:padding="14dp"
-            android:background="@drawable/gradient_top">
+            android:background="@drawable/gradient_top"
+            android:clickable="false"
+            android:focusable="false">
 
             <ImageButton
                 android:id="@+id/btn_back"
-                android:layout_width="38dp"
-                android:layout_height="38dp"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
                 android:src="@drawable/ic_arrow_back"
                 android:background="@drawable/bg_icon_btn"
-                android:contentDescription="Back" />
+                android:contentDescription="Back"
+                android:padding="8dp"
+                android:clickable="true"
+                android:focusable="true" />
 
             <TextView
                 android:id="@+id/tv_player_title"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:layout_marginHorizontal="12dp"
+                android:layout_marginLeft="12dp"
+                android:layout_marginRight="12dp"
                 android:textColor="@color/white"
                 android:textSize="14sp"
                 android:textStyle="bold"
                 android:singleLine="true"
-                android:ellipsize="end" />
+                android:ellipsize="end"
+                android:clickable="false"
+                android:focusable="false" />
 
             <TextView
                 android:id="@+id/tv_speed"
                 android:layout_width="wrap_content"
-                android:layout_height="34dp"
-                android:paddingHorizontal="10dp"
+                android:layout_height="40dp"
+                android:paddingLeft="12dp"
+                android:paddingRight="12dp"
                 android:gravity="center"
                 android:background="@drawable/bg_speed_btn"
                 android:textColor="@color/white"
-                android:textSize="11sp"
+                android:textSize="12sp"
                 android:textStyle="bold"
                 android:text="1.0x"
-                android:layout_marginEnd="8dp" />
+                android:layout_marginRight="8dp"
+                android:clickable="true"
+                android:focusable="true" />
 
             <ImageButton
                 android:id="@+id/btn_pip"
-                android:layout_width="34dp"
-                android:layout_height="34dp"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
                 android:src="@drawable/ic_pip"
                 android:background="@drawable/bg_icon_btn"
                 android:contentDescription="PiP"
-                android:padding="6dp" />
+                android:padding="8dp"
+                android:clickable="true"
+                android:focusable="true" />
         </LinearLayout>
 
         <!-- MIDDLE: flex spacer -->
-        <View android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" />
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:clickable="false"
+            android:focusable="false" />
 
         <!-- CENTER CONTROLS: seek back, play/pause, seek forward -->
         <LinearLayout
@@ -197,32 +220,43 @@
             android:layout_height="wrap_content"
             android:gravity="center"
             android:orientation="horizontal"
-            android:layout_marginBottom="8dp">
+            android:layout_marginBottom="12dp"
+            android:clickable="false"
+            android:focusable="false">
 
             <ImageButton
                 android:id="@+id/btn_seek_back"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
                 android:src="@drawable/ic_replay_10"
-                android:background="@color/transparent"
-                android:contentDescription="Seek back 10s" />
+                android:background="@drawable/bg_icon_btn"
+                android:contentDescription="Seek back 10s"
+                android:padding="10dp"
+                android:clickable="true"
+                android:focusable="true" />
 
             <ImageButton
                 android:id="@+id/btn_play_pause"
-                android:layout_width="68dp"
-                android:layout_height="68dp"
-                android:layout_marginHorizontal="28dp"
+                android:layout_width="72dp"
+                android:layout_height="72dp"
+                android:layout_marginLeft="28dp"
+                android:layout_marginRight="28dp"
                 android:src="@drawable/ic_pause"
                 android:background="@drawable/bg_play_circle"
-                android:contentDescription="Play/Pause" />
+                android:contentDescription="Play/Pause"
+                android:clickable="true"
+                android:focusable="true" />
 
             <ImageButton
                 android:id="@+id/btn_seek_forward"
-                android:layout_width="56dp"
-                android:layout_height="56dp"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
                 android:src="@drawable/ic_forward_10"
-                android:background="@color/transparent"
-                android:contentDescription="Seek forward 10s" />
+                android:background="@drawable/bg_icon_btn"
+                android:contentDescription="Seek forward 10s"
+                android:padding="10dp"
+                android:clickable="true"
+                android:focusable="true" />
         </LinearLayout>
 
         <!-- BOTTOM: seekbar + time -->
@@ -230,15 +264,20 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:paddingHorizontal="14dp"
+            android:paddingLeft="14dp"
+            android:paddingRight="14dp"
             android:paddingBottom="16dp"
-            android:background="@drawable/gradient_bottom">
+            android:background="@drawable/gradient_bottom"
+            android:clickable="false"
+            android:focusable="false">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="horizontal"
-                android:gravity="center_vertical">
+                android:gravity="center_vertical"
+                android:clickable="false"
+                android:focusable="false">
 
                 <TextView
                     android:id="@+id/tv_position"
@@ -246,17 +285,22 @@
                     android:layout_height="wrap_content"
                     android:textColor="@color/white"
                     android:textSize="12sp"
-                    android:text="00:00" />
+                    android:text="00:00"
+                    android:clickable="false"
+                    android:focusable="false" />
 
                 <SeekBar
                     android:id="@+id/seek_bar"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
-                    android:layout_marginHorizontal="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
                     android:progressTint="@color/red"
                     android:thumbTint="@color/red"
-                    android:max="1000" />
+                    android:max="1000"
+                    android:clickable="true"
+                    android:focusable="true" />
 
                 <TextView
                     android:id="@+id/tv_duration"
@@ -264,7 +308,9 @@
                     android:layout_height="wrap_content"
                     android:textColor="@color/white"
                     android:textSize="12sp"
-                    android:text="00:00" />
+                    android:text="00:00"
+                    android:clickable="false"
+                    android:focusable="false" />
             </LinearLayout>
         </LinearLayout>
 

@@ -67,8 +67,8 @@
             android:textSize="10sp"
             android:textStyle="bold"
             android:textColor="@color/white"
-            android:paddingHorizontal="10dp"
-            android:paddingVertical="4dp"
+            android:paddingLeft="10dp" android:paddingRight="10dp"
+            android:paddingTop="4dp" android:paddingBottom="4dp"
             android:background="@drawable/bg_badge_free"
             android:visibility="gone" />
 
@@ -127,8 +127,8 @@
                     android:textSize="12sp"
                     android:textColor="@color/t2"
                     android:background="@drawable/bg_tag"
-                    android:paddingHorizontal="8dp"
-                    android:paddingVertical="3dp" />
+                    android:paddingLeft="8dp" android:paddingRight="8dp"
+                    android:paddingTop="3dp" android:paddingBottom="3dp" />
 
                 <View
                     android:layout_width="4dp"

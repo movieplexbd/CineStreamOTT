@@ -11,240 +11,208 @@
         android:layout_height="match_parent"
         android:background="@color/bg">
 
-        <!-- SHIMMER: visible while loading -->
+        <!-- Shimmer placeholder while loading -->
         <com.facebook.shimmer.ShimmerFrameLayout
             android:id="@+id/shimmer_layout"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:visibility="visible">
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+                <View android:layout_width="match_parent" android:layout_height="280dp"
+                    android:background="@color/surface2"/>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:padding="10dp" android:layout_marginTop="16dp">
+                    <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="150dp"
+                        android:background="@color/surface2" android:layout_margin="4dp"/>
+                    <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="150dp"
+                        android:background="@color/surface2" android:layout_margin="4dp"/>
+                    <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="150dp"
+                        android:background="@color/surface2" android:layout_margin="4dp"/>
+                </LinearLayout>
+                <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                    android:orientation="horizontal" android:padding="10dp">
+                    <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="150dp"
+                        android:background="@color/surface2" android:layout_margin="4dp"/>
+                    <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="150dp"
+                        android:background="@color/surface2" android:layout_margin="4dp"/>
+                    <View android:layout_width="0dp" android:layout_weight="1" android:layout_height="150dp"
+                        android:background="@color/surface2" android:layout_margin="4dp"/>
+                </LinearLayout>
+            </LinearLayout>
+        </com.facebook.shimmer.ShimmerFrameLayout>
+
+        <!-- Main content - entire page scrolls together including banner -->
+        <androidx.core.widget.NestedScrollView
+            android:id="@+id/content_wrapper"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scrollbars="none"
+            android:overScrollMode="never"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
-                <View
+                <!-- BANNER — ViewPager2 scrolls away with content -->
+                <FrameLayout
                     android:layout_width="match_parent"
-                    android:layout_height="350dp"
-                    android:background="@color/surface2" />
+                    android:layout_height="280dp">
 
+                    <androidx.viewpager2.widget.ViewPager2
+                        android:id="@+id/banner_pager"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:nestedScrollingEnabled="false" />
+
+                    <!-- Dot indicators -->
+                    <LinearLayout
+                        android:id="@+id/banner_dots"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="bottom|center_horizontal"
+                        android:orientation="horizontal"
+                        android:layout_marginBottom="12dp"
+                        android:gravity="center_vertical" />
+
+                </FrameLayout>
+
+                <!-- TRENDING SECTION -->
                 <LinearLayout
+                    android:id="@+id/section_trending"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:padding="10dp"
-                    android:layout_marginTop="16dp">
-                    <View android:layout_width="0dp" android:layout_weight="1"
-                        android:layout_height="150dp" android:background="@color/surface2"
-                        android:layout_margin="4dp" />
-                    <View android:layout_width="0dp" android:layout_weight="1"
-                        android:layout_height="150dp" android:background="@color/surface2"
-                        android:layout_margin="4dp" />
-                    <View android:layout_width="0dp" android:layout_weight="1"
-                        android:layout_height="150dp" android:background="@color/surface2"
-                        android:layout_margin="4dp" />
+                    android:orientation="vertical"
+                    android:layout_marginTop="20dp"
+                    android:visibility="gone">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/section_trending"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/t1"
+                        android:fontFamily="serif"
+                        android:paddingLeft="14dp"
+                        android:paddingRight="14dp"
+                        android:paddingBottom="10dp" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_trending"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:clipToPadding="false"
+                        android:overScrollMode="never"
+                        android:nestedScrollingEnabled="false" />
                 </LinearLayout>
 
+                <!-- BANGLA SECTION -->
                 <LinearLayout
+                    android:id="@+id/section_bangla"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal"
-                    android:paddingHorizontal="10dp"
-                    android:layout_marginTop="8dp">
-                    <View android:layout_width="0dp" android:layout_weight="1"
-                        android:layout_height="150dp" android:background="@color/surface2"
-                        android:layout_margin="4dp" />
-                    <View android:layout_width="0dp" android:layout_weight="1"
-                        android:layout_height="150dp" android:background="@color/surface2"
-                        android:layout_margin="4dp" />
-                    <View android:layout_width="0dp" android:layout_weight="1"
-                        android:layout_height="150dp" android:background="@color/surface2"
-                        android:layout_margin="4dp" />
+                    android:orientation="vertical"
+                    android:layout_marginTop="20dp"
+                    android:visibility="gone">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/section_bangla"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/t1"
+                        android:fontFamily="serif"
+                        android:paddingLeft="14dp"
+                        android:paddingRight="14dp"
+                        android:paddingBottom="10dp" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_bangla"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:clipToPadding="false"
+                        android:overScrollMode="never"
+                        android:nestedScrollingEnabled="false" />
                 </LinearLayout>
+
+                <!-- HINDI SECTION -->
+                <LinearLayout
+                    android:id="@+id/section_hindi"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="20dp"
+                    android:visibility="gone">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/section_hindi"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/t1"
+                        android:fontFamily="serif"
+                        android:paddingLeft="14dp"
+                        android:paddingRight="14dp"
+                        android:paddingBottom="10dp" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_hindi"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:clipToPadding="false"
+                        android:overScrollMode="never"
+                        android:nestedScrollingEnabled="false" />
+                </LinearLayout>
+
+                <!-- ALL MOVIES SECTION -->
+                <LinearLayout
+                    android:id="@+id/section_all"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:layout_marginTop="20dp"
+                    android:visibility="gone">
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="সব মুভি"
+                        android:textSize="17sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/t1"
+                        android:fontFamily="serif"
+                        android:paddingLeft="14dp"
+                        android:paddingRight="14dp"
+                        android:paddingBottom="10dp" />
+                    <androidx.recyclerview.widget.RecyclerView
+                        android:id="@+id/rv_all"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="10dp"
+                        android:paddingRight="10dp"
+                        android:clipToPadding="false"
+                        android:overScrollMode="never"
+                        android:nestedScrollingEnabled="false" />
+                </LinearLayout>
+
+                <View android:layout_width="match_parent" android:layout_height="80dp" />
 
             </LinearLayout>
-        </com.facebook.shimmer.ShimmerFrameLayout>
+        </androidx.core.widget.NestedScrollView>
 
-        <!-- CONTENT: hidden until data arrives -->
-        <LinearLayout
-            android:id="@+id/content_wrapper"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:visibility="gone">
-
-            <!-- Banner ViewPager2 (fixed 350dp, outside scroll) -->
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="350dp">
-
-                <androidx.viewpager2.widget.ViewPager2
-                    android:id="@+id/banner_pager"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent" />
-
-                <LinearLayout
-                    android:id="@+id/banner_dots"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="bottom|center_horizontal"
-                    android:layout_marginBottom="14dp"
-                    android:orientation="horizontal"
-                    android:gravity="center_vertical" />
-
-            </FrameLayout>
-
-            <!-- Scrollable movie sections -->
-            <androidx.core.widget.NestedScrollView
-                android:id="@+id/scroll_content"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="1"
-                android:overScrollMode="never"
-                android:scrollbars="none">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <!-- Trending -->
-                    <LinearLayout
-                        android:id="@+id/section_trending"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginTop="20dp"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/section_trending"
-                            android:textSize="17sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/t1"
-                            android:fontFamily="serif"
-                            android:paddingHorizontal="14dp"
-                            android:paddingBottom="10dp" />
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/rv_trending"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:paddingHorizontal="10dp"
-                            android:clipToPadding="false"
-                            android:overScrollMode="never"
-                            android:nestedScrollingEnabled="false" />
-
-                    </LinearLayout>
-
-                    <!-- Bangla -->
-                    <LinearLayout
-                        android:id="@+id/section_bangla"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginTop="20dp"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/section_bangla"
-                            android:textSize="17sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/t1"
-                            android:fontFamily="serif"
-                            android:paddingHorizontal="14dp"
-                            android:paddingBottom="10dp" />
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/rv_bangla"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:paddingHorizontal="10dp"
-                            android:clipToPadding="false"
-                            android:overScrollMode="never"
-                            android:nestedScrollingEnabled="false" />
-
-                    </LinearLayout>
-
-                    <!-- Hindi -->
-                    <LinearLayout
-                        android:id="@+id/section_hindi"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginTop="20dp"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="@string/section_hindi"
-                            android:textSize="17sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/t1"
-                            android:fontFamily="serif"
-                            android:paddingHorizontal="14dp"
-                            android:paddingBottom="10dp" />
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/rv_hindi"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:paddingHorizontal="10dp"
-                            android:clipToPadding="false"
-                            android:overScrollMode="never"
-                            android:nestedScrollingEnabled="false" />
-
-                    </LinearLayout>
-
-                    <!-- All Movies -->
-                    <LinearLayout
-                        android:id="@+id/section_all"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="vertical"
-                        android:layout_marginTop="20dp"
-                        android:visibility="gone">
-
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="সব মুভি"
-                            android:textSize="17sp"
-                            android:textStyle="bold"
-                            android:textColor="@color/t1"
-                            android:fontFamily="serif"
-                            android:paddingHorizontal="14dp"
-                            android:paddingBottom="10dp" />
-
-                        <androidx.recyclerview.widget.RecyclerView
-                            android:id="@+id/rv_all"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:paddingHorizontal="10dp"
-                            android:clipToPadding="false"
-                            android:overScrollMode="never"
-                            android:nestedScrollingEnabled="false" />
-
-                    </LinearLayout>
-
-                    <View android:layout_width="match_parent" android:layout_height="80dp" />
-
-                </LinearLayout>
-            </androidx.core.widget.NestedScrollView>
-
-        </LinearLayout>
-
-        <!-- OVERLAY: subscription badge (top-left) -->
+        <!-- Hidden user info views (kept for binding compatibility) -->
         <TextView
             android:id="@+id/tv_subscription_badge"
             android:layout_width="wrap_content"
             android:layout_height="24dp"
-            android:paddingHorizontal="10dp"
+            android:paddingLeft="10dp"
+            android:paddingRight="10dp"
             android:gravity="center"
             android:textSize="9sp"
             android:textStyle="bold"
@@ -254,7 +222,6 @@
             android:layout_margin="12dp"
             android:visibility="gone" />
 
-        <!-- OVERLAY: avatar initial (top-right) -->
         <TextView
             android:id="@+id/tv_avatar_initial"
             android:layout_width="36dp"
@@ -267,22 +234,20 @@
             android:background="@drawable/bg_avatar"
             android:layout_gravity="top|end"
             android:layout_marginTop="12dp"
-            android:layout_marginEnd="12dp"
+            android:layout_marginRight="12dp"
             android:visibility="gone" />
 
-        <!-- OVERLAY: avatar photo (no src, loaded by Glide) -->
-        <ImageView
+        <de.hdodenhof.circleimageview.CircleImageView
             android:id="@+id/iv_avatar"
             android:layout_width="36dp"
             android:layout_height="36dp"
-            android:scaleType="centerCrop"
+            android:src="@color/red"
             android:layout_gravity="top|end"
             android:layout_marginTop="12dp"
-            android:layout_marginEnd="12dp"
-            android:background="@drawable/bg_avatar"
+            android:layout_marginRight="12dp"
             android:visibility="gone" />
 
-        <!-- OVERLAY: search button (top-right corner) -->
+        <!-- Floating search button -->
         <ImageButton
             android:id="@+id/btn_search"
             android:layout_width="44dp"

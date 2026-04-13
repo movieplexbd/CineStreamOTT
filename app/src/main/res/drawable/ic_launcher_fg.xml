@@ -4,8 +4,35 @@
     android:height="108dp"
     android:viewportWidth="108"
     android:viewportHeight="108">
-    <!-- Play button icon as app launcher -->
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M42,30 L42,78 L78,54 Z"/>
+
+    <!-- Film strip left column -->
+    <rect android:fillColor="#CC000000"
+        android:left="12" android:top="20" android:right="28" android:bottom="88"/>
+
+    <!-- Film holes left -->
+    <rect android:fillColor="#AAFFFFFF" android:left="15" android:top="26" android:right="25" android:bottom="33"/>
+    <rect android:fillColor="#AAFFFFFF" android:left="15" android:top="38" android:right="25" android:bottom="45"/>
+    <rect android:fillColor="#AAFFFFFF" android:left="15" android:top="50" android:right="25" android:bottom="57"/>
+    <rect android:fillColor="#AAFFFFFF" android:left="15" android:top="62" android:right="25" android:bottom="69"/>
+    <rect android:fillColor="#AAFFFFFF" android:left="15" android:top="74" android:right="25" android:bottom="81"/>
+
+    <!-- Film strip right column -->
+    <rect android:fillColor="#CC000000"
+        android:left="80" android:top="20" android:right="96" android:bottom="88"/>
+
+    <!-- Film holes right -->
+    <rect android:fillColor="#AAFFFFFF" android:left="83" android:top="26" android:right="93" android:bottom="33"/>
+    <rect android:fillColor="#AAFFFFFF" android:left="83" android:top="38" android:right="93" android:bottom="45"/>
+    <rect android:fillColor="#AAFFFFFF" android:left="83" android:top="50" android:right="93" android:bottom="57"/>
+    <rect android:fillColor="#AAFFFFFF" android:left="83" android:top="62" android:right="93" android:bottom="69"/>
+    <rect android:fillColor="#AAFFFFFF" android:left="83" android:top="74" android:right="93" android:bottom="81"/>
+
+    <!-- Screen area background -->
+    <rect android:fillColor="#22000000"
+        android:left="28" android:top="20" android:right="80" android:bottom="88"/>
+
+    <!-- Large white play triangle -->
+    <path android:fillColor="#FFFFFF"
+        android:pathData="M40,36 L40,72 L74,54 Z"/>
+
 </vector>
