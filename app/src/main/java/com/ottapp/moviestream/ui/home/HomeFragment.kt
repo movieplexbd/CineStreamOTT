@@ -69,6 +69,7 @@ class HomeFragment : Fragment() {
         try { observeData() }   catch (e: Exception) { log("observeData: ${e.message}") }
         try { initRefresh() }   catch (e: Exception) { log("initRefresh: ${e.message}") }
         try { initSearch() }    catch (e: Exception) { log("initSearch: ${e.message}") }
+        try { initReels() }     catch (e: Exception) { log("initReels: ${e.message}") }
     }
 
     override fun onResume() {
@@ -148,9 +149,6 @@ class HomeFragment : Fragment() {
         _binding?.swipeRefresh?.setOnRefreshListener {
             vm.loadData()
         }
-        _binding?.btnRetryHome?.setOnClickListener {
-            vm.loadData()
-        }
     }
 
     private fun initSearch() {
@@ -159,6 +157,16 @@ class HomeFragment : Fragment() {
                 findNavController().navigate(R.id.searchFragment)
             } catch (e: Exception) {
                 log("search nav: ${e.message}")
+            }
+        }
+    }
+
+    private fun initReels() {
+        _binding?.btnReels?.setOnClickListener {
+            try {
+                findNavController().navigate(R.id.reelsFragment)
+            } catch (e: Exception) {
+                log("reels nav: ${e.message}")
             }
         }
     }
@@ -175,13 +183,11 @@ class HomeFragment : Fragment() {
                     b.shimmerLayout.startShimmer()
                     b.shimmerLayout.show()
                     b.contentWrapper.hide()
-                    b.layoutEmptyHome.hide()
                 } else {
                     b.shimmerLayout.stopShimmer()
                     b.shimmerLayout.hide()
                     b.contentWrapper.show()
                     b.swipeRefresh.isRefreshing = false
-                    updateHomeEmptyState()
                 }
             }
         }
@@ -248,7 +254,6 @@ class HomeFragment : Fragment() {
             runCatching {
                 allAdapter?.submitList(list)
                 b.sectionAll.visibility = if (list.isEmpty()) View.GONE else View.VISIBLE
-                updateHomeEmptyState()
             }
         }
 
@@ -343,17 +348,6 @@ class HomeFragment : Fragment() {
                 R.id.action_home_to_detail,
                 bundleOf(Constants.EXTRA_MOVIE_ID to movie.id)
             )
-        }
-    }
-
-    private fun updateHomeEmptyState() {
-        val b = _binding ?: return
-        val hasMovies = vm.allMovies.value?.isNotEmpty() == true
-        val loading = vm.loading.value == true
-        if (!loading && !hasMovies) {
-            b.layoutEmptyHome.show()
-        } else {
-            b.layoutEmptyHome.hide()
         }
     }
 

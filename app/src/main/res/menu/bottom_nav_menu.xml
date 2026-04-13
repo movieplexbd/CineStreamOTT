@@ -12,11 +12,6 @@
         android:title="@string/nav_movies" />
 
     <item
-        android:id="@+id/reelsFragment"
-        android:icon="@drawable/ic_nav_reels"
-        android:title="রিলস" />
-
-    <item
         android:id="@+id/searchFragment"
         android:icon="@drawable/ic_nav_search"
         android:title="@string/nav_search" />
