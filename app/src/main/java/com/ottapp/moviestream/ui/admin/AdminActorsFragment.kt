@@ -47,7 +47,7 @@ class AdminActorsFragment : Fragment() {
     }
 
     private fun loadActors() {
-        binding.progress_bar.visibility = View.VISIBLE
+        binding.progressBar.visibility = View.VISIBLE
         lifecycleScope.launch {
             try {
                 val actors = repo.getAllActors()
@@ -56,7 +56,7 @@ class AdminActorsFragment : Fragment() {
             } catch (e: Exception) {
                 requireContext().toast("লোড করতে সমস্যা হয়েছে")
             } finally {
-                binding.progress_bar.visibility = View.GONE
+                binding.progressBar.visibility = View.GONE
             }
         }
     }
