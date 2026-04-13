@@ -1,6 +1,7 @@
 package com.ottapp.moviestream.ui.admin
 
 import android.os.Bundle
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
@@ -13,21 +14,31 @@ class AdminActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityAdminBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+        try {
+            binding = ActivityAdminBinding.inflate(layoutInflater)
+            setContentView(binding.root)
 
-        setSupportActionBar(binding.toolbar)
-        supportActionBar?.setDisplayHomeAsUpEnabled(true)
-        supportActionBar?.title = "মাস্টার কন্ট্রোল"
+            setSupportActionBar(binding.toolbar)
+            supportActionBar?.setDisplayHomeAsUpEnabled(true)
+            supportActionBar?.title = "মাস্টার কন্ট্রোল"
 
-        val navHostFragment = supportFragmentManager
-            .findFragmentById(R.id.admin_nav_host_fragment) as NavHostFragment
-        val navController = navHostFragment.navController
+            val navHostFragment = supportFragmentManager
+                .findFragmentById(R.id.admin_nav_host_fragment) as? NavHostFragment
+                ?: run {
+                    Log.e("AdminActivity", "NavHostFragment not found — finishing")
+                    finish()
+                    return
+                }
 
-        binding.adminBottomNavigation.setupWithNavController(navController)
+            val navController = navHostFragment.navController
+            binding.adminBottomNavigation.setupWithNavController(navController)
 
-        navController.addOnDestinationChangedListener { _, destination, _ ->
-            supportActionBar?.title = destination.label
+            navController.addOnDestinationChangedListener { _, destination, _ ->
+                supportActionBar?.title = destination.label
+            }
+        } catch (e: Exception) {
+            Log.e("AdminActivity", "Crash in onCreate: ${e.message}", e)
+            finish()
         }
     }
 
