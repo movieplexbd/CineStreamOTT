@@ -154,7 +154,11 @@ class HomeFragment : Fragment() {
     private fun initSearch() {
         _binding?.btnSearch?.setOnClickListener {
             try {
-                findNavController().navigate(R.id.searchFragment)
+                val navOptions = androidx.navigation.NavOptions.Builder()
+                    .setPopUpTo(R.id.homeFragment, false)
+                    .setLaunchSingleTop(true)
+                    .build()
+                findNavController().navigate(R.id.searchFragment, null, navOptions)
             } catch (e: Exception) {
                 log("search nav: ${e.message}")
             }
@@ -164,7 +168,11 @@ class HomeFragment : Fragment() {
     private fun initReels() {
         _binding?.btnReels?.setOnClickListener {
             try {
-                findNavController().navigate(R.id.reelsFragment)
+                val navOptions = androidx.navigation.NavOptions.Builder()
+                    .setPopUpTo(R.id.homeFragment, false)
+                    .setLaunchSingleTop(true)
+                    .build()
+                findNavController().navigate(R.id.reelsFragment, null, navOptions)
             } catch (e: Exception) {
                 log("reels nav: ${e.message}")
             }

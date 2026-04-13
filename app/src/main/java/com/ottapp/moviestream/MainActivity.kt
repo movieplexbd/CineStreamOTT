@@ -55,6 +55,8 @@ class MainActivity : AppCompatActivity() {
             val destId = item.itemId
 
             if (destId == currentTabId) {
+                // If already on the destination, pop everything above it
+                nc.popBackStack(destId, false)
                 return@setOnItemSelectedListener true
             }
 
@@ -64,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                 .setLaunchSingleTop(true)
                 .setRestoreState(true)
                 .setPopUpTo(
-                    R.id.homeFragment,
+                    nc.graph.startDestinationId,
                     inclusive = false,
                     saveState = true
                 )
