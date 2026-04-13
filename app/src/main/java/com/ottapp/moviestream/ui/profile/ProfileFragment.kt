@@ -17,6 +17,7 @@ import com.ottapp.moviestream.data.model.User
 import com.ottapp.moviestream.databinding.FragmentProfileBinding
 import com.ottapp.moviestream.ui.admin.AdminActivity
 import com.ottapp.moviestream.ui.subscription.SubscriptionActivity
+import androidx.navigation.fragment.findNavController
 import com.ottapp.moviestream.util.TrialManager
 import com.ottapp.moviestream.util.loadImage
 import java.text.SimpleDateFormat
@@ -141,6 +142,14 @@ class ProfileFragment : Fragment() {
                 .setNegativeButton("বাতিল", null)
                 .show()
         }
+
+        // Navigate to watchlist
+        try {
+            val wlBtn = binding.root.findViewById<android.view.View>(R.id.btn_my_watchlist)
+            wlBtn?.setOnClickListener {
+                try { findNavController().navigate(com.ottapp.moviestream.R.id.watchlistFragment) } catch (e: Exception) {}
+            }
+        } catch (e: Exception) {}
 
         binding.btnShareApp.setOnClickListener {
             val shareIntent = Intent(Intent.ACTION_SEND).apply {

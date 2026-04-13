@@ -20,6 +20,8 @@ import com.ottapp.moviestream.adapter.MovieGridAdapter
 import com.ottapp.moviestream.data.model.Movie
 import com.ottapp.moviestream.databinding.FragmentHomeBinding
 import com.ottapp.moviestream.util.Constants
+import com.ottapp.moviestream.util.WatchHistoryEntry
+import com.ottapp.moviestream.adapter.ContinueWatchingAdapter
 import com.ottapp.moviestream.util.hide
 import com.ottapp.moviestream.util.loadImage
 import com.ottapp.moviestream.util.show
@@ -34,6 +36,7 @@ class HomeFragment : Fragment() {
     private var banglaAdapter: MovieGridAdapter? = null
     private var hindiAdapter: MovieGridAdapter? = null
     private var allAdapter: MovieGridAdapter? = null
+    private var continueWatchingAdapter: ContinueWatchingAdapter? = null
 
     private val scrollHandler = Handler(Looper.getMainLooper())
     private var scrollRunnable: Runnable? = null
@@ -88,6 +91,7 @@ class HomeFragment : Fragment() {
         banglaAdapter = null
         hindiAdapter = null
         allAdapter = null
+        continueWatchingAdapter = null
         _binding = null
         super.onDestroyView()
     }
@@ -183,6 +187,30 @@ class HomeFragment : Fragment() {
                 bannerAdapter?.submitList(list)
                 buildDots(list.size)
                 if (list.size > 1) startScroll(list.size) else stopScroll()
+            }
+        }
+
+        vm.continueWatching.observe(viewLifecycleOwner) { list ->
+            val b = _binding ?: return@observe
+            runCatching {
+                val section = b.root.findViewById<android.view.View>(R.id.section_continue_watching)
+                val rv = b.root.findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.rv_continue_watching)
+                if (list.isEmpty()) {
+                    section?.visibility = android.view.View.GONE
+                } else {
+                    section?.visibility = android.view.View.VISIBLE
+                    if (continueWatchingAdapter == null) {
+                        continueWatchingAdapter = ContinueWatchingAdapter { entry ->
+                            try {
+                                findNavController().navigate(R.id.action_home_to_detail,
+                                    androidx.core.os.bundleOf(Constants.EXTRA_MOVIE_ID to entry.movieId))
+                            } catch (e: Exception) {}
+                        }
+                        rv?.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(requireContext(), androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL, false)
+                        rv?.adapter = continueWatchingAdapter
+                    }
+                    continueWatchingAdapter?.submitList(list)
+                }
             }
         }
 

@@ -23,6 +23,7 @@ import com.ottapp.moviestream.util.hide
 import com.ottapp.moviestream.util.loadImage
 import com.ottapp.moviestream.util.show
 import com.ottapp.moviestream.util.toast
+import com.ottapp.moviestream.util.WatchlistManager
 import kotlinx.coroutines.launch
 
 class MovieDetailFragment : Fragment() {
@@ -35,6 +36,7 @@ class MovieDetailFragment : Fragment() {
     private lateinit var dlRepo: DownloadRepository
 
     private var currentMovie: Movie? = null
+    private lateinit var watchlistManager: WatchlistManager
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
@@ -46,6 +48,7 @@ class MovieDetailFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         dlRepo = DownloadRepository(requireContext())
+        watchlistManager = WatchlistManager(requireContext())
 
         binding.btnBack.setOnClickListener {
             findNavController().navigateUp()
@@ -118,6 +121,20 @@ class MovieDetailFragment : Fragment() {
         }
 
         // Watch button — opens player directly
+        // Watchlist button
+        try {
+            val wlBtn = binding.root.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_watchlist)
+            if (wlBtn != null) {
+                val inList = watchlistManager.isInWatchlist(movie.id)
+                wlBtn.text = if (inList) "⭐  ওয়াচলিস্টে আছে" else "☆  ওয়াচলিস্টে যোগ করুন"
+                wlBtn.setOnClickListener {
+                    val added = watchlistManager.toggleWatchlist(movie)
+                    wlBtn.text = if (added) "⭐  ওয়াচলিস্টে আছে" else "☆  ওয়াচলিস্টে যোগ করুন"
+                    requireContext().toast(if (added) "ওয়াচলিস্টে যোগ হয়েছে ⭐" else "ওয়াচলিস্ট থেকে সরানো হয়েছে")
+                }
+            }
+        } catch (e: Exception) { }
+
         binding.btnWatch.setOnClickListener {
             lifecycleScope.launch {
                 val user = try { userRepo.getCurrentUser() } catch (e: Exception) { null }

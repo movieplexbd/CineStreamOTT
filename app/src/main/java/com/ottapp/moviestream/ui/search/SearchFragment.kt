@@ -1,11 +1,15 @@
 package com.ottapp.moviestream.ui.search
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.speech.RecognizerIntent
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -19,6 +23,7 @@ import com.ottapp.moviestream.databinding.FragmentSearchBinding
 import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.hide
 import com.ottapp.moviestream.util.show
+import java.util.Locale
 
 class SearchFragment : Fragment() {
 
@@ -26,6 +31,10 @@ class SearchFragment : Fragment() {
     private val binding get() = _binding!!
     private val viewModel: SearchViewModel by viewModels()
     private lateinit var adapter: MovieGridAdapter
+
+    companion object {
+        private const val VOICE_REQUEST_CODE = 1001
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentSearchBinding.inflate(inflater, container, false)
@@ -41,6 +50,7 @@ class SearchFragment : Fragment() {
 
         setupSearch()
         setupFilters()
+        setupVoiceSearch()
         observeViewModel()
     }
 
@@ -75,6 +85,41 @@ class SearchFragment : Fragment() {
             }
         }
         setChipSelected(binding.chipAll, true)
+    }
+
+    private fun setupVoiceSearch() {
+        try {
+            val micBtn = binding.root.findViewById<View>(R.id.btn_voice_search)
+            micBtn?.setOnClickListener { startVoiceSearch() }
+        } catch (e: Exception) { }
+    }
+
+    private fun startVoiceSearch() {
+        try {
+            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "bn-BD")
+                putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, false)
+                putExtra(RecognizerIntent.EXTRA_PROMPT, "বলুন মুভির নাম...")
+                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
+            }
+            startActivityForResult(intent, VOICE_REQUEST_CODE)
+        } catch (e: Exception) {
+            Toast.makeText(requireContext(), "ভয়েস সার্চ উপলব্ধ নয়", Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
+        super.onActivityResult(requestCode, resultCode, data)
+        if (requestCode == VOICE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
+            val results = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            val query = results?.firstOrNull() ?: return
+            binding.etSearch.setText(query)
+            binding.etSearch.setSelection(query.length)
+            viewModel.search(query)
+        }
     }
 
     private fun setChipSelected(chip: MaterialButton, selected: Boolean) {

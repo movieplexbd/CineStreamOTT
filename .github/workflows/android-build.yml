@@ -91,83 +91,67 @@ jobs:
         run: |
           VERSION_NAME=$(grep -m 1 "versionName" app/build.gradle | sed "s/.*versionName\s*['\"]//;s/['\"].*//")
           VERSION_CODE=$(grep -m 1 "versionCode" app/build.gradle | sed 's/.*versionCode\s*//')
+          BUILD_DATE=$(date +'%Y-%m-%d')
+          SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
           echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
           echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
+          echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
+          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "tag_name=v${VERSION_NAME}-build${VERSION_CODE}-${SHORT_SHA}" >> $GITHUB_OUTPUT
 
-      - name: Rename and copy APKs
+      - name: Rename APKs for release
         run: |
           mkdir -p dist
           DEBUG_APK=$(find app/build/outputs/apk/debug -name "*.apk" | head -1)
           RELEASE_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
           cp "$DEBUG_APK"   dist/CineStream-v${{ steps.version.outputs.version_name }}-debug.apk
-          cp "$RELEASE_APK" dist/CineStream-v${{ steps.version.outputs.version_name }}-release.apk
+          cp "$RELEASE_APK" dist/CineStreamOTT-release.apk
 
-      - name: Upload Debug APK (Artifact)
+      - name: Upload Debug APK as artifact
         uses: actions/upload-artifact@v4
         with:
           name: CineStream-Debug-Build${{ github.run_number }}
           path: dist/CineStream-v${{ steps.version.outputs.version_name }}-debug.apk
           retention-days: 90
 
-      - name: Upload Release APK (Artifact)
+      - name: Upload Release APK as artifact
         uses: actions/upload-artifact@v4
         with:
           name: CineStream-Release-Build${{ github.run_number }}
-          path: dist/CineStream-v${{ steps.version.outputs.version_name }}-release.apk
+          path: dist/CineStreamOTT-release.apk
           retention-days: 90
 
-      - name: Create GitHub Release
-        if: github.event_name == 'push' && (github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master')
+      - name: Create GitHub Release with APK download link
+        if: github.event_name == 'push'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version.outputs.version_name }}-build${{ github.run_number }}
-          name: "CineStream v${{ steps.version.outputs.version_name }} (Build #${{ github.run_number }})"
+          tag_name: ${{ steps.version.outputs.tag_name }}
+          name: "CineStream v${{ steps.version.outputs.version_name }} (${{ steps.version.outputs.build_date }})"
           body: |
-            ## CineStream v${{ steps.version.outputs.version_name }} — Build #${{ github.run_number }}
+            ## 🎬 CineStream OTT — v${{ steps.version.outputs.version_name }}
 
-            ### এই বিল্ডে পরিবর্তন
-            - Google Sign-In সম্পূর্ণ সরানো হয়েছে — শুধুমাত্র Email/Password login
-            - অ্যাপ চালু হওয়ার সময় crash ঠিক করা হয়েছে
-            - Data load করার সময় crash ঠিক করা হয়েছে
-            - Firebase initialization আরও robust করা হয়েছে
-            - Google Play Services dependency সরানো হয়েছে (অ্যাপ হালকা হয়েছে)
+            **Version:** ${{ steps.version.outputs.version_name }}
+            **Build:** ${{ steps.version.outputs.version_code }}
+            **Date:** ${{ steps.version.outputs.build_date }}
+            **Commit:** ${{ steps.version.outputs.short_sha }}
 
-            ### APK ডাউনলোড
-            | ফাইল | ধরন |
-            |------|------|
-            | `CineStream-v${{ steps.version.outputs.version_name }}-release.apk` | **Release (সুপারিশকৃত)** |
-            | `CineStream-v${{ steps.version.outputs.version_name }}-debug.apk` | Debug |
+            ---
 
-            > **ইন্সটল করুন:** Settings → Security → Unknown Sources → Enable
-            > 
-            > **Direct link:** https://github.com/${{ github.repository }}/releases/latest
-          files: |
-            dist/CineStream-v${{ steps.version.outputs.version_name }}-release.apk
-            dist/CineStream-v${{ steps.version.outputs.version_name }}-debug.apk
+            ### ✅ নতুন ফিচার (v2.6.0)
+            - 📺 **Watch History & Continue Watching** — যেখানে ছেড়েছিলেন সেখান থেকে শুরু করুন
+            - ⭐ **Watchlist / Favorites** — পছন্দের মুভি সেভ করুন
+            - 🎙️ **Voice Search** — মাইক বাটন চেপে বাংলায় বলুন
+            - 🎬 **Trailer Reels** — TikTok স্টাইলে উল্লম্বভাবে ট্রেইলার দেখুন
+            - ⬇️ **Improved Download Manager** — আরও স্থিতিশীল ডাউনলোড
+
+            ---
+
+            ### 📥 APK ডাউনলোড করুন
+            নিচের **Assets** সেকশন থেকে `CineStreamOTT-release.apk` ডাউনলোড করুন।
+
+            > ⚠️ ইনস্টল করার আগে Settings → Unknown Sources / Install Unknown Apps চালু করুন।
+          files: dist/CineStreamOTT-release.apk
           draft: false
           prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Build Summary
-        if: always()
-        run: |
-          VER="${{ steps.version.outputs.version_name }}"
-          echo "## CineStream Build #${{ github.run_number }}" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| APK | Status |" >> $GITHUB_STEP_SUMMARY
-          echo "|-----|--------|" >> $GITHUB_STEP_SUMMARY
-          if [ -f "dist/CineStream-v${VER}-debug.apk" ]; then
-            SZ=$(du -sh "dist/CineStream-v${VER}-debug.apk" | cut -f1)
-            echo "| Debug APK ($SZ) | ✅ SUCCESS |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Debug APK | ❌ FAILED |" >> $GITHUB_STEP_SUMMARY
-          fi
-          if [ -f "dist/CineStream-v${VER}-release.apk" ]; then
-            SZ=$(du -sh "dist/CineStream-v${VER}-release.apk" | cut -f1)
-            echo "| Release APK ($SZ) | ✅ SUCCESS |" >> $GITHUB_STEP_SUMMARY
-          else
-            echo "| Release APK | ❌ FAILED |" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Releases:** https://github.com/${{ github.repository }}/releases" >> $GITHUB_STEP_SUMMARY

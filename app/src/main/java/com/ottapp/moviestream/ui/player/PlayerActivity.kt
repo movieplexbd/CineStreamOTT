@@ -29,6 +29,8 @@ import com.ottapp.moviestream.util.hide
 import com.ottapp.moviestream.util.show
 import com.ottapp.moviestream.util.toast
 import com.ottapp.moviestream.util.toFormattedTime
+import com.ottapp.moviestream.util.WatchHistoryManager
+import com.ottapp.moviestream.data.model.Movie
 import kotlin.math.abs
 
 @OptIn(UnstableApi::class)
@@ -42,6 +44,7 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var binding: ActivityPlayerBinding
     private var player: ExoPlayer? = null
     private lateinit var prefs: SharedPreferences
+    private lateinit var watchHistoryManager: WatchHistoryManager
 
     private var movieId    = ""
     private var movieTitle = ""
@@ -73,6 +76,7 @@ class PlayerActivity : AppCompatActivity() {
             hideSystemUI()
 
             prefs      = getSharedPreferences("ott_prefs", MODE_PRIVATE)
+            watchHistoryManager = WatchHistoryManager(this)
             movieId    = intent.getStringExtra(Constants.EXTRA_MOVIE_ID)    ?: ""
             movieTitle = intent.getStringExtra(Constants.EXTRA_MOVIE_TITLE) ?: "Movie"
             videoUrl   = intent.getStringExtra(Constants.EXTRA_VIDEO_URL)   ?: ""
@@ -399,6 +403,13 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun savePosition(pos: Long) {
+        try {
+            val duration = player?.duration ?: 0L
+            if (movieId.isNotEmpty() && movieTitle.isNotEmpty() && duration > 0) {
+                val m = Movie(id = movieId, title = movieTitle, bannerImageUrl = intent.getStringExtra("extra_banner_url") ?: "", category = "")
+                watchHistoryManager.saveProgress(m, pos, duration)
+            }
+        } catch (e: Exception) { }
         try {
             prefs.edit().putLong(Constants.PREF_PLAYBACK_POSITION + movieId, pos).apply()
         } catch (e: Exception) { /* ignore */ }

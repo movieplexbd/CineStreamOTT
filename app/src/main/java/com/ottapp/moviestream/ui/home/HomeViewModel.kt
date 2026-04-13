@@ -7,11 +7,16 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.ottapp.moviestream.data.model.Movie
 import com.ottapp.moviestream.data.model.User
+import com.ottapp.moviestream.util.WatchHistoryManager
+import com.ottapp.moviestream.util.WatchHistoryEntry
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.data.repository.UserRepository
 import kotlinx.coroutines.launch
 
-class HomeViewModel : ViewModel() {
+class HomeViewModel(app: Application) : AndroidViewModel(app) {
+    private val watchHistoryManager = WatchHistoryManager(app.applicationContext)
 
     companion object {
         private const val TAG = "HomeViewModel"
@@ -21,6 +26,9 @@ class HomeViewModel : ViewModel() {
     private val userRepo = UserRepository()
 
     // loading starts TRUE so shimmer shows immediately
+    private val _continueWatching = MutableLiveData<List<WatchHistoryEntry>>(emptyList())
+    val continueWatching: LiveData<List<WatchHistoryEntry>> = _continueWatching
+
     private val _loading = MutableLiveData(true)
     val loading: LiveData<Boolean> = _loading
 
@@ -50,7 +58,10 @@ class HomeViewModel : ViewModel() {
         viewModelScope.launch {
             _loading.value = true
             try {
-                // Load movies
+                // Load continue watching from local history
+            _continueWatching.value = watchHistoryManager.getContinueWatching()
+
+            // Load movies
                 val all = safeGetMovies()
                 _allMovies.value = all
 
