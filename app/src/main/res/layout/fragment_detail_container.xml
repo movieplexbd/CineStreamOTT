@@ -188,23 +188,31 @@
 
                 </LinearLayout>
 
-                <!-- DOWNLOAD BUTTON (prominent, below meta) -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_download"
+                <!-- DOWNLOAD BUTTONS CONTAINER -->
+                <LinearLayout
+                    android:id="@+id/layout_downloads"
                     android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:layout_marginHorizontal="16dp"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:paddingHorizontal="16dp"
                     android:layout_marginBottom="16dp"
-                    android:text="⬇  ডাউনলোড করুন"
-                    android:textSize="15sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/red"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    app:strokeColor="@color/red"
-                    app:strokeWidth="1.5dp"
-                    app:cornerRadius="12dp"
-                    app:backgroundTint="@color/transparent"
-                    app:icon="@null" />
+                    android:gravity="center_horizontal">
+                    <!-- Dynamic buttons will be added here or we can use a hidden button as template -->
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_download"
+                        android:layout_width="match_parent"
+                        android:layout_height="52dp"
+                        android:text="⬇  ডাউনলোড করুন"
+                        android:textSize="15sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/red"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        app:strokeColor="@color/red"
+                        app:strokeWidth="1.5dp"
+                        app:cornerRadius="12dp"
+                        app:backgroundTint="@color/transparent"
+                        app:icon="@null" />
+                </LinearLayout>
 
                 <!-- Actors / Cast Section -->
                 <LinearLayout
@@ -237,30 +245,23 @@
                         android:overScrollMode="never" />
                 </LinearLayout>
 
-                
                 <!-- WATCHLIST BUTTON -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_watchlist"
                     android:layout_width="match_parent"
                     android:layout_height="48dp"
                     android:layout_marginHorizontal="16dp"
-                    android:layout_marginBottom="12dp"
+                    android:layout_marginBottom="16dp"
                     android:text="☆  ওয়াচলিস্টে যোগ করুন"
                     android:textSize="14sp"
-                    android:textStyle="bold"
                     android:textColor="@color/t2"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    app:strokeColor="@color/border"
-                    app:strokeWidth="1dp"
-                    app:cornerRadius="12dp"
-                    app:backgroundTint="@color/transparent"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
                     app:icon="@null" />
 
-<!-- Divider -->
                 <View
                     android:layout_width="match_parent"
                     android:layout_height="1dp"
-                    android:background="@color/border"
+                    android:background="@color/surface"
                     android:layout_marginHorizontal="16dp"
                     android:layout_marginBottom="16dp" />
 
@@ -269,80 +270,76 @@
                     android:id="@+id/tv_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginBottom="24dp"
                     android:textSize="14sp"
                     android:textColor="@color/t2"
-                    android:paddingLeft="16dp" android:paddingRight="16dp"
-                    android:paddingBottom="24dp"
-                    android:lineSpacingMultiplier="1.6" />
+                    android:lineSpacingExtra="4dp" />
 
-                <!-- Locked panel for non-premium — WHITE background -->
+                <!-- Locked panel (subscription required) -->
                 <LinearLayout
                     android:id="@+id/layout_locked"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:gravity="center"
                     android:background="@drawable/bg_locked_panel"
-                    android:padding="24dp"
-                    android:layout_marginLeft="16dp"
-                    android:layout_marginRight="16dp"
-                    android:layout_marginBottom="24dp"
+                    android:layout_margin="16dp"
+                    android:padding="20dp"
+                    android:gravity="center"
                     android:visibility="gone">
 
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="🔒"
-                        android:textSize="36sp" />
+                    <ImageView
+                        android:layout_width="48dp"
+                        android:layout_height="48dp"
+                        android:src="@drawable/ic_lock"
+                        app:tint="@color/red"
+                        android:layout_marginBottom="12dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/locked_title"
-                        android:textSize="16sp"
+                        android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@color/t1"
-                        android:fontFamily="serif"
-                        android:layout_marginTop="10dp"
-                        android:gravity="center" />
+                        android:layout_marginBottom="6dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/locked_sub"
                         android:textSize="13sp"
-                        android:textColor="@color/t2"
+                        android:textColor="@color/t3"
                         android:gravity="center"
-                        android:layout_marginTop="6dp"
-                        android:lineSpacingMultiplier="1.5" />
+                        android:layout_marginBottom="20dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_subscribe"
                         android:layout_width="match_parent"
-                        android:layout_height="48dp"
-                        android:text="প্রিমিয়াম নিন"
+                        android:layout_height="50dp"
+                        android:text="@string/btn_subscribe"
                         android:textSize="14sp"
-                        android:textStyle="bold"
                         android:textColor="@color/white"
                         app:backgroundTint="@color/red"
-                        app:cornerRadius="10dp"
-                        android:layout_marginTop="16dp" />
+                        app:cornerRadius="12dp" />
                 </LinearLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="32dp" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="80dp" />
 
             </LinearLayout>
 
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
 
-    <!-- Center loading progress -->
+    <!-- Center Progress -->
     <ProgressBar
         android:id="@+id/progress_center"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_gravity="center"
         android:indeterminateTint="@color/red"
-        android:visibility="gone"
-        android:layout_gravity="center" />
+        android:visibility="gone" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

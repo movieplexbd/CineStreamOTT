@@ -5,13 +5,16 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.LinearLayout
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.google.android.material.button.MaterialButton
 import com.ottapp.moviestream.R
 import com.ottapp.moviestream.data.model.Actor
 import com.ottapp.moviestream.data.model.Movie
+import com.ottapp.moviestream.data.model.DownloadQuality
 import com.ottapp.moviestream.data.repository.ActorRepository
 import com.ottapp.moviestream.data.repository.DownloadRepository
 import com.ottapp.moviestream.data.repository.MovieRepository
@@ -122,30 +125,10 @@ class MovieDetailFragment : Fragment() {
             binding.layoutActors.hide()
         }
 
-        // Download button state
-        if (dlRepo.isDownloaded(movie.id)) {
-            binding.btnDownload.text = "ডাউনলোড হয়েছে ✓"
-            binding.btnDownload.isEnabled = false
-        } else {
-            binding.btnDownload.text = "ডাউনলোড করুন"
-            binding.btnDownload.isEnabled = true
-        }
+        // SETUP DOWNLOAD BUTTONS
+        setupDownloadButtons(movie)
 
         // Watch button — opens player directly
-        // Watchlist button
-        try {
-            val wlBtn = binding.root.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_watchlist)
-            if (wlBtn != null) {
-                val inList = watchlistManager.isInWatchlist(movie.id)
-                wlBtn.text = if (inList) "⭐  ওয়াচলিস্টে আছে" else "☆  ওয়াচলিস্টে যোগ করুন"
-                wlBtn.setOnClickListener {
-                    val added = watchlistManager.toggleWatchlist(movie)
-                    wlBtn.text = if (added) "⭐  ওয়াচলিস্টে আছে" else "☆  ওয়াচলিস্টে যোগ করুন"
-                    requireContext().toast(if (added) "ওয়াচলিস্টে যোগ হয়েছে ⭐" else "ওয়াচলিস্ট থেকে সরানো হয়েছে")
-                }
-            }
-        } catch (e: Exception) { }
-
         binding.btnWatch.setOnClickListener {
             lifecycleScope.launch {
                 val user = try { userRepo.getCurrentUser() } catch (e: Exception) { null }
@@ -165,24 +148,92 @@ class MovieDetailFragment : Fragment() {
             }
         }
 
-        // Download button — starts download and navigates to download page
-        binding.btnDownload.setOnClickListener {
-            lifecycleScope.launch {
-                val user = try { userRepo.getCurrentUser() } catch (e: Exception) { null }
-                if (_binding == null) return@launch
-
-                if (movie.testMovie || user?.isPremium == true) {
-                    startDownload(movie)
-                    // Navigate to download tab
-                    try {
-                        findNavController().navigate(R.id.action_global_to_download)
-                    } catch (e: Exception) {
-                        requireContext().toast("ডাউনলোড শুরু হয়েছে")
-                    }
-                } else {
-                    binding.layoutLocked.show()
-                    binding.btnSubscribe.setOnClickListener { openSubscriptionDialog() }
+        // Watchlist button
+        try {
+            val wlBtn = binding.btnWatchlist
+            if (wlBtn != null) {
+                val inList = watchlistManager.isInWatchlist(movie.id)
+                wlBtn.text = if (inList) "⭐  ওয়াচলিস্টে আছে" else "☆  ওয়াচলিস্টে যোগ করুন"
+                wlBtn.setOnClickListener {
+                    val added = watchlistManager.toggleWatchlist(movie)
+                    wlBtn.text = if (added) "⭐  ওয়াচলিস্টে আছে" else "☆  ওয়াচলিস্টে যোগ করুন"
+                    requireContext().toast(if (added) "ওয়াচলিস্টে যোগ হয়েছে ⭐" else "ওয়াচলিস্ট থেকে সরানো হয়েছে")
                 }
+            }
+        } catch (e: Exception) { }
+    }
+
+    private fun setupDownloadButtons(movie: Movie) {
+        binding.layoutDownloads.removeAllViews()
+        
+        val qualities = movie.downloads.ifEmpty {
+            // Fallback to legacy downloadUrl if downloads list is empty
+            if (movie.downloadUrl.isNotEmpty()) {
+                listOf(DownloadQuality("Download", movie.downloadUrl, ""))
+            } else {
+                emptyList()
+            }
+        }
+
+        if (qualities.isEmpty()) {
+            binding.layoutDownloads.hide()
+            return
+        }
+
+        binding.layoutDownloads.show()
+        
+        qualities.forEach { quality ->
+            val btn = MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonOutlinedStyle)
+            val params = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f)
+            params.setMargins(8, 0, 8, 0)
+            btn.layoutParams = params
+            
+            // Text with quality and size
+            val btnText = if (quality.size.isNotEmpty()) {
+                "⬇ ${quality.quality}\n(${quality.size})"
+            } else {
+                "⬇ ${quality.quality}"
+            }
+            btn.text = btnText
+            btn.textSize = 12f
+            btn.setPadding(0, 20, 0, 20)
+            btn.setLineSpacing(0f, 0.8f)
+            
+            btn.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+            btn.setStrokeColorResource(R.color.red)
+            btn.strokeWidth = 3
+            btn.cornerRadius = 20
+            
+            if (dlRepo.isDownloaded(movie.id)) {
+                btn.alpha = 0.5f
+                btn.isEnabled = false
+                btn.text = "ডাউনলোড\nহয়েছে ✓"
+            } else {
+                btn.setOnClickListener {
+                    handleDownloadClick(movie, quality.url)
+                }
+            }
+            
+            binding.layoutDownloads.addView(btn)
+        }
+    }
+
+    private fun handleDownloadClick(movie: Movie, downloadUrl: String) {
+        lifecycleScope.launch {
+            val user = try { userRepo.getCurrentUser() } catch (e: Exception) { null }
+            if (_binding == null) return@launch
+
+            if (movie.testMovie || user?.isPremium == true) {
+                startDownload(movie, downloadUrl)
+                // Navigate to download tab
+                try {
+                    findNavController().navigate(R.id.action_global_to_download)
+                } catch (e: Exception) {
+                    requireContext().toast("ডাউনলোড শুরু হয়েছে")
+                }
+            } else {
+                binding.layoutLocked.show()
+                binding.btnSubscribe.setOnClickListener { openSubscriptionDialog() }
             }
         }
     }
@@ -212,11 +263,11 @@ class MovieDetailFragment : Fragment() {
         startActivity(intent)
     }
 
-    private fun startDownload(movie: Movie) {
+    private fun startDownload(movie: Movie, downloadUrl: String) {
         val intent = Intent(requireContext(), DownloadService::class.java).apply {
             putExtra(Constants.EXTRA_MOVIE_ID,    movie.id)
             putExtra(Constants.EXTRA_MOVIE_TITLE, movie.title)
-            putExtra(Constants.EXTRA_VIDEO_URL,   movie.downloadUrl.ifEmpty { movie.videoStreamUrl })
+            putExtra(Constants.EXTRA_VIDEO_URL,   downloadUrl)
             putExtra(Constants.EXTRA_BANNER_URL,  movie.bannerImageUrl)
         }
         ContextCompat.startForegroundService(requireContext(), intent)

@@ -3,10 +3,12 @@ package com.ottapp.moviestream.ui.admin
 import android.os.Bundle
 import android.view.View
 import android.widget.ArrayAdapter
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.ottapp.moviestream.data.model.Actor
 import com.ottapp.moviestream.data.model.Movie
+import com.ottapp.moviestream.data.model.DownloadQuality
 import com.ottapp.moviestream.data.repository.ActorRepository
 import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.databinding.ActivityAddEditMovieBinding
@@ -59,7 +61,7 @@ class AddEditMovieActivity : AppCompatActivity() {
     }
 
     private fun loadExistingMovie(id: String) {
-        binding.progressBar.visibility = View.VISIBLE
+        binding.progress_bar.visibility = View.VISIBLE
         lifecycleScope.launch {
             try {
                 val movie = repo.getMovieById(id)
@@ -67,7 +69,7 @@ class AddEditMovieActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 toast("লোড করতে সমস্যা হয়েছে")
             } finally {
-                binding.progressBar.visibility = View.GONE
+                binding.progress_bar.visibility = View.GONE
             }
         }
     }
@@ -78,7 +80,6 @@ class AddEditMovieActivity : AppCompatActivity() {
         binding.etBannerUrl.setText(movie.bannerImageUrl)
         binding.etDetailThumbnailUrl.setText(movie.detailThumbnailUrl)
         binding.etVideoUrl.setText(movie.videoStreamUrl)
-        binding.etDownloadUrl.setText(movie.downloadUrl)
         binding.etYear.setText(if (movie.year > 0) movie.year.toString() else "")
         binding.etDuration.setText(movie.duration)
         binding.etRating.setText(if (movie.imdbRating > 0) movie.imdbRating.toString() else "")
@@ -91,6 +92,24 @@ class AddEditMovieActivity : AppCompatActivity() {
         
         selectedActorIds = movie.actorIds.toMutableList()
         updateSelectedActorsText()
+
+        // Populate downloads
+        movie.downloads.forEach { dl ->
+            when (dl.quality) {
+                "360p" -> {
+                    binding.etUrl360.setText(dl.url)
+                    binding.etSize360.setText(dl.size)
+                }
+                "480p" -> {
+                    binding.etUrl480.setText(dl.url)
+                    binding.etSize480.setText(dl.size)
+                }
+                "1080p" -> {
+                    binding.etUrl1080.setText(dl.url)
+                    binding.etSize1080.setText(dl.size)
+                }
+            }
+        }
     }
 
     private fun loadAllActors() {
@@ -154,6 +173,17 @@ class AddEditMovieActivity : AppCompatActivity() {
         val year      = binding.etYear.text.toString().toIntOrNull() ?: 0
         val isTestMov = binding.switchFree.isChecked
 
+        // Collect downloads
+        val downloads = mutableListOf<DownloadQuality>()
+        val url360 = binding.etUrl360.text.toString().trim()
+        if (url360.isNotEmpty()) downloads.add(DownloadQuality("360p", url360, binding.etSize360.text.toString().trim()))
+        
+        val url480 = binding.etUrl480.text.toString().trim()
+        if (url480.isNotEmpty()) downloads.add(DownloadQuality("480p", url480, binding.etSize480.text.toString().trim()))
+        
+        val url1080 = binding.etUrl1080.text.toString().trim()
+        if (url1080.isNotEmpty()) downloads.add(DownloadQuality("1080p", url1080, binding.etSize1080.text.toString().trim()))
+
         val movie = Movie(
             id             = movieId ?: "",
             title          = title,
@@ -161,18 +191,19 @@ class AddEditMovieActivity : AppCompatActivity() {
             bannerImageUrl = binding.etBannerUrl.text.toString().trim(),
             detailThumbnailUrl = binding.etDetailThumbnailUrl.text.toString().trim(),
             videoStreamUrl = videoUrl,
-            downloadUrl    = binding.etDownloadUrl.text.toString().trim(),
+            downloadUrl    = downloads.firstOrNull()?.url ?: "", // Keep legacy field for safety
             category       = category,
             imdbRating     = rating,
             year           = year,
-	            duration       = binding.etDuration.text.toString().trim(),
-	            trending       = binding.switchTrending.isChecked,
-	            testMovie      = isTestMov,
-	            actorIds       = selectedActorIds
-	        )
+            duration       = binding.etDuration.text.toString().trim(),
+            trending       = binding.switchTrending.isChecked,
+            testMovie      = isTestMov,
+            actorIds       = selectedActorIds,
+            downloads      = downloads
+        )
 
         binding.btnSave.isEnabled = false
-        binding.progressBar.visibility = View.VISIBLE
+        binding.progress_bar.visibility = View.VISIBLE
 
         lifecycleScope.launch {
             try {
@@ -186,7 +217,7 @@ class AddEditMovieActivity : AppCompatActivity() {
                     if (existingTestCount >= Constants.MAX_TEST_MOVIES) {
                         toast("❌ সর্বোচ্চ ${Constants.MAX_TEST_MOVIES}টি ফ্রি (Test) মুভি রাখা যাবে। আগে অন্য একটি মুভির ফ্রি টগল বন্ধ করুন।")
                         binding.btnSave.isEnabled = true
-                        binding.progressBar.visibility = View.GONE
+                        binding.progress_bar.visibility = View.GONE
                         return@launch
                     }
                 }
@@ -204,7 +235,7 @@ class AddEditMovieActivity : AppCompatActivity() {
             } catch (e: Exception) {
                 toast("সমস্যা হয়েছে: ${e.message}")
                 binding.btnSave.isEnabled = true
-                binding.progressBar.visibility = View.GONE
+                binding.progress_bar.visibility = View.GONE
             }
         }
     }

@@ -3,6 +3,7 @@ package com.ottapp.moviestream.data.repository
 import android.util.Log
 import com.google.firebase.database.FirebaseDatabase
 import com.ottapp.moviestream.data.model.Movie
+import com.ottapp.moviestream.data.model.DownloadQuality
 import kotlinx.coroutines.tasks.await
 
 class MovieRepository {
@@ -28,6 +29,17 @@ class MovieRepository {
             val data: Map<*, *> = when (rawValue) {
                 is Map<*, *> -> rawValue
                 else -> return null
+            }
+
+            val downloadsList = mutableListOf<DownloadQuality>()
+            (data["downloads"] as? List<*>)?.forEach { item ->
+                (item as? Map<*, *>)?.let { map ->
+                    downloadsList.add(DownloadQuality(
+                        quality = map["quality"]?.toString() ?: "",
+                        url = map["url"]?.toString() ?: "",
+                        size = map["size"]?.toString() ?: ""
+                    ))
+                }
             }
 
             Movie(
@@ -68,7 +80,8 @@ class MovieRepository {
                     is String  -> f.equals("true", ignoreCase = true)
                     else       -> false
                 },
-                actorIds       = (data["actorIds"] as? List<*>)?.mapNotNull { it?.toString() } ?: emptyList()
+                actorIds       = (data["actorIds"] as? List<*>)?.mapNotNull { it?.toString() } ?: emptyList(),
+                downloads      = downloadsList
             )
         } catch (e: Exception) {
             Log.e(TAG, "Parse movie error: ${e.message}")
@@ -126,8 +139,11 @@ class MovieRepository {
         "imdbRating"     to movie.imdbRating,
         "year"           to movie.year,
         "duration"       to movie.duration,
-	        "trending"       to movie.trending,
-	        "testMovie"      to movie.testMovie,
-	        "actorIds"       to movie.actorIds
-	    )
+        "trending"       to movie.trending,
+        "testMovie"      to movie.testMovie,
+        "actorIds"       to movie.actorIds,
+        "downloads"      to movie.downloads.map { 
+            mapOf("quality" to it.quality, "url" to it.url, "size" to it.size)
+        }
+    )
 }
