@@ -49,10 +49,12 @@ class AdminSubsFragment : Fragment() {
     }
 
     private fun loadSubs() {
-        binding.progressBar.visibility = View.VISIBLE
+        _binding?.progressBar?.visibility = View.VISIBLE
         lifecycleScope.launch {
             try {
-                val db = FirebaseDatabase.getInstance("https://movies-bee24-default-rtdb.firebaseio.com").reference
+                val db = FirebaseDatabase
+                    .getInstance("https://movies-bee24-default-rtdb.firebaseio.com")
+                    .reference
                 val snapshot = db.child(Constants.DB_SUBSCRIPTIONS).get().await()
                 val subs = mutableListOf<SubscriptionRequest>()
                 for (child in snapshot.children) {
@@ -68,11 +70,12 @@ class AdminSubsFragment : Fragment() {
                         ))
                     }
                 }
+                if (_binding == null) return@launch
                 adapter.submitList(subs)
             } catch (e: Exception) {
-                requireContext().toast("লোড করতে সমস্যা: ${e.message}")
+                context?.toast("লোড করতে সমস্যা: ${e.message}")
             } finally {
-                binding.progressBar.visibility = View.GONE
+                if (_binding != null) binding.progressBar.visibility = View.GONE
             }
         }
     }
@@ -98,22 +101,19 @@ class AdminSubsFragment : Fragment() {
     private fun approveSub(sub: SubscriptionRequest) {
         lifecycleScope.launch {
             try {
-                val db = FirebaseDatabase.getInstance("https://movies-bee24-default-rtdb.firebaseio.com").reference
+                val db = FirebaseDatabase
+                    .getInstance("https://movies-bee24-default-rtdb.firebaseio.com")
+                    .reference
                 val expiry = System.currentTimeMillis() + Constants.SUBSCRIPTION_DURATION_MS
-                
-                // Update user status
                 userRepo.updateSubscription(sub.uid, Constants.SUB_PREMIUM, expiry)
-                
-                // Update subscription record
                 db.child(Constants.DB_SUBSCRIPTIONS).child(sub.uid).updateChildren(mapOf(
                     "status" to "APPROVED",
                     "expiry" to expiry
                 )).await()
-                
-                requireContext().toast("অ্যাপ্রুভ সফল হয়েছে")
-                loadSubs()
+                context?.toast("অ্যাপ্রুভ সফল হয়েছে")
+                if (_binding != null) loadSubs()
             } catch (e: Exception) {
-                requireContext().toast("অ্যাপ্রুভ করতে সমস্যা: ${e.message}")
+                context?.toast("অ্যাপ্রুভ করতে সমস্যা: ${e.message}")
             }
         }
     }
@@ -121,20 +121,17 @@ class AdminSubsFragment : Fragment() {
     private fun rejectSub(sub: SubscriptionRequest) {
         lifecycleScope.launch {
             try {
-                val db = FirebaseDatabase.getInstance("https://movies-bee24-default-rtdb.firebaseio.com").reference
-                
-                // Update user status
+                val db = FirebaseDatabase
+                    .getInstance("https://movies-bee24-default-rtdb.firebaseio.com")
+                    .reference
                 userRepo.updateSubscription(sub.uid, Constants.SUB_FREE, 0L)
-                
-                // Update subscription record
                 db.child(Constants.DB_SUBSCRIPTIONS).child(sub.uid).updateChildren(mapOf(
                     "status" to "REJECTED"
                 )).await()
-                
-                requireContext().toast("রিজেক্ট সফল হয়েছে")
-                loadSubs()
+                context?.toast("রিজেক্ট সফল হয়েছে")
+                if (_binding != null) loadSubs()
             } catch (e: Exception) {
-                requireContext().toast("রিজেক্ট করতে সমস্যা: ${e.message}")
+                context?.toast("রিজেক্ট করতে সমস্যা: ${e.message}")
             }
         }
     }
