@@ -17,6 +17,7 @@
     <color name="amber">#F59E0B</color>
     <color name="gold">#C9A84C</color>
     <color name="green">#22C55E</color>
+    <color name="blue">#3B82F6</color>
 
     <!-- Status bar / nav bar -->
     <color name="black">#000000</color>
