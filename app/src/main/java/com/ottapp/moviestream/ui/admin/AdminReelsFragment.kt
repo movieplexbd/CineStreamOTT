@@ -41,15 +41,16 @@ class AdminReelsFragment : Fragment() {
     }
 
     private fun loadReels() {
-        binding.progressBar.visibility = View.VISIBLE
+        _binding?.progressBar?.visibility = View.VISIBLE
         lifecycleScope.launch {
             try {
                 val reels = repo.getAllReels()
+                if (_binding == null) return@launch
                 adapter.submitList(reels)
             } catch (e: Exception) {
-                requireContext().toast("লোড করতে সমস্যা: ${e.message}")
+                context?.toast("লোড করতে সমস্যা: ${e.message}")
             } finally {
-                binding.progressBar.visibility = View.GONE
+                if (_binding != null) binding.progressBar.visibility = View.GONE
             }
         }
     }
@@ -73,10 +74,10 @@ class AdminReelsFragment : Fragment() {
         lifecycleScope.launch {
             try {
                 repo.deleteReel(reel.id)
-                requireContext().toast("মুছে ফেলা হয়েছে")
-                loadReels()
+                context?.toast("মুছে ফেলা হয়েছে")
+                if (_binding != null) loadReels()
             } catch (e: Exception) {
-                requireContext().toast("মুছতে সমস্যা: ${e.message}")
+                context?.toast("মুছতে সমস্যা: ${e.message}")
             }
         }
     }
