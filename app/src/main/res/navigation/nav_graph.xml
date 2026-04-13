@@ -51,7 +51,11 @@
         android:id="@+id/profileFragment"
         android:name="com.ottapp.moviestream.ui.profile.ProfileFragment"
         android:label="প্রোফাইল"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile">
+        <action android:id="@+id/action_profile_to_detail" app:destination="@id/movieDetailFragment"
+            app:enterAnim="@anim/slide_up" app:exitAnim="@anim/fade_out"
+            app:popEnterAnim="@anim/fade_in" app:popExitAnim="@anim/slide_down" />
+    </fragment>
 
     <fragment
         android:id="@+id/watchlistFragment"

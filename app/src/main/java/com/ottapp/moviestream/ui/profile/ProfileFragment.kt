@@ -18,8 +18,9 @@ import com.ottapp.moviestream.databinding.FragmentProfileBinding
 import com.ottapp.moviestream.ui.admin.AdminActivity
 import com.ottapp.moviestream.ui.subscription.SubscriptionActivity
 import androidx.navigation.fragment.findNavController
-import com.ottapp.moviestream.util.TrialManager
-import com.ottapp.moviestream.util.loadImage
+import com.ottapp.moviestream.adapter.ContinueWatchingAdapter
+import com.ottapp.moviestream.ui.player.PlayerActivity
+import com.ottapp.moviestream.util.*
 import java.text.SimpleDateFormat
 import java.util.*
 
@@ -28,6 +29,8 @@ class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
     private val viewModel: ProfileViewModel by viewModels()
+    private lateinit var watchHistoryManager: WatchHistoryManager
+    private lateinit var continueWatchingAdapter: ContinueWatchingAdapter
 
     companion object {
         private const val ADMIN_EMAIL = "a@gmail.com"
@@ -40,6 +43,9 @@ class ProfileFragment : Fragment() {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+
+        watchHistoryManager = WatchHistoryManager(requireContext())
+        setupContinueWatching()
 
         val authEmail = FirebaseAuth.getInstance().currentUser?.email
         if (authEmail == ADMIN_EMAIL) binding.btnAdmin.visibility = View.VISIBLE
@@ -181,6 +187,47 @@ class ProfileFragment : Fragment() {
 
         binding.btnSubscribe.setOnClickListener {
             startActivity(Intent(requireContext(), SubscriptionActivity::class.java))
+        }
+    }
+
+    private fun setupContinueWatching() {
+        continueWatchingAdapter = ContinueWatchingAdapter { entry ->
+            val intent = Intent(requireContext(), PlayerActivity::class.java).apply {
+                putExtra(Constants.EXTRA_MOVIE_ID,    entry.movieId)
+                putExtra(Constants.EXTRA_MOVIE_TITLE, entry.title)
+                putExtra(Constants.EXTRA_BANNER_URL,  entry.bannerUrl)
+                // We don't have the video URL here, so we'll navigate to detail instead
+                // or the player needs to fetch it. Usually, it's better to go to detail
+                // but the user asked for "same jaiga theke mone load hoi" (load from same place).
+                // If we go to detail, the detail page will show "Continue Watching" button.
+            }
+            
+            // To fulfill "load from same place", we navigate to detail which handles the resume logic.
+            val bundle = Bundle().apply {
+                putString(Constants.EXTRA_MOVIE_ID, entry.movieId)
+            }
+            findNavController().navigate(R.id.action_profile_to_detail, bundle)
+        }
+        binding.rvContinueWatching.adapter = continueWatchingAdapter
+        
+        val history = watchHistoryManager.getContinueWatching()
+        if (history.isNotEmpty()) {
+            binding.layoutContinueWatching.visibility = View.VISIBLE
+            continueWatchingAdapter.submitList(history)
+        } else {
+            binding.layoutContinueWatching.visibility = View.GONE
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Refresh history when returning to profile
+        val history = watchHistoryManager.getContinueWatching()
+        if (history.isNotEmpty()) {
+            binding.layoutContinueWatching.visibility = View.VISIBLE
+            continueWatchingAdapter.submitList(history)
+        } else {
+            binding.layoutContinueWatching.visibility = View.GONE
         }
     }
 

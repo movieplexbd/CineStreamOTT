@@ -98,6 +98,35 @@
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
+        <!-- Section: দেখা চালিয়ে যান (Continue Watching) -->
+        <LinearLayout
+            android:id="@+id/layout_continue_watching"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:visibility="gone">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="দেখা চালিয়ে যান"
+                android:textSize="12sp"
+                android:textStyle="bold"
+                android:textColor="@color/t3"
+                android:paddingHorizontal="16dp"
+                android:paddingBottom="6dp" />
+
+            <androidx.recyclerview.widget.RecyclerView
+                android:id="@+id/rv_continue_watching"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+                android:paddingHorizontal="12dp"
+                android:paddingBottom="16dp"
+                android:clipToPadding="false" />
+        </LinearLayout>
+
         <!-- Section: অ্যাকাউন্ট -->
         <TextView
             android:layout_width="wrap_content"

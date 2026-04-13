@@ -140,8 +140,15 @@ class LoginActivity : AppCompatActivity() {
     }
 
     private fun setLoading(loading: Boolean) {
-        binding.progressBar.visibility = if (loading) View.VISIBLE else View.GONE
-        binding.btnEmailAction.isEnabled = !loading
+        if (loading) {
+            binding.progressBar.visibility = View.VISIBLE
+            binding.btnEmailAction.text = ""
+            binding.btnEmailAction.isEnabled = false
+        } else {
+            binding.progressBar.visibility = View.GONE
+            binding.btnEmailAction.text = if (isSignUpMode) getString(R.string.btn_signup) else getString(R.string.btn_signin)
+            binding.btnEmailAction.isEnabled = true
+        }
     }
 
     private fun showError(msg: String) {
