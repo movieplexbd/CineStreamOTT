@@ -37,19 +37,11 @@ jobs:
         run: |
           if [ -n "$GOOGLE_SERVICES_JSON" ]; then
             echo "$GOOGLE_SERVICES_JSON" | base64 --decode > app/google-services.json
+          else
+            echo "Warning: GOOGLE_SERVICES_JSON secret is missing. Using existing file if available."
           fi
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
 
       - name: Grant execute permission to gradlew
         run: chmod +x gradlew
@@ -75,6 +67,7 @@ jobs:
           if [ -n "$RELEASE_KEYSTORE_B64" ]; then
             echo "$RELEASE_KEYSTORE_B64" | base64 --decode > keystore/cinestream-release.jks
           else
+            echo "Generating a temporary release keystore as secret is missing..."
             keytool -genkey -v \
               -keystore keystore/cinestream-release.jks \
               -alias cinestream_release \
@@ -115,8 +108,12 @@ jobs:
           mkdir -p dist
           DEBUG_APK=$(find app/build/outputs/apk/debug -name "*.apk" | head -1)
           RELEASE_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
-          cp "$DEBUG_APK"   dist/CineStream-v${{ steps.version.outputs.version_name }}-debug.apk
-          cp "$RELEASE_APK" dist/CineStreamOTT-release.apk
+          if [ -f "$DEBUG_APK" ]; then
+            cp "$DEBUG_APK" dist/CineStream-v${{ steps.version.outputs.version_name }}-debug.apk
+          fi
+          if [ -f "$RELEASE_APK" ]; then
+            cp "$RELEASE_APK" dist/CineStreamOTT-release.apk
+          fi
 
       - name: Upload Debug APK as artifact
         uses: actions/upload-artifact@v4

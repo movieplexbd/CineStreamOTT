@@ -9,10 +9,11 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import com.ottapp.moviestream.R
+import com.ottapp.moviestream.adapter.MovieGridAdapter
 import com.ottapp.moviestream.data.repository.ActorRepository
 import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.databinding.FragmentActorProfileBinding
-import com.ottapp.moviestream.ui.movies.MovieAdapter
+import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.loadImage
 import com.ottapp.moviestream.util.toast
 import kotlinx.coroutines.launch
@@ -23,7 +24,7 @@ class ActorProfileFragment : Fragment() {
     private val binding get() = _binding!!
     private val actorRepo = ActorRepository()
     private val movieRepo = MovieRepository()
-    private lateinit var movieAdapter: MovieAdapter
+    private lateinit var movieAdapter: MovieGridAdapter
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentActorProfileBinding.inflate(inflater, container, false)
@@ -37,8 +38,8 @@ class ActorProfileFragment : Fragment() {
 
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        movieAdapter = MovieAdapter { movie ->
-            val bundle = Bundle().apply { putString("extra_movie_id", movie.id) }
+        movieAdapter = MovieGridAdapter { movie ->
+            val bundle = Bundle().apply { putString(Constants.EXTRA_MOVIE_ID, movie.id) }
             findNavController().navigate(R.id.movieDetailFragment, bundle)
         }
 
