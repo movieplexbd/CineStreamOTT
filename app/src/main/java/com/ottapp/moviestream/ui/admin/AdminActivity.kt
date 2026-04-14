@@ -2,85 +2,96 @@ package com.ottapp.moviestream.ui.admin
 
 import android.os.Bundle
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import com.google.android.material.tabs.TabLayout
 import com.ottapp.moviestream.R
 import com.ottapp.moviestream.databinding.ActivityAdminBinding
 
 class AdminActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAdminBinding
+    private val fragmentCache = mutableMapOf<Int, Fragment>()
 
-    private val fragments = mutableMapOf<Int, Fragment>()
+    data class TabInfo(val index: Int, val title: String, val iconRes: Int, val fragmentId: Int)
+
+    private val tabs = listOf(
+        TabInfo(0, "মুভি",      R.drawable.ic_nav_movies,  0),
+        TabInfo(1, "ব্যানার",   R.drawable.ic_nav_home,    1),
+        TabInfo(2, "রিলস",      R.drawable.ic_nav_reels,   2),
+        TabInfo(3, "ইউজার",     R.drawable.ic_nav_profile, 3),
+        TabInfo(4, "পেমেন্ট",  R.drawable.ic_nav_download,4),
+        TabInfo(5, "অভিনেতা",  R.drawable.ic_nav_profile, 5)
+    )
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        try {
-            binding = ActivityAdminBinding.inflate(layoutInflater)
-            setContentView(binding.root)
 
+        binding = ActivityAdminBinding.inflate(layoutInflater)
+        setContentView(binding.root)
+
+        try {
             setSupportActionBar(binding.toolbar)
             supportActionBar?.setDisplayHomeAsUpEnabled(true)
             supportActionBar?.title = "মাস্টার কন্ট্রোল"
-
-            if (savedInstanceState == null) {
-                showFragment(R.id.adminMoviesFragment)
-            }
-
-            binding.adminBottomNavigation.setOnItemSelectedListener { item ->
-                showFragment(item.itemId)
-                true
-            }
         } catch (e: Exception) {
-            Log.e("AdminActivity", "Crash in onCreate: ${e.message}", e)
-            finish()
+            Log.w("AdminActivity", "Toolbar: ${e.message}")
         }
-    }
 
-    private fun showFragment(itemId: Int) {
-        val tag = itemId.toString()
-        val existing = supportFragmentManager.findFragmentByTag(tag)
+        tabs.forEach { tab ->
+            val t = binding.adminTabLayout.newTab()
+            t.text = tab.title
+            try { t.setIcon(tab.iconRes) } catch (e: Exception) { /* icon optional */ }
+            binding.adminTabLayout.addTab(t)
+        }
 
-        val fragment: Fragment = when {
-            existing != null -> {
-                updateTitle(itemId)
-                supportFragmentManager.beginTransaction()
-                    .show(existing)
-                    .also { tx ->
-                        fragments.values.forEach { f ->
-                            if (f.tag != tag && !f.isHidden) tx.hide(f)
-                        }
-                    }
-                    .commit()
-                return
+        binding.adminTabLayout.addOnTabSelectedListener(object : TabLayout.OnTabSelectedListener {
+            override fun onTabSelected(tab: TabLayout.Tab?) {
+                val index = tab?.position ?: 0
+                loadFragment(index)
+                val title = tabs.getOrNull(index)?.title ?: "মাস্টার কন্ট্রোল"
+                supportActionBar?.title = title
             }
-            itemId == R.id.adminMoviesFragment   -> AdminMoviesFragment()
-            itemId == R.id.adminBannersFragment  -> AdminBannersFragment()
-            itemId == R.id.adminReelsFragment    -> AdminReelsFragment()
-            itemId == R.id.adminUsersFragment    -> AdminUsersFragment()
-            itemId == R.id.adminSubsFragment     -> AdminSubsFragment()
-            itemId == R.id.adminActorsFragment   -> AdminActorsFragment()
-            else -> AdminMoviesFragment()
+            override fun onTabUnselected(tab: TabLayout.Tab?) {}
+            override fun onTabReselected(tab: TabLayout.Tab?) {}
+        })
+
+        if (savedInstanceState == null) {
+            loadFragment(0)
         }
-
-        fragments[itemId] = fragment
-        updateTitle(itemId)
-
-        val tx = supportFragmentManager.beginTransaction()
-        fragments.values.forEach { f -> if (!f.isHidden && f !== fragment) tx.hide(f) }
-        tx.add(R.id.admin_fragment_container, fragment, tag)
-        tx.commit()
     }
 
-    private fun updateTitle(itemId: Int) {
-        supportActionBar?.title = when (itemId) {
-            R.id.adminMoviesFragment  -> "মুভি ম্যানেজমেন্ট"
-            R.id.adminBannersFragment -> "ব্যানার ম্যানেজমেন্ট"
-            R.id.adminReelsFragment   -> "রিলস ম্যানেজমেন্ট"
-            R.id.adminUsersFragment   -> "ইউজার ম্যানেজমেন্ট"
-            R.id.adminSubsFragment    -> "পেমেন্ট রিকোয়েস্ট"
-            R.id.adminActorsFragment  -> "অভিনেতা ম্যানেজমেন্ট"
-            else -> "মাস্টার কন্ট্রোল"
+    private fun loadFragment(index: Int) {
+        val target: Fragment = fragmentCache.getOrPut(index) {
+            when (index) {
+                0 -> AdminMoviesFragment()
+                1 -> AdminBannersFragment()
+                2 -> AdminReelsFragment()
+                3 -> AdminUsersFragment()
+                4 -> AdminSubsFragment()
+                5 -> AdminActorsFragment()
+                else -> AdminMoviesFragment()
+            }
+        }
+
+        try {
+            val tx = supportFragmentManager.beginTransaction()
+            if (!target.isAdded) {
+                fragmentCache.values.forEach { f ->
+                    if (f !== target && f.isAdded && !f.isHidden) tx.hide(f)
+                }
+                tx.add(R.id.admin_fragment_container, target, "admin_frag_$index")
+            } else {
+                fragmentCache.values.forEach { f ->
+                    if (f !== target && f.isAdded && !f.isHidden) tx.hide(f)
+                }
+                if (target.isHidden) tx.show(target)
+            }
+            tx.commitAllowingStateLoss()
+        } catch (e: Exception) {
+            Log.e("AdminActivity", "Fragment error: ${e.message}", e)
+            Toast.makeText(this, "সমস্যা হয়েছে: ${e.message}", Toast.LENGTH_LONG).show()
         }
     }
 
