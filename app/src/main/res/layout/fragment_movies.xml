@@ -20,7 +20,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="মুভি"
+            android:text="à¦®à§à¦­à¦¿"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/t1"
@@ -44,32 +44,32 @@
             android:paddingHorizontal="12dp">
 
             <Button android:id="@+id/tab_all"
-                style="@style/CategoryChip"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_marginEnd="8dp"
-                android:text="সব মুভি" />
+                android:text="à¦¸à¦¬ à¦®à§à¦­à¦¿" />
 
             <Button android:id="@+id/tab_trending"
-                style="@style/CategoryChip"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_marginEnd="8dp"
-                android:text="🔥 ট্রেন্ডিং" />
+                android:text="ð¥ à¦à§à¦°à§à¦¨à§à¦¡à¦¿à¦" />
 
             <Button android:id="@+id/tab_bangla"
-                style="@style/CategoryChip"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_marginEnd="8dp"
-                android:text="🇧🇩 বাংলা" />
+                android:text="ð§ð© à¦¬à¦¾à¦à¦²à¦¾" />
 
             <Button android:id="@+id/tab_hindi"
-                style="@style/CategoryChip"
+                style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_marginEnd="8dp"
-                android:text="🎬 হিন্দি" />
+                android:text="ð¬ à¦¹à¦¿à¦¨à§à¦¦à¦¿" />
 
         </LinearLayout>
     </HorizontalScrollView>
@@ -131,12 +131,12 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="🎬"
+            android:text="ð¬"
             android:textSize="48sp" />
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="এই ক্যাটাগরিতে কোনো মুভি নেই"
+            android:text="à¦à¦ à¦à§à¦¯à¦¾à¦à¦¾à¦à¦°à¦¿à¦¤à§ à¦à§à¦¨à§ à¦®à§à¦­à¦¿ à¦¨à§à¦"
             android:textSize="14sp"
             android:textColor="@color/t3"
             android:layout_marginTop="12dp"

@@ -5,13 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- ── Gradient background ── -->
+    <!-- ââ Gradient background ââ -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/bg_login_gradient" />
 
-    <!-- ── Top-left blob ── -->
+    <!-- ââ Top-left blob ââ -->
     <View
         android:layout_width="260dp"
         android:layout_height="260dp"
@@ -20,7 +20,7 @@
         android:translationY="-90dp"
         android:background="@drawable/bg_login_blob" />
 
-    <!-- ── Bottom-right blob ── -->
+    <!-- ââ Bottom-right blob ââ -->
     <View
         android:layout_width="220dp"
         android:layout_height="220dp"
@@ -29,7 +29,7 @@
         android:translationY="80dp"
         android:background="@drawable/bg_login_blob" />
 
-    <!-- ── Auth Title (top-right, fixed) ── -->
+    <!-- ââ Auth Title (top-right, fixed) ââ -->
     <TextView
         android:id="@+id/tv_auth_title"
         android:layout_width="wrap_content"
@@ -43,7 +43,7 @@
         android:textStyle="bold"
         android:letterSpacing="0.02" />
 
-    <!-- ── Scrollable form ── -->
+    <!-- ââ Scrollable form ââ -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -61,7 +61,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="148dp" />
 
-            <!-- ── White card ── -->
+            <!-- ââ White card ââ -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -235,8 +235,6 @@
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
                         android:gravity="center"
-                        android:layout_marginStart="auto"
-                        android:layout_marginEnd="auto"
                         android:text="@string/toggle_to_signup"
                         android:textSize="13sp"
                         android:textColor="#FF4B6A"
@@ -255,7 +253,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="  অথবা  "
+                            android:text="  à¦à¦¥à¦¬à¦¾  "
                             android:textSize="12sp"
                             android:textColor="#AAAAAA" />
                         <View android:layout_width="0dp" android:layout_height="1dp"
