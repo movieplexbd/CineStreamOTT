@@ -73,3 +73,13 @@
     <string name="sub_price">৳১০/এককালীন</string>
     <string name="sub_success_title">সাবমিট সফল হয়েছে!</string>
 </resources>
+
+    <!-- Smart Request System -->
+    <string name="search_or_request">মুভি খুঁজুন বা রিকোয়েস্ট করুন...</string>
+    <string name="request_this_movie">এই মুভিটি রিকোয়েস্ট করুন</string>
+    <string name="request_sent_success">আপনার রিকোয়েস্ট সফলভাবে পাঠানো হয়েছে!</string>
+    <string name="request_already_exists">এই মুভিটি ইতিমধ্যে রিকোয়েস্ট করা হয়েছে।</string>
+    <string name="trending_request">🔥 ট্রেন্ডিং রিকোয়েস্ট</string>
+    <string name="available_now">এখনই দেখুন</string>
+    <string name="coming_soon">শীঘ্রই আসছে</string>
+    <string name="request_limit_reached">আপনি আজ আর রিকোয়েস্ট করতে পারবেন না।</string>

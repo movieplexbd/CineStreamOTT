@@ -2,7 +2,9 @@ package com.ottapp.moviestream.ui.search
 
 import androidx.lifecycle.*
 import com.ottapp.moviestream.data.model.Movie
+import com.ottapp.moviestream.data.model.MovieRequest
 import com.ottapp.moviestream.data.repository.MovieRepository
+import com.ottapp.moviestream.data.repository.RequestRepository
 import com.ottapp.moviestream.util.Constants
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -11,6 +13,7 @@ import kotlinx.coroutines.launch
 class SearchViewModel : ViewModel() {
 
     private val repo = MovieRepository()
+    private val requestRepo = RequestRepository()
 
     private val _results = MutableLiveData<List<Movie>>(emptyList())
     val results: LiveData<List<Movie>> = _results
@@ -24,6 +27,12 @@ class SearchViewModel : ViewModel() {
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
+    private val _requestStatus = MutableLiveData<Boolean?>()
+    val requestStatus: LiveData<Boolean?> = _requestStatus
+
+    private val _trendingRequests = MutableLiveData<List<MovieRequest>>(emptyList())
+    val trendingRequests: LiveData<List<MovieRequest>> = _trendingRequests
+
     private var allMovies: List<Movie> = emptyList()
     private var currentQuery = ""
     private var searchJob: Job? = null
@@ -33,10 +42,18 @@ class SearchViewModel : ViewModel() {
         viewModelScope.launch {
             try {
                 allMovies = repo.getAllMovies()
+                loadTrendingRequests()
             } catch (e: Exception) {
                 _error.value = e.message
                 allMovies = emptyList()
             }
+        }
+    }
+
+    private fun loadTrendingRequests() {
+        viewModelScope.launch {
+            val requests = requestRepo.getAllRequests()
+            _trendingRequests.value = requests.filter { it.count >= 5 }.sortedByDescending { it.count }
         }
     }
 
@@ -53,8 +70,11 @@ class SearchViewModel : ViewModel() {
             try {
                 delay(300)
                 val q = query.lowercase()
+                
+                // Fuzzy matching: check if title contains query or query contains title
                 val filtered = allMovies.filter {
-                    it.title.orEmpty().lowercase().contains(q) ||
+                    val title = it.title.orEmpty().lowercase()
+                    title.contains(q) || q.contains(title) ||
                     it.description.orEmpty().lowercase().contains(q) ||
                     it.category.orEmpty().lowercase().contains(q)
                 }
@@ -65,6 +85,20 @@ class SearchViewModel : ViewModel() {
                 _loading.value = false
             }
         }
+    }
+
+    fun submitRequest(movieTitle: String) {
+        viewModelScope.launch {
+            _loading.value = true
+            val success = requestRepo.submitRequest(movieTitle)
+            _requestStatus.value = success
+            _loading.value = false
+            if (success) loadTrendingRequests()
+        }
+    }
+
+    fun resetRequestStatus() {
+        _requestStatus.value = null
     }
 
     fun setFilter(cat: String) {

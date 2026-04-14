@@ -53,6 +53,7 @@ class SearchFragment : Fragment() {
         setupFilters()
         setupVoiceSearch()
         setupTrendingSearches()
+        setupRequestButton()
         observeViewModel()
 
         // Handle incoming search query from Reels
@@ -123,6 +124,15 @@ class SearchFragment : Fragment() {
         }
     }
 
+    private fun setupRequestButton() {
+        binding.btnRequestMovie.setOnClickListener {
+            val query = binding.etSearch.text.toString().trim()
+            if (query.isNotEmpty()) {
+                viewModel.submitRequest(query)
+            }
+        }
+    }
+
     private fun startVoiceSearch() {
         try {
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
@@ -172,9 +182,52 @@ class SearchFragment : Fragment() {
             adapter.submitList(movies)
             val query = binding.etSearch.text.toString()
             when {
-                query.isBlank()  -> { binding.layoutEmpty.hide(); binding.layoutSearchHint.show() }
-                movies.isEmpty() -> { binding.layoutEmpty.show(); binding.layoutSearchHint.hide() }
-                else             -> { binding.layoutEmpty.hide(); binding.layoutSearchHint.hide() }
+                query.isBlank()  -> { 
+                    binding.layoutEmpty.hide()
+                    binding.layoutSearchHint.show() 
+                }
+                movies.isEmpty() -> { 
+                    binding.layoutEmpty.show()
+                    binding.layoutSearchHint.hide() 
+                }
+                else             -> { 
+                    binding.layoutEmpty.hide()
+                    binding.layoutSearchHint.hide() 
+                }
+            }
+        }
+
+        viewModel.requestStatus.observe(viewLifecycleOwner) { success ->
+            if (success == true) {
+                Toast.makeText(requireContext(), getString(R.string.request_sent_success), Toast.LENGTH_LONG).show()
+                binding.etSearch.setText("")
+                viewModel.resetRequestStatus()
+            } else if (success == false) {
+                Toast.makeText(requireContext(), "কিছু ভুল হয়েছে, আবার চেষ্টা করুন", Toast.LENGTH_SHORT).show()
+                viewModel.resetRequestStatus()
+            }
+        }
+
+        viewModel.trendingRequests.observe(viewLifecycleOwner) { requests ->
+            if (requests.isNotEmpty()) {
+                binding.layoutTrendingRequests.show()
+                binding.cgTrendingRequests.removeAllViews()
+                requests.forEach { request ->
+                    val chip = Chip(requireContext()).apply {
+                        text = "${request.title} (${request.count})"
+                        isClickable = true
+                        setChipBackgroundColorResource(R.color.red_soft)
+                        setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
+                        setOnClickListener {
+                            binding.etSearch.setText(request.title)
+                            binding.etSearch.setSelection(request.title.length)
+                            viewModel.search(request.title)
+                        }
+                    }
+                    binding.cgTrendingRequests.addView(chip)
+                }
+            } else {
+                binding.layoutTrendingRequests.hide()
             }
         }
     }
