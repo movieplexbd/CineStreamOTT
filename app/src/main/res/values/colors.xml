@@ -17,12 +17,9 @@
     <color name="t1">#0D0D0D</color>
     <color name="t2">#4A4A5A</color>
     <color name="t3">#9999AA</color>
-    <color name="t2_color">#4A4A5A</color>
-    <color name="t3_color">#9999AA</color>
 
     <!-- Status Colors -->
     <color name="red">#E50914</color>
-    <color name="red_color">#E50914</color>
     <color name="red_soft">#15E50914</color>
     <color name="green">#00A846</color>
     <color name="blue">#1976D2</color>
@@ -33,7 +30,6 @@
     <color name="white">#FFFFFF</color>
     <color name="transparent">#00000000</color>
     <color name="border">#1A000000</color>
-    <color name="nav_icon_color">#9999BB</color>
     <color name="player_bg">#000000</color>
     <color name="player_overlay">#99000000</color>
 
