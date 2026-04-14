@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+  <resources>
+      <!-- Deep Dark OTT Background -->
+      <color name="bg">#0A0A0A</color>
+      <color name="surface">#141414</color>
+      <color name="surface2">#1F1F1F</color>
+      <color name="border">#2C2C2C</color>
+
+      <!-- Text on dark -->
+      <color name="t1">#F2F2F2</color>
+      <color name="t2">#9A9A9A</color>
+      <color name="t3">#555555</color>
+
+      <!-- Accents unchanged -->
+      <color name="red">#E8431C</color>
+      <color name="red_soft">#3D1208</color>
+      <color name="amber">#F59E0B</color>
+      <color name="gold">#C9A84C</color>
+      <color name="green">#22C55E</color>
+      <color name="blue">#60A5FA</color>
+
+      <!-- Static colors -->
+      <color name="black">#000000</color>
+      <color name="white">#FFFFFF</color>
+      <color name="transparent">#00000000</color>
+
+      <!-- Player -->
+      <color name="player_bg">#000000</color>
+      <color name="player_overlay">#99000000</color>
+  </resources>

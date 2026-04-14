@@ -1,30 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources>
-    <!-- Background -->
-    <color name="bg">#F6F4F0</color>
-    <color name="surface">#FFFFFF</color>
-    <color name="surface2">#EDEAE5</color>
-    <color name="border">#E2DED7</color>
+  <resources>
+      <!-- Background (light / white theme) -->
+      <color name="bg">#F6F4F0</color>
+      <color name="surface">#FFFFFF</color>
+      <color name="surface2">#EDEAE5</color>
+      <color name="border">#E2DED7</color>
 
-    <!-- Text -->
-    <color name="t1">#1C1917</color>
-    <color name="t2">#78716C</color>
-    <color name="t3">#B8B0A8</color>
+      <!-- Text -->
+      <color name="t1">#1C1917</color>
+      <color name="t2">#78716C</color>
+      <color name="t3">#B8B0A8</color>
 
-    <!-- Accent -->
-    <color name="red">#E8431C</color>
-    <color name="red_soft">#FEF0EC</color>
-    <color name="amber">#F59E0B</color>
-    <color name="gold">#C9A84C</color>
-    <color name="green">#22C55E</color>
-    <color name="blue">#3B82F6</color>
+      <!-- Accent -->
+      <color name="red">#E8431C</color>
+      <color name="red_soft">#FEF0EC</color>
+      <color name="amber">#F59E0B</color>
+      <color name="gold">#C9A84C</color>
+      <color name="green">#22C55E</color>
+      <color name="blue">#3B82F6</color>
+      <color name="blue_glow">#1A3B82F6</color>
 
-    <!-- Status bar / nav bar -->
-    <color name="black">#000000</color>
-    <color name="white">#FFFFFF</color>
-    <color name="transparent">#00000000</color>
+      <!-- Static -->
+      <color name="black">#000000</color>
+      <color name="white">#FFFFFF</color>
+      <color name="transparent">#00000000</color>
 
-    <!-- Player -->
-    <color name="player_bg">#000000</color>
-    <color name="player_overlay">#99000000</color>
-</resources>
+      <!-- Player -->
+      <color name="player_bg">#000000</color>
+      <color name="player_overlay">#99000000</color>
+  </resources>
