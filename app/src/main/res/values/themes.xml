@@ -1,14 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <!-- ═══ Default Light / White Theme (Material 3) ═══ -->
+    <!-- Default Light / White Theme (Material 3) -->
     <style name="Theme.OTTStreamingApp" parent="Theme.Material3.Light.NoActionBar">
-        <item name="colorPrimary">@color/red</item>
+        <item name="colorPrimary">@color/brand_primary</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorPrimaryContainer">@color/red_soft</item>
-        <item name="colorOnPrimaryContainer">@color/red</item>
-        <item name="colorSecondary">@color/amber</item>
+        <item name="colorOnPrimaryContainer">@color/brand_primary</item>
+        <item name="colorSecondary">@color/brand_secondary</item>
         <item name="colorOnSecondary">@color/white</item>
+        <item name="colorSecondaryContainer">@color/surface2</item>
         <item name="colorTertiary">@color/blue</item>
         <item name="colorSurface">@color/surface</item>
         <item name="colorOnSurface">@color/t1</item>
@@ -18,7 +19,7 @@
         <item name="android:colorBackground">@color/bg</item>
         <item name="android:windowBackground">@color/bg</item>
         <item name="android:statusBarColor">@android:color/transparent</item>
-        <item name="android:navigationBarColor">@color/surface</item>
+        <item name="android:navigationBarColor">@color/white</item>
         <item name="android:windowLightStatusBar">true</item>
         <item name="android:windowActivityTransitions">true</item>
         <item name="windowActionBar">false</item>
@@ -27,9 +28,9 @@
 
     <style name="Theme.OTTStreamingApp.NoActionBar" parent="Theme.OTTStreamingApp" />
 
-    <!-- ═══ Player Theme (Always dark) ═══ -->
+    <!-- Player Theme (Always dark) -->
     <style name="Theme.OTTStreamingApp.Player" parent="Theme.Material3.Dark.NoActionBar">
-        <item name="colorPrimary">@color/red</item>
+        <item name="colorPrimary">@color/brand_primary</item>
         <item name="colorOnPrimary">@color/white</item>
         <item name="colorSurface">#141414</item>
         <item name="android:colorBackground">#000000</item>
@@ -44,19 +45,19 @@
     <!-- Legacy Dark alias -->
     <style name="Theme.OTTStreamingApp.Dark" parent="Theme.OTTStreamingApp.Player" />
 
-    <!-- ═══ Splash ═══ -->
+    <!-- Splash -->
     <style name="Theme.OTTStreamingApp.Splash" parent="Theme.OTTStreamingApp.NoActionBar">
-        <item name="android:windowBackground">@drawable/splash_bg</item>
-        <item name="android:statusBarColor">@color/red</item>
-        <item name="android:windowLightStatusBar">false</item>
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@color/bg</item>
+        <item name="android:windowLightStatusBar">true</item>
     </style>
 
-    <!-- ═══ Login ═══ -->
+    <!-- Login -->
     <style name="Theme.OTTStreamingApp.Login" parent="Theme.OTTStreamingApp">
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
-    <!-- ═══ Circular image shape for actor cards ═══ -->
+    <!-- Circular image shape for actor cards -->
     <style name="CircleImageStyle" parent="">
         <item name="cornerFamily">rounded</item>
         <item name="cornerSize">50%</item>

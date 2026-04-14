@@ -136,30 +136,30 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag_name }}
           name: "CineStream v${{ steps.version.outputs.version_name }} (${{ steps.version.outputs.build_date }})"
           body: |
-            ## 🎬 CineStream OTT — v${{ steps.version.outputs.version_name }}
+            ## CineStream OTT v${{ steps.version.outputs.version_name }} - White Theme Edition
 
             **Version:** ${{ steps.version.outputs.version_name }}
             **Build:** ${{ steps.version.outputs.version_code }}
             **Date:** ${{ steps.version.outputs.build_date }}
             **Commit:** ${{ steps.version.outputs.short_sha }}
-            **Run:** ${{ github.run_number }}
 
             ---
 
-            ### ✅ নতুন ফিচার (v2.9.0)
-            - ✨ **Premium Onboarding** — সম্পূর্ণ নতুন এবং আধুনিক অনবোর্ডিং ফ্লো।
-            - 🎨 **Material 3 Design** — মেটেরিয়াল ৩ ডিজাইন গাইডলাইন অনুসরণ করে প্রিমিয়াম লুক।
-            - 📐 **Vector Graphics** — সব ইমেজ PNG থেকে VectorDrawable (.xml) এ কনভার্ট করা হয়েছে।
-            - 🔄 **Smooth Animations** — ViewPager2 ব্যবহার করে স্মুথ স্লাইড এবং অ্যানিমেশন।
-            - 🎯 **Perfect Circles** — প্লে বাটন এবং ডট ইন্ডিকেটরগুলোকে নিখুঁত বৃত্তাকার করা হয়েছে।
-            - 🛠️ **Bug Fix** — অনবোর্ডিং শেষ করার পর পুনরায় দেখানোর সমস্যা সমাধান করা হয়েছে।
+            ### v3.0.0 White Theme Edition
+            - Premium White Theme - Apple-style soft white background design
+            - Netflix-style Brand Colors - Primary Red + Warm Orange accent
+            - Card Shadows & Borders - Subtle shadows on white surfaces
+            - Light Status Bar - Dark icons on white status bar
+            - Dark Player Preserved - Player screen stays fully dark
+            - Premium Gold Badges - Gold gradient premium badge design
+            - New Search Box - EFEFEF background, 28dp rounded search box
+            - Shimmer Effects - Optimized shimmer loading for light theme
+            - All drawables redesigned for white theme consistency
 
             ---
 
-            ### 📥 APK ডাউনলোড করুন
-            নিচের **Assets** সেকশন থেকে `CineStreamOTT-release.apk` ডাউনলোড করুন।
-
-            > ⚠️ ইনস্টল করার আগে Settings → Unknown Sources / Install Unknown Apps চালু করুন।
+            ### APK Download
+            Download `CineStreamOTT-release.apk` from the Assets section below.
           files: dist/CineStreamOTT-release.apk
           draft: false
           prerelease: false
