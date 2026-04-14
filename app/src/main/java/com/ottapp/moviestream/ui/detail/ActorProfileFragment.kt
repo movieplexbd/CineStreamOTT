@@ -38,10 +38,10 @@ class ActorProfileFragment : Fragment() {
 
         binding.toolbar.setNavigationOnClickListener { findNavController().popBackStack() }
 
-        movieAdapter = MovieGridAdapter { movie ->
+        movieAdapter = MovieGridAdapter(onClick = { movie ->
             val bundle = Bundle().apply { putString(Constants.EXTRA_MOVIE_ID, movie.id) }
             findNavController().navigate(R.id.movieDetailFragment, bundle)
-        }
+        })
 
         binding.rvMovies.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.rvMovies.adapter = movieAdapter
