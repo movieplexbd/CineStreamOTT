@@ -21,9 +21,10 @@ class SubscriptionDialog : BottomSheetDialogFragment() {
     companion object {
         const val TAG = "SubscriptionDialog"
 
-        private const val BKASH_NUMBER = "01700000000"
-        private const val MONTHLY_PRICE = "৯৯"
-        private const val YEARLY_PRICE = "৭৯৯"
+        private const val BKASH_NUMBER = "01913305107"
+        private const val MONTHLY_PRICE = "১০"
+        private const val YEARLY_PRICE = "১০০"
+        private const val DB_URL = "https://movies-bee24-default-rtdb.firebaseio.com"
 
         fun newInstance() = SubscriptionDialog()
     }
@@ -114,7 +115,7 @@ class SubscriptionDialog : BottomSheetDialogFragment() {
                 "status"    to "pending"
             )
 
-            FirebaseDatabase.getInstance()
+            FirebaseDatabase.getInstance(DB_URL)
                 .getReference("subscription_requests")
                 .push()
                 .setValue(data)

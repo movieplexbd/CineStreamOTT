@@ -71,7 +71,8 @@ package com.ottapp.moviestream
       }
 
       private suspend fun checkUpdate() {
-          val snapshot = FirebaseDatabase.getInstance().getReference("app_update").get().await()
+          val dbUrl = "https://movies-bee24-default-rtdb.firebaseio.com"
+          val snapshot = FirebaseDatabase.getInstance(dbUrl).getReference("app_update").get().await()
           if (snapshot.exists()) {
               val latestVersion = snapshot.child("version_code").getValue(Int::class.java) ?: 0
               val currentVersion = packageManager.getPackageInfo(packageName, 0).versionCode
