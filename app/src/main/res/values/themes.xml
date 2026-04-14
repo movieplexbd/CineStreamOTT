@@ -1,59 +1,65 @@
 <?xml version="1.0" encoding="utf-8"?>
-  <resources>
+<resources>
 
-      <!-- ═══ Default Light / White Theme (Material 3) ═══ -->
-      <style name="Theme.OTTStreamingApp" parent="Theme.Material3.Light.NoActionBar">
-          <item name="colorPrimary">@color/red</item>
-          <item name="colorOnPrimary">@color/white</item>
-          <item name="colorPrimaryContainer">@color/red_soft</item>
-          <item name="colorOnPrimaryContainer">@color/red</item>
-          <item name="colorSecondary">@color/amber</item>
-          <item name="colorOnSecondary">@color/white</item>
-          <item name="colorTertiary">@color/blue</item>
-          <item name="colorSurface">@color/surface</item>
-          <item name="colorOnSurface">@color/t1</item>
-          <item name="colorSurfaceVariant">@color/surface2</item>
-          <item name="colorOnSurfaceVariant">@color/t2</item>
-          <item name="colorOutline">@color/border</item>
-          <item name="android:colorBackground">@color/bg</item>
-          <item name="android:windowBackground">@color/bg</item>
-          <item name="android:statusBarColor">@android:color/transparent</item>
-          <item name="android:navigationBarColor">@color/surface</item>
-          <item name="android:windowLightStatusBar">true</item>
-          <item name="android:windowActivityTransitions">true</item>
-          <item name="windowActionBar">false</item>
-          <item name="windowNoTitle">true</item>
-      </style>
+    <!-- ═══ Default Light / White Theme (Material 3) ═══ -->
+    <style name="Theme.OTTStreamingApp" parent="Theme.Material3.Light.NoActionBar">
+        <item name="colorPrimary">@color/red</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorPrimaryContainer">@color/red_soft</item>
+        <item name="colorOnPrimaryContainer">@color/red</item>
+        <item name="colorSecondary">@color/amber</item>
+        <item name="colorOnSecondary">@color/white</item>
+        <item name="colorTertiary">@color/blue</item>
+        <item name="colorSurface">@color/surface</item>
+        <item name="colorOnSurface">@color/t1</item>
+        <item name="colorSurfaceVariant">@color/surface2</item>
+        <item name="colorOnSurfaceVariant">@color/t2</item>
+        <item name="colorOutline">@color/border</item>
+        <item name="android:colorBackground">@color/bg</item>
+        <item name="android:windowBackground">@color/bg</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:navigationBarColor">@color/surface</item>
+        <item name="android:windowLightStatusBar">true</item>
+        <item name="android:windowActivityTransitions">true</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 
-      <style name="Theme.OTTStreamingApp.NoActionBar" parent="Theme.OTTStreamingApp" />
+    <style name="Theme.OTTStreamingApp.NoActionBar" parent="Theme.OTTStreamingApp" />
 
-      <!-- ═══ Player Theme (Always dark — never affected by system theme) ═══ -->
-      <style name="Theme.OTTStreamingApp.Player" parent="Theme.Material3.Dark.NoActionBar">
-          <item name="colorPrimary">@color/red</item>
-          <item name="colorOnPrimary">@color/white</item>
-          <item name="colorSurface">#141414</item>
-          <item name="android:colorBackground">#000000</item>
-          <item name="android:windowBackground">#000000</item>
-          <item name="android:statusBarColor">#000000</item>
-          <item name="android:navigationBarColor">#000000</item>
-          <item name="android:windowLightStatusBar">false</item>
-          <item name="windowActionBar">false</item>
-          <item name="windowNoTitle">true</item>
-      </style>
+    <!-- ═══ Player Theme (Always dark) ═══ -->
+    <style name="Theme.OTTStreamingApp.Player" parent="Theme.Material3.Dark.NoActionBar">
+        <item name="colorPrimary">@color/red</item>
+        <item name="colorOnPrimary">@color/white</item>
+        <item name="colorSurface">#141414</item>
+        <item name="android:colorBackground">#000000</item>
+        <item name="android:windowBackground">#000000</item>
+        <item name="android:statusBarColor">#000000</item>
+        <item name="android:navigationBarColor">#000000</item>
+        <item name="android:windowLightStatusBar">false</item>
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+    </style>
 
-      <!-- Legacy Dark alias (kept for backward compat) -->
-      <style name="Theme.OTTStreamingApp.Dark" parent="Theme.OTTStreamingApp.Player" />
+    <!-- Legacy Dark alias -->
+    <style name="Theme.OTTStreamingApp.Dark" parent="Theme.OTTStreamingApp.Player" />
 
-      <!-- ═══ Splash ═══ -->
-      <style name="Theme.OTTStreamingApp.Splash" parent="Theme.OTTStreamingApp.NoActionBar">
-          <item name="android:windowBackground">@drawable/splash_bg</item>
-          <item name="android:statusBarColor">@color/red</item>
-          <item name="android:windowLightStatusBar">false</item>
-      </style>
+    <!-- ═══ Splash ═══ -->
+    <style name="Theme.OTTStreamingApp.Splash" parent="Theme.OTTStreamingApp.NoActionBar">
+        <item name="android:windowBackground">@drawable/splash_bg</item>
+        <item name="android:statusBarColor">@color/red</item>
+        <item name="android:windowLightStatusBar">false</item>
+    </style>
 
-      <!-- ═══ Login ═══ -->
-      <style name="Theme.OTTStreamingApp.Login" parent="Theme.OTTStreamingApp">
-          <item name="android:windowSoftInputMode">adjustResize</item>
-      </style>
+    <!-- ═══ Login ═══ -->
+    <style name="Theme.OTTStreamingApp.Login" parent="Theme.OTTStreamingApp">
+        <item name="android:windowSoftInputMode">adjustResize</item>
+    </style>
 
-  </resources>
+    <!-- ═══ Circular image shape for actor cards ═══ -->
+    <style name="CircleImageStyle" parent="">
+        <item name="cornerFamily">rounded</item>
+        <item name="cornerSize">50%</item>
+    </style>
+
+</resources>

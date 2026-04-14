@@ -198,6 +198,10 @@ package com.ottapp.moviestream.ui.profile
           binding.btnSubscribe.setOnClickListener {
               startActivity(Intent(requireContext(), SubscriptionActivity::class.java))
           }
+
+          binding.btnWatchlist?.setOnClickListener {
+              try { findNavController().navigate(R.id.action_profile_to_watchlist) } catch (_: Exception) {}
+          }
       }
 
       private fun setupContinueWatching() {

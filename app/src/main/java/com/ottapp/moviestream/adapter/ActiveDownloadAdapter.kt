@@ -20,15 +20,23 @@ class ActiveDownloadAdapter(
             b.ivThumb.loadImage(item.bannerUrl)
 
             if (item.progress < 0) {
-                // Unknown size — indeterminate
                 b.progressBar.isIndeterminate = true
                 b.tvStatus.text = "সংযোগ করছে..."
                 b.tvPercent.visibility = View.GONE
+                b.tvFileSize.visibility = View.GONE
             } else {
                 b.progressBar.isIndeterminate = false
                 b.progressBar.progress = item.progress
                 b.tvPercent.visibility = View.VISIBLE
                 b.tvPercent.text = "${item.progress}%"
+
+                // Show file size label e.g. "245.3 MB / 1.2 GB"
+                if (item.sizeLabel.isNotEmpty()) {
+                    b.tvFileSize.visibility = View.VISIBLE
+                    b.tvFileSize.text = item.sizeLabel
+                } else {
+                    b.tvFileSize.visibility = View.GONE
+                }
                 b.tvStatus.text = "ডাউনলোড হচ্ছে..."
             }
 

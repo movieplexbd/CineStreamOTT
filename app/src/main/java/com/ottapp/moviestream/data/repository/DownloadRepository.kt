@@ -21,20 +21,24 @@ class DownloadRepository(private val context: Context) {
     fun getLocalFilePath(movieId: String): String =
         File(moviesDir, "$movieId.mp4").absolutePath
 
-    fun saveMetadata(movie: DownloadedMovie) {
+    fun saveDownload(movie: DownloadedMovie) {
         val json = JSONObject().apply {
-            put("movieId",       movie.movieId)
-            put("title",         movie.title)
-            put("bannerImageUrl",movie.bannerImageUrl)
-            put("localFilePath", movie.localFilePath)
-            put("fileSize",      movie.fileSize)
-            put("downloadedAt",  movie.downloadedAt)
-            put("imdbRating",    movie.imdbRating.toDouble())
-            put("category",      movie.category)
-            put("duration",      movie.duration)
+            put("movieId",        movie.movieId)
+            put("title",          movie.title)
+            put("bannerImageUrl", movie.bannerImageUrl)
+            put("localFilePath",  movie.localFilePath)
+            put("fileSize",       movie.fileSize)
+            put("fileSizeBytes",  movie.fileSizeBytes)
+            put("downloadedAt",   movie.downloadedAt)
+            put("imdbRating",     movie.imdbRating.toDouble())
+            put("category",       movie.category)
+            put("duration",       movie.duration)
         }
         File(metaDir, "${movie.movieId}.json").writeText(json.toString())
     }
+
+    // Legacy alias
+    fun saveMetadata(movie: DownloadedMovie) = saveDownload(movie)
 
     fun getAllDownloads(): List<DownloadedMovie> {
         val files = metaDir.listFiles { f -> f.extension == "json" } ?: return emptyList()
@@ -42,15 +46,16 @@ class DownloadRepository(private val context: Context) {
             try {
                 val j = JSONObject(f.readText())
                 val m = DownloadedMovie(
-                    movieId       = j.getString("movieId"),
-                    title         = j.getString("title"),
-                    bannerImageUrl= j.optString("bannerImageUrl"),
-                    localFilePath = j.getString("localFilePath"),
-                    fileSize      = j.getLong("fileSize"),
-                    downloadedAt  = j.getLong("downloadedAt"),
-                    imdbRating    = j.optDouble("imdbRating", 0.0).toFloat(),
-                    category      = j.optString("category"),
-                    duration      = j.optString("duration")
+                    movieId        = j.getString("movieId"),
+                    title          = j.getString("title"),
+                    bannerImageUrl = j.optString("bannerImageUrl"),
+                    localFilePath  = j.getString("localFilePath"),
+                    fileSize       = j.optString("fileSize", ""),
+                    fileSizeBytes  = j.optLong("fileSizeBytes", 0L),
+                    downloadedAt   = j.getLong("downloadedAt"),
+                    imdbRating     = j.optDouble("imdbRating", 0.0).toFloat(),
+                    category       = j.optString("category"),
+                    duration       = j.optString("duration")
                 )
                 if (File(moviesDir, "${m.movieId}.mp4").exists()) m else null
             } catch (e: Exception) { null }
@@ -68,6 +73,9 @@ class DownloadRepository(private val context: Context) {
 
     fun getTempFile(movieId: String): File =
         File(moviesDir, "$movieId.tmp")
+
+    fun getFinalFile(movieId: String): File =
+        File(moviesDir, "$movieId.mp4")
 
     fun finalizeTempFile(movieId: String): Boolean =
         File(moviesDir, "$movieId.tmp").renameTo(File(moviesDir, "$movieId.mp4"))

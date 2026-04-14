@@ -101,6 +101,26 @@
                       app:icon="@null"
                       android:contentDescription="Subscribe to premium" />
 
+                  <!-- Watchlist shortcut -->
+                  <com.google.android.material.button.MaterialButton
+                      android:id="@+id/btn_watchlist"
+                      android:layout_width="match_parent"
+                      android:layout_height="48dp"
+                      android:layout_marginTop="10dp"
+                      android:text="আমার ওয়াচলিস্ট"
+                      android:textSize="14sp"
+                      android:textStyle="bold"
+                      android:textColor="@color/red"
+                      style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                      app:strokeColor="@color/red"
+                      app:strokeWidth="1.5dp"
+                      app:cornerRadius="24dp"
+                      app:backgroundTint="@color/transparent"
+                      app:icon="@drawable/ic_watchlist_star"
+                      app:iconGravity="start"
+                      app:iconPadding="8dp"
+                      app:iconTint="@color/red" />
+
               </LinearLayout>
           </com.google.android.material.card.MaterialCardView>
 

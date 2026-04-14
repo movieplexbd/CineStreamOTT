@@ -9,6 +9,7 @@ import com.ottapp.moviestream.data.model.Movie
 import com.ottapp.moviestream.data.model.User
 import com.ottapp.moviestream.util.WatchHistoryManager
 import com.ottapp.moviestream.util.WatchHistoryEntry
+import com.ottapp.moviestream.util.MovieCache
 import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import com.ottapp.moviestream.data.model.Banner
@@ -20,6 +21,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val watchHistoryManager = WatchHistoryManager(app.applicationContext)
+    private val ctx = app.applicationContext
 
     companion object {
         private const val TAG = "HomeViewModel"
@@ -29,7 +31,6 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val userRepo = UserRepository()
     private val bannerRepo = BannerRepository()
 
-    // loading starts TRUE so shimmer shows immediately
     private val _continueWatching = MutableLiveData<List<WatchHistoryEntry>>(emptyList())
     val continueWatching: LiveData<List<WatchHistoryEntry>> = _continueWatching
 
@@ -61,43 +62,57 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
     fun loadData() {
         viewModelScope.launch {
             _loading.value = true
+
+            // 1. Serve cache immediately if available (offline-first)
+            val cachedMovies = MovieCache.loadMovies(ctx)
+            if (cachedMovies != null) {
+                applyMovieLists(cachedMovies)
+                // If cache is fresh (<6h), skip network call
+                if (MovieCache.isFresh(ctx)) {
+                    _continueWatching.value = watchHistoryManager.getContinueWatching()
+                    safeGetUser()
+                    _loading.value = false
+                    return@launch
+                }
+            }
+
             try {
-                // Load continue watching from local history
-            _continueWatching.value = watchHistoryManager.getContinueWatching()
+                _continueWatching.value = watchHistoryManager.getContinueWatching()
 
-            // Load movies
                 val all = safeGetMovies()
-                _allMovies.value = all
+                if (all.isNotEmpty()) {
+                    MovieCache.saveMovies(ctx, all)
+                    applyMovieLists(all)
+                }
 
-                val trending = all.filter { it.trending }
-                _trendingMovies.value = trending
-                
                 val banners = bannerRepo.getAllBanners()
                 _banners.value = banners
 
-                _banglaMovies.value = all.filter { m ->
-                    m.category.lowercase().let { it.contains("bangla") || it.contains("বাংলা") }
-                }
-                _hindiMovies.value = all.filter { m ->
-                    m.category.lowercase().let { it.contains("hindi") || it.contains("হিন্দি") }
-                }
-
-                // Load user info (one-shot, no persistent listener)
                 safeGetUser()
 
             } catch (e: Exception) {
                 Log.e(TAG, "loadData error: ${e.message}", e)
+                // Already showing cached data, no problem
             } finally {
                 _loading.value = false
             }
         }
     }
 
+    private fun applyMovieLists(all: List<Movie>) {
+        _allMovies.value = all
+        _trendingMovies.value = all.filter { it.trending }
+        _banglaMovies.value = all.filter { m ->
+            m.category.lowercase().let { it.contains("bangla") || it.contains("বাংলা") }
+        }
+        _hindiMovies.value = all.filter { m ->
+            m.category.lowercase().let { it.contains("hindi") || it.contains("হিন্দি") }
+        }
+    }
+
     private suspend fun safeGetMovies(): List<Movie> {
         return try {
-            withTimeoutOrNull(12000) {
-                movieRepo.getAllMovies()
-            } ?: emptyList()
+            withTimeoutOrNull(12000) { movieRepo.getAllMovies() } ?: emptyList()
         } catch (e: Exception) {
             Log.e(TAG, "getAllMovies error: ${e.message}", e)
             emptyList()

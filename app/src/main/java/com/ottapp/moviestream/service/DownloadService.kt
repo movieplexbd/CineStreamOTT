@@ -14,7 +14,6 @@ import com.ottapp.moviestream.data.repository.DownloadRepository
 import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.DownloadTracker
 import kotlinx.coroutines.*
-import kotlin.coroutines.coroutineContext
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
 import java.net.HttpURLConnection
@@ -36,7 +35,7 @@ class DownloadService : Service() {
 
     override fun onCreate() {
         super.onCreate()
-        repo        = DownloadRepository(this)
+        repo         = DownloadRepository(this)
         notifManager = getSystemService(NotificationManager::class.java)
     }
 
@@ -58,21 +57,13 @@ class DownloadService : Service() {
 
         try {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                startForeground(
-                    notifId(movieId),
-                    buildNotif(movieId, movieTitle, -1),
-                    ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC
-                )
+                startForeground(notifId(movieId), buildNotif(movieId, movieTitle, -1, "--"), ServiceInfo.FOREGROUND_SERVICE_TYPE_DATA_SYNC)
             } else {
-                startForeground(notifId(movieId), buildNotif(movieId, movieTitle, -1))
+                startForeground(notifId(movieId), buildNotif(movieId, movieTitle, -1, "--"))
             }
         } catch (e: Exception) {
             Log.e(TAG, "startForeground failed: ${e.message}", e)
-            try {
-                startForeground(notifId(movieId), buildNotif(movieId, movieTitle, -1))
-            } catch (e2: Exception) {
-                Log.e(TAG, "startForeground fallback failed: ${e2.message}", e2)
-            }
+            try { startForeground(notifId(movieId), buildNotif(movieId, movieTitle, -1, "--")) } catch (_: Exception) {}
         }
 
         val job = scope.launch { downloadFile(movieId, movieTitle, videoUrl, bannerUrl) }
@@ -103,64 +94,72 @@ class DownloadService : Service() {
                 connect()
             }
 
-            val responseCode = conn.responseCode
-            if (responseCode !in 200..299) {
-                throw Exception("HTTP $responseCode")
-            }
+            val totalBytes = conn.contentLengthLong
+            val totalMB    = if (totalBytes > 0) totalBytes / (1024.0 * 1024.0) else -1.0
+            val sizeLabel  = if (totalMB > 0) formatSize(totalBytes) else ""
 
-            val total      = conn.contentLengthLong
             var downloaded = 0L
-            var lastNotify = 0L
+            var lastProgress = -1
 
-            val input  = BufferedInputStream(conn.inputStream)
-            val output = FileOutputStream(tempFile)
-            val buf    = ByteArray(8 * 1024)
-            var read: Int
+            BufferedInputStream(conn.inputStream).use { inp ->
+                FileOutputStream(tempFile).use { out ->
+                    val buf = ByteArray(8192)
+                    while (coroutineContext.isActive) {
+                        val n = inp.read(buf)
+                        if (n < 0) break
+                        out.write(buf, 0, n)
+                        downloaded += n
 
-            output.use { out ->
-                input.use { inp ->
-                    while (inp.read(buf).also { read = it } != -1) {
-                        if (!coroutineContext.isActive) { tempFile.delete(); return }
-                        out.write(buf, 0, read)
-                        downloaded += read
-
-                        val now = System.currentTimeMillis()
-                        if (now - lastNotify > 400) {
-                            val pct = if (total > 0) ((downloaded * 100) / total).toInt() else -1
-                            DownloadTracker.update(movieId, pct)
-                            try {
-                                withContext(Dispatchers.Main) {
-                                    notifManager.notify(notifId(movieId), buildNotif(movieId, title, pct))
+                        if (totalBytes > 0) {
+                            val pct = ((downloaded * 100) / totalBytes).toInt()
+                            if (pct != lastProgress) {
+                                lastProgress = pct
+                                val dlSize   = formatSize(downloaded)
+                                val totalStr = if (sizeLabel.isNotEmpty()) " / $sizeLabel" else ""
+                                val label    = "$dlSize$totalStr ($pct%)"
+                                DownloadTracker.updateProgress(movieId, pct)
+                                withContext(Dispatchers.Main.immediate) {
+                                    notifManager.notify(notifId(movieId), buildNotif(movieId, title, pct, label))
                                 }
-                            } catch (_: Exception) {}
-                            lastNotify = now
+                            }
                         }
                     }
                 }
             }
-            conn.disconnect()
 
-            if (repo.finalizeTempFile(movieId)) {
-                val meta = DownloadedMovie(
-                    movieId        = movieId,
-                    title          = title,
-                    bannerImageUrl = bannerUrl,
-                    localFilePath  = repo.getLocalFilePath(movieId),
-                    fileSize       = downloaded,
-                    downloadedAt   = System.currentTimeMillis()
-                )
-                repo.saveMetadata(meta)
-                showDoneNotif(movieId, title, success = true)
-            } else {
-                showDoneNotif(movieId, title, success = false)
+            if (!coroutineContext.isActive) {
+                tempFile.delete()
+                return
             }
 
+            val finalFile = repo.getFinalFile(movieId)
+            tempFile.renameTo(finalFile)
+
+            val totalStr = if (sizeLabel.isNotEmpty()) sizeLabel else formatSize(downloaded)
+            val movie = DownloadedMovie(
+                movieId      = movieId,
+                title        = title,
+                bannerImageUrl = bannerUrl,
+                localFilePath  = finalFile.absolutePath,
+                fileSize       = totalStr,
+                downloadedAt   = System.currentTimeMillis()
+            )
+            repo.saveDownload(movie)
+            DownloadTracker.complete(movieId)
+
+            withContext(Dispatchers.Main.immediate) {
+                showDoneNotif(movieId, title, success = true, sizeLabel = totalStr)
+            }
         } catch (e: CancellationException) {
-            try { tempFile.delete() } catch (_: Exception) {}
+            tempFile.delete()
+            DownloadTracker.remove(movieId)
         } catch (e: Exception) {
-            Log.e(TAG, "Download failed: ${e.message}", e)
-            try { tempFile.delete() } catch (_: Exception) {}
-            showDoneNotif(movieId, title, success = false)
+            Log.e(TAG, "download error: ${e.message}", e)
+            tempFile.delete()
+            DownloadTracker.error(movieId)
+            withContext(Dispatchers.Main.immediate) {
+                showDoneNotif(movieId, title, success = false, sizeLabel = "")
+            }
         } finally {
             DownloadTracker.remove(movieId)
             activeJobs.remove(movieId)
@@ -168,6 +167,15 @@ class DownloadService : Service() {
             try {
                 withContext(Dispatchers.Main.immediate) { if (activeJobs.isEmpty()) stopSelf() }
             } catch (_: Exception) { }
+        }
+    }
+
+    private fun formatSize(bytes: Long): String {
+        return when {
+            bytes >= 1024 * 1024 * 1024 -> "%.2f GB".format(bytes / (1024.0 * 1024.0 * 1024.0))
+            bytes >= 1024 * 1024        -> "%.1f MB".format(bytes / (1024.0 * 1024.0))
+            bytes >= 1024               -> "%.1f KB".format(bytes / 1024.0)
+            else                        -> "$bytes B"
         }
     }
 
@@ -184,23 +192,26 @@ class DownloadService : Service() {
         )
     }
 
-    private fun buildNotif(movieId: String, title: String, progress: Int): Notification =
-        NotificationCompat.Builder(this, OTTApplication.DOWNLOAD_CHANNEL_ID)
+    private fun buildNotif(movieId: String, title: String, progress: Int, sizeLabel: String): Notification {
+        val text = if (sizeLabel.isNotEmpty()) "$title  •  $sizeLabel" else title
+        return NotificationCompat.Builder(this, OTTApplication.DOWNLOAD_CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_download_notif)
             .setContentTitle("ডাউনলোড হচ্ছে")
-            .setContentText(title)
+            .setContentText(text)
             .setProgress(100, progress.coerceAtLeast(0), progress < 0)
             .setOngoing(true)
             .setSilent(true)
             .addAction(R.drawable.ic_close, "বাতিল", cancelPi(movieId))
             .build()
+    }
 
-    private fun showDoneNotif(movieId: String, title: String, success: Boolean) {
+    private fun showDoneNotif(movieId: String, title: String, success: Boolean, sizeLabel: String) {
         try {
+            val subText = if (success && sizeLabel.isNotEmpty()) "$title  •  $sizeLabel" else title
             val notif = NotificationCompat.Builder(this, OTTApplication.DOWNLOAD_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_download_notif)
                 .setContentTitle(if (success) "ডাউনলোড সম্পন্ন" else "ডাউনলোড ব্যর্থ")
-                .setContentText(if (success) "$title সংরক্ষিত হয়েছে" else "$title ডাউনলোড করা যায়নি")
+                .setContentText(if (success) subText else "$title ডাউনলোড করা যায়নি")
                 .setAutoCancel(true)
                 .build()
             notifManager.notify(notifId(movieId), notif)

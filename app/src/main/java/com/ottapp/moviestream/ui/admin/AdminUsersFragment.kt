@@ -37,6 +37,7 @@ class AdminUsersFragment : Fragment() {
         adapter = AdminUserAdapter(
             onBlock = { user -> confirmBlock(user) },
             onMakePremium = { user -> confirmPremium(user) },
+            onRemovePremium = { user -> confirmRemovePremium(user) },
             onExtend = { user -> showExtendDialog(user) },
             onResetPassword = { user -> confirmResetPassword(user) }
         )
@@ -95,11 +96,11 @@ class AdminUsersFragment : Fragment() {
         val isBlocked = user.subscriptionStatus == Constants.SUB_BLOCKED
         val title = if (isBlocked) "আনব্লক করবেন?" else "ব্লক করবেন?"
         val msg = if (isBlocked) "ইউজারকে আনব্লক করা হবে।" else "ইউজারকে ব্লক করা হবে।"
-        
+
         AlertDialog.Builder(requireContext())
             .setTitle(title)
             .setMessage(msg)
-            .setPositiveButton("হ্যাঁ") { _, _ -> 
+            .setPositiveButton("হ্যাঁ") { _, _ ->
                 updateUserStatus(user.uid, if (isBlocked) Constants.SUB_FREE else Constants.SUB_BLOCKED, 0L)
             }
             .setNegativeButton("না", null)
@@ -110,7 +111,7 @@ class AdminUsersFragment : Fragment() {
         AlertDialog.Builder(requireContext())
             .setTitle("প্রিমিয়াম করবেন?")
             .setMessage("ইউজারকে ৩০ দিনের প্রিমিয়াম এক্সেস দেওয়া হবে।")
-            .setPositiveButton("হ্যাঁ") { _, _ -> 
+            .setPositiveButton("হ্যাঁ") { _, _ ->
                 val expiry = System.currentTimeMillis() + Constants.SUBSCRIPTION_DURATION_MS
                 updateUserStatus(user.uid, Constants.SUB_PREMIUM, expiry)
             }
@@ -118,12 +119,23 @@ class AdminUsersFragment : Fragment() {
             .show()
     }
 
-    private fun showExtendDialog(user: User) {
-        val options = arrayOf("7 Days", "30 Days", "90 Days", "365 Days")
-        val days = longArrayOf(7, 30, 90, 365)
-        
+    private fun confirmRemovePremium(user: User) {
         AlertDialog.Builder(requireContext())
-            .setTitle("Extend Subscription")
+            .setTitle("প্রিমিয়াম সরাবেন?")
+            .setMessage("ইউজারের প্রিমিয়াম সাবস্ক্রিপশন বাতিল করা হবে এবং ফ্রি প্ল্যানে নামিয়ে আনা হবে।")
+            .setPositiveButton("হ্যাঁ, সরাও") { _, _ ->
+                updateUserStatus(user.uid, Constants.SUB_FREE, 0L)
+            }
+            .setNegativeButton("না", null)
+            .show()
+    }
+
+    private fun showExtendDialog(user: User) {
+        val options = arrayOf("7 দিন", "30 দিন", "90 দিন", "365 দিন")
+        val days = longArrayOf(7, 30, 90, 365)
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("সাবস্ক্রিপশন বাড়ান")
             .setItems(options) { _, which ->
                 val currentExpiry = if (user.subscriptionExpiry > System.currentTimeMillis()) user.subscriptionExpiry else System.currentTimeMillis()
                 val newExpiry = currentExpiry + (days[which] * 24 * 60 * 60 * 1000L)
@@ -134,16 +146,16 @@ class AdminUsersFragment : Fragment() {
 
     private fun confirmResetPassword(user: User) {
         AlertDialog.Builder(requireContext())
-            .setTitle("Reset Password?")
-            .setMessage("Send password reset email to ${user.email}?")
-            .setPositiveButton("Send") { _, _ ->
+            .setTitle("পাসওয়ার্ড রিসেট?")
+            .setMessage("${user.email} এ রিসেট ইমেইল পাঠানো হবে।")
+            .setPositiveButton("পাঠাও") { _, _ ->
                 FirebaseAuth.getInstance().sendPasswordResetEmail(user.email)
                     .addOnCompleteListener { task ->
-                        if (task.isSuccessful) requireContext().toast("Reset email sent")
-                        else requireContext().toast("Failed: ${task.exception?.message}")
+                        if (task.isSuccessful) requireContext().toast("রিসেট ইমেইল পাঠানো হয়েছে")
+                        else requireContext().toast("ব্যর্থ: ${task.exception?.message}")
                     }
             }
-            .setNegativeButton("Cancel", null)
+            .setNegativeButton("বাতিল", null)
             .show()
     }
 

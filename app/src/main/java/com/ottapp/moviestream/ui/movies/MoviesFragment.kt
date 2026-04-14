@@ -32,7 +32,11 @@ class MoviesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = MovieGridAdapter { movie -> openDetail(movie) }
+        // Pass loadNextPage as onLoadMore for infinite scroll
+        adapter = MovieGridAdapter(
+            onClick     = { movie -> openDetail(movie) },
+            onLoadMore  = { viewModel.loadNextPage() }
+        )
         binding.rvMovies.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.rvMovies.adapter = adapter
 
@@ -86,9 +90,7 @@ class MoviesFragment : Fragment() {
         try {
             val bundle = bundleOf(Constants.EXTRA_MOVIE_ID to movie.id)
             findNavController().navigate(R.id.action_movies_to_detail, bundle)
-        } catch (e: Exception) {
-            // Prevent duplicate navigation crash
-        }
+        } catch (_: Exception) { }
     }
 
     override fun onDestroyView() {

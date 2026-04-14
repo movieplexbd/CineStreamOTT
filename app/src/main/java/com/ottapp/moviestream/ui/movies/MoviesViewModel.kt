@@ -1,16 +1,21 @@
 package com.ottapp.moviestream.ui.movies
 
+import android.app.Application
 import androidx.lifecycle.*
 import com.ottapp.moviestream.data.model.Movie
 import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.util.Constants
+import com.ottapp.moviestream.util.MovieCache
 import kotlinx.coroutines.launch
 
-class MoviesViewModel : ViewModel() {
+class MoviesViewModel(private val app: Application) : AndroidViewModel(app) {
 
     private val repo = MovieRepository()
+    private val ctx  = app.applicationContext
 
-    private val _allMovies = MutableLiveData<List<Movie>>(emptyList())
+    private val allMovies     = mutableListOf<Movie>()
+    private val displayedMovies = mutableListOf<Movie>()
+
     private val _filteredMovies = MutableLiveData<List<Movie>>(emptyList())
     val filteredMovies: LiveData<List<Movie>> = _filteredMovies
 
@@ -22,19 +27,40 @@ class MoviesViewModel : ViewModel() {
 
     private var selectedCategory = Constants.CAT_ALL
 
+    // Pagination
+    private val pageSize = 24
+    private var pageOffset = 0
+    private var isLoadingMore = false
+    private var hasMore = true
+
     init { loadMovies() }
 
     fun loadMovies() {
         viewModelScope.launch {
             _loading.value = true
             _error.value = null
+
+            // Show cache immediately
+            val cached = MovieCache.loadMovies(ctx)
+            if (cached != null) {
+                allMovies.clear()
+                allMovies.addAll(cached)
+                resetPagination()
+                if (MovieCache.isFresh(ctx)) {
+                    _loading.value = false
+                    return@launch
+                }
+            }
+
             try {
                 val movies = repo.getAllMovies()
-                _allMovies.value = movies
-                applyFilter(movies)
+                allMovies.clear()
+                allMovies.addAll(movies)
+                if (movies.isNotEmpty()) MovieCache.saveMovies(ctx, movies)
+                resetPagination()
             } catch (e: Exception) {
                 _error.value = e.message
-                _filteredMovies.value = emptyList()
+                if (allMovies.isEmpty()) _filteredMovies.value = emptyList()
             } finally {
                 _loading.value = false
             }
@@ -43,18 +69,44 @@ class MoviesViewModel : ViewModel() {
 
     fun setCategory(cat: String) {
         selectedCategory = cat
-        applyFilter(_allMovies.value ?: emptyList())
+        resetPagination()
     }
 
-    private fun applyFilter(all: List<Movie>) {
-        _filteredMovies.value = when (selectedCategory) {
-            Constants.CAT_ALL      -> all
-            Constants.CAT_TRENDING -> all.filter { it.trending }
-            else                   -> all.filter { movie ->
-                val cat = movie.category.lowercase().trim()
-                val sel = selectedCategory.lowercase().trim()
-                cat == sel || cat.contains(sel) || sel.contains(cat)
-            }
+    /** Called by adapter when near the end of the list */
+    fun loadNextPage() {
+        if (isLoadingMore || !hasMore) return
+        isLoadingMore = true
+
+        val filtered = filteredFrom(allMovies)
+        val end = minOf(pageOffset + pageSize, filtered.size)
+        if (pageOffset >= filtered.size) {
+            hasMore = false
+            isLoadingMore = false
+            return
+        }
+
+        displayedMovies.addAll(filtered.subList(pageOffset, end))
+        pageOffset = end
+        hasMore = pageOffset < filtered.size
+        _filteredMovies.value = displayedMovies.toList()
+        isLoadingMore = false
+    }
+
+    private fun resetPagination() {
+        pageOffset = 0
+        hasMore = true
+        isLoadingMore = false
+        displayedMovies.clear()
+        loadNextPage()
+    }
+
+    private fun filteredFrom(all: List<Movie>): List<Movie> = when (selectedCategory) {
+        Constants.CAT_ALL      -> all
+        Constants.CAT_TRENDING -> all.filter { it.trending }
+        else                   -> all.filter { movie ->
+            val cat = movie.category.lowercase().trim()
+            val sel = selectedCategory.lowercase().trim()
+            cat == sel || cat.contains(sel) || sel.contains(cat)
         }
     }
 }

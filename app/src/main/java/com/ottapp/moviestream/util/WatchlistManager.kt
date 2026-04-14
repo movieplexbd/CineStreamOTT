@@ -2,6 +2,7 @@ package com.ottapp.moviestream.util
 
 import android.content.Context
 import android.content.SharedPreferences
+import com.google.firebase.auth.FirebaseAuth
 import com.ottapp.moviestream.data.model.Movie
 import org.json.JSONArray
 import org.json.JSONObject
@@ -17,23 +18,29 @@ data class WatchlistEntry(
 
 class WatchlistManager(context: Context) {
 
-    private val prefs: SharedPreferences =
-        context.getSharedPreferences("watchlist_prefs", Context.MODE_PRIVATE)
+    private val appContext = context.applicationContext
 
     companion object {
         private const val KEY_WATCHLIST = "watchlist_items"
+        private const val PREFS_PREFIX  = "watchlist_prefs_"
+    }
+
+    /** Returns SharedPreferences keyed per Firebase user UID (falls back to "guest") */
+    private fun prefs(): SharedPreferences {
+        val uid = FirebaseAuth.getInstance().currentUser?.uid ?: "guest"
+        return appContext.getSharedPreferences("$PREFS_PREFIX$uid", Context.MODE_PRIVATE)
     }
 
     fun addToWatchlist(movie: Movie) {
         val list = getWatchlist().toMutableList()
         if (list.none { it.movieId == movie.id }) {
             list.add(0, WatchlistEntry(
-                movieId  = movie.id,
-                title    = movie.title,
+                movieId   = movie.id,
+                title     = movie.title,
                 bannerUrl = movie.bannerImageUrl,
-                category = movie.category,
-                rating   = movie.imdbRating,
-                addedAt  = System.currentTimeMillis()
+                category  = movie.category,
+                rating    = movie.imdbRating,
+                addedAt   = System.currentTimeMillis()
             ))
             saveWatchlist(list)
         }
@@ -45,9 +52,7 @@ class WatchlistManager(context: Context) {
         saveWatchlist(list)
     }
 
-    fun isInWatchlist(movieId: String): Boolean {
-        return getWatchlist().any { it.movieId == movieId }
-    }
+    fun isInWatchlist(movieId: String): Boolean = getWatchlist().any { it.movieId == movieId }
 
     fun toggleWatchlist(movie: Movie): Boolean {
         return if (isInWatchlist(movie.id)) {
@@ -60,7 +65,7 @@ class WatchlistManager(context: Context) {
     }
 
     fun getWatchlist(): List<WatchlistEntry> {
-        val json = prefs.getString(KEY_WATCHLIST, "[]") ?: "[]"
+        val json = prefs().getString(KEY_WATCHLIST, "[]") ?: "[]"
         return try {
             val arr = JSONArray(json)
             (0 until arr.length()).mapNotNull { i ->
@@ -78,7 +83,7 @@ class WatchlistManager(context: Context) {
     }
 
     fun clearAll() {
-        prefs.edit().remove(KEY_WATCHLIST).apply()
+        prefs().edit().remove(KEY_WATCHLIST).apply()
     }
 
     private fun saveWatchlist(list: List<WatchlistEntry>) {
@@ -93,6 +98,6 @@ class WatchlistManager(context: Context) {
                 put("addedAt",   e.addedAt)
             })
         }
-        prefs.edit().putString(KEY_WATCHLIST, arr.toString()).apply()
+        prefs().edit().putString(KEY_WATCHLIST, arr.toString()).apply()
     }
 }

@@ -6,26 +6,26 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="4dp"
-    android:layout_marginEnd="8dp">
+    android:padding="6dp"
+    android:layout_marginEnd="4dp">
 
+    <!-- Circular actor image with premium gold border -->
     <com.google.android.material.imageview.ShapeableImageView
         android:id="@+id/iv_actor"
-        android:layout_width="70dp"
-        android:layout_height="70dp"
+        android:layout_width="80dp"
+        android:layout_height="80dp"
         android:scaleType="centerCrop"
-        app:shapeAppearanceOverlay="@style/ShapeAppearance.MaterialComponents.LargeComponent"
-        android:padding="2dp"
-        app:strokeColor="@color/border"
-        app:strokeWidth="1dp"
-        android:background="@color/bg" />
+        app:shapeAppearanceOverlay="@style/CircleImageStyle"
+        app:strokeColor="#FFCC00"
+        app:strokeWidth="2dp"
+        android:elevation="2dp"
+        android:background="@color/surface2" />
 
     <TextView
         android:id="@+id/tv_name"
-        android:layout_width="80dp"
+        android:layout_width="88dp"
         android:layout_height="wrap_content"
-        android:layout_marginTop="6dp"
-        android:text="Actor Name"
+        android:layout_marginTop="7dp"
         android:textColor="@color/t1"
         android:textSize="11sp"
         android:textStyle="bold"

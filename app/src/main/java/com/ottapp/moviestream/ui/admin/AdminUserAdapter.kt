@@ -1,6 +1,7 @@
 package com.ottapp.moviestream.ui.admin
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -15,6 +16,7 @@ import java.util.*
 class AdminUserAdapter(
     private val onBlock: (User) -> Unit,
     private val onMakePremium: (User) -> Unit,
+    private val onRemovePremium: (User) -> Unit,
     private val onExtend: (User) -> Unit,
     private val onResetPassword: (User) -> Unit
 ) : ListAdapter<User, AdminUserAdapter.VH>(Diff()) {
@@ -24,7 +26,7 @@ class AdminUserAdapter(
             b.tvName.text = user.displayName.ifEmpty { "নাম নেই" }
             b.tvEmail.text = user.email.ifEmpty { "ইমেইল নেই" }
             b.tvStatus.text = user.subscriptionStatus.uppercase()
-            
+
             val statusColor = when (user.subscriptionStatus) {
                 Constants.SUB_PREMIUM -> R.drawable.bg_premium_badge
                 Constants.SUB_PENDING -> R.drawable.bg_offer_badge
@@ -42,7 +44,18 @@ class AdminUserAdapter(
 
             b.btnBlock.text = if (user.subscriptionStatus == Constants.SUB_BLOCKED) "আনব্লক" else "ব্লক"
             b.btnBlock.setOnClickListener { onBlock(user) }
-            b.btnMakePremium.setOnClickListener { onMakePremium(user) }
+
+            // Show Make Premium or Remove Premium based on current status
+            val isPremium = user.subscriptionStatus == Constants.SUB_PREMIUM
+            if (isPremium) {
+                b.btnMakePremium.text = "প্রিমিয়াম সরাও"
+                b.btnMakePremium.setOnClickListener { onRemovePremium(user) }
+            } else {
+                b.btnMakePremium.text = "প্রিমিয়াম দাও"
+                b.btnMakePremium.setOnClickListener { onMakePremium(user) }
+            }
+
+            b.btnExtend.visibility = if (isPremium) View.VISIBLE else View.GONE
             b.btnExtend.setOnClickListener { onExtend(user) }
             b.btnResetPassword.setOnClickListener { onResetPassword(user) }
         }

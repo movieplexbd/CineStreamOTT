@@ -291,6 +291,13 @@ class HomeFragment : Fragment() {
                 }
                 b.tvSubscriptionBadge.text = if (user.isPremium) "PREMIUM" else "FREE"
                 b.tvSubscriptionBadge.show()
+
+                // Instantly remove/add lock icons across all movie grids without reload
+                val isPremium = user.isPremium
+                trendingAdapter?.setPremiumUser(isPremium)
+                banglaAdapter?.setPremiumUser(isPremium)
+                hindiAdapter?.setPremiumUser(isPremium)
+                allAdapter?.setPremiumUser(isPremium)
             }
         }
     }

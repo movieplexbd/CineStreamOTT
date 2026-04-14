@@ -153,11 +153,11 @@ class MovieDetailFragment : Fragment() {
             val wlBtn = binding.btnWatchlist
             if (wlBtn != null) {
                 val inList = watchlistManager.isInWatchlist(movie.id)
-                wlBtn.text = if (inList) "⭐  ওয়াচলিস্টে আছে" else "☆  ওয়াচলিস্টে যোগ করুন"
+                wlBtn.text = if (inList) "ওয়াচলিস্টে আছে ✓" else "ওয়াচলিস্টে যোগ করুন"
                 wlBtn.setOnClickListener {
                     val added = watchlistManager.toggleWatchlist(movie)
-                    wlBtn.text = if (added) "⭐  ওয়াচলিস্টে আছে" else "☆  ওয়াচলিস্টে যোগ করুন"
-                    requireContext().toast(if (added) "ওয়াচলিস্টে যোগ হয়েছে ⭐" else "ওয়াচলিস্ট থেকে সরানো হয়েছে")
+                    wlBtn.text = if (added) "ওয়াচলিস্টে আছে ✓" else "ওয়াচলিস্টে যোগ করুন"
+                    requireContext().toast(if (added) "ওয়াচলিস্টে যোগ হয়েছে!" else "ওয়াচলিস্ট থেকে সরানো হয়েছে")
                 }
             }
         } catch (e: Exception) { }

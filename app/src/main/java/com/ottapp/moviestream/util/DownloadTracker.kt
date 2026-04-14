@@ -14,7 +14,8 @@ object DownloadTracker {
         val movieId:   String,
         val title:     String,
         val bannerUrl: String,
-        val progress:  Int,      // 0-100; -1 = indeterminate (unknown size)
+        val progress:  Int,       // 0-100; -1 = indeterminate (unknown size)
+        val sizeLabel: String = "" // e.g. "345.2 MB / 1.2 GB (28%)"
     )
 
     private val _active = MutableStateFlow<Map<String, ActiveDownload>>(emptyMap())
@@ -27,6 +28,21 @@ object DownloadTracker {
     fun update(movieId: String, progress: Int) {
         val current = _active.value[movieId] ?: return
         _active.value = _active.value + (movieId to current.copy(progress = progress))
+    }
+
+    fun updateProgress(movieId: String, progress: Int, sizeLabel: String = "") {
+        val current = _active.value[movieId] ?: return
+        _active.value = _active.value + (movieId to current.copy(progress = progress, sizeLabel = sizeLabel))
+    }
+
+    fun complete(movieId: String) {
+        val current = _active.value[movieId] ?: return
+        _active.value = _active.value + (movieId to current.copy(progress = 100))
+    }
+
+    fun error(movieId: String) {
+        val current = _active.value[movieId] ?: return
+        _active.value = _active.value + (movieId to current.copy(progress = -1))
     }
 
     fun remove(movieId: String) {

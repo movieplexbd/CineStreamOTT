@@ -64,6 +64,16 @@
                 android:max="100"
                 android:progress="0" />
 
+            <!-- File size label e.g. 245 MB / 1.2 GB -->
+            <TextView
+                android:id="@+id/tv_file_size"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="10sp"
+                android:textColor="@color/t2"
+                android:layout_marginTop="2dp"
+                android:visibility="gone" />
+
             <!-- Percentage text -->
             <TextView
                 android:id="@+id/tv_percent"

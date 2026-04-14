@@ -9,7 +9,6 @@ import com.ottapp.moviestream.R
 import com.ottapp.moviestream.data.model.DownloadedMovie
 import com.ottapp.moviestream.databinding.ItemDownloadBinding
 import com.ottapp.moviestream.util.loadImage
-import com.ottapp.moviestream.util.toReadableSize
 
 class DownloadAdapter(
     private val onPlay:   (DownloadedMovie) -> Unit,
@@ -20,9 +19,10 @@ class DownloadAdapter(
         fun bind(item: DownloadedMovie) {
             b.ivThumb.loadImage(item.bannerImageUrl, R.color.surface2)
             b.tvTitle.text    = item.title
-            b.tvSize.text     = item.fileSize.toReadableSize()
+            // Show human-readable file size from String field directly
+            b.tvSize.text     = item.fileSize.ifEmpty { "–" }
             b.tvCategory.text = item.category
-            b.tvRating.text   = "★ ${item.imdbRating}"
+            b.tvRating.text   = "\u2605 ${item.imdbRating}"
             b.btnPlay.setOnClickListener   { onPlay(item) }
             b.btnDelete.setOnClickListener { onDelete(item) }
         }
