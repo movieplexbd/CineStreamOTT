@@ -1,113 +1,138 @@
 package com.ottapp.moviestream
 
-import android.Manifest
-import android.content.pm.PackageManager
-import android.os.Build
-import android.os.Bundle
-import android.util.Log
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.ActivityCompat
-import androidx.core.content.ContextCompat
-import androidx.navigation.NavController
-import androidx.navigation.NavOptions
-import androidx.navigation.fragment.NavHostFragment
-import com.ottapp.moviestream.databinding.ActivityMainBinding
+  import android.Manifest
+  import android.content.pm.PackageManager
+  import android.os.Build
+  import android.os.Bundle
+  import android.util.Log
+  import android.view.View
+  import androidx.appcompat.app.AppCompatActivity
+  import androidx.core.app.ActivityCompat
+  import androidx.core.content.ContextCompat
+  import androidx.navigation.NavController
+  import androidx.navigation.NavOptions
+  import androidx.navigation.fragment.NavHostFragment
+  import com.ottapp.moviestream.databinding.ActivityMainBinding
 
-class MainActivity : AppCompatActivity() {
+  class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
-    private var navController: NavController? = null
+      private lateinit var binding: ActivityMainBinding
+      private var navController: NavController? = null
 
-    private var currentTabId: Int = R.id.homeFragment
+      private var currentTabId: Int = R.id.homeFragment
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        try {
-            binding = ActivityMainBinding.inflate(layoutInflater)
-            setContentView(binding.root)
+      override fun onCreate(savedInstanceState: Bundle?) {
+          super.onCreate(savedInstanceState)
+          try {
+              binding = ActivityMainBinding.inflate(layoutInflater)
+              setContentView(binding.root)
 
-            val navHost = supportFragmentManager
-                .findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
-            if (navHost == null) {
-                Log.e("MainActivity", "NavHostFragment not found")
-                return
-            }
-            navController = navHost.navController
+              val navHost = supportFragmentManager
+                  .findFragmentById(R.id.nav_host_fragment) as? NavHostFragment
+              if (navHost == null) {
+                  Log.e("MainActivity", "NavHostFragment not found")
+                  return
+              }
+              navController = navHost.navController
 
-            setupBottomNav()
-            requestNotificationPermissionIfNeeded()
-        } catch (e: Exception) {
-            Log.e("MainActivity", "onCreate error: ${e.message}", e)
-        }
-    }
+              val isTablet = resources.getBoolean(R.bool.is_tablet)
+              if (isTablet) {
+                  setupNavigationRail()
+              } else {
+                  setupBottomNav()
+              }
 
-    private fun requestNotificationPermissionIfNeeded() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
-        val permission = Manifest.permission.POST_NOTIFICATIONS
-        if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) return
-        ActivityCompat.requestPermissions(this, arrayOf(permission), 1002)
-    }
+              requestNotificationPermissionIfNeeded()
+          } catch (e: Exception) {
+              Log.e("MainActivity", "onCreate error: ${e.message}", e)
+          }
+      }
 
-    private fun setupBottomNav() {
-        val nc = navController ?: return
+      private fun requestNotificationPermissionIfNeeded() {
+          if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+          val permission = Manifest.permission.POST_NOTIFICATIONS
+          if (ContextCompat.checkSelfPermission(this, permission) == PackageManager.PERMISSION_GRANTED) return
+          ActivityCompat.requestPermissions(this, arrayOf(permission), 1002)
+      }
 
-        binding.bottomNavigation.setOnItemSelectedListener { item ->
-            val destId = item.itemId
+      private fun setupBottomNav() {
+          val nc = navController ?: return
 
-            if (destId == currentTabId) {
-                // If already on the destination, pop everything above it
-                nc.popBackStack(destId, false)
-                return@setOnItemSelectedListener true
-            }
+          binding.bottomNavigation.setOnItemSelectedListener { item ->
+              val destId = item.itemId
 
-            currentTabId = destId
+              if (destId == currentTabId) {
+                  nc.popBackStack(destId, false)
+                  return@setOnItemSelectedListener true
+              }
 
-            val navOptions = NavOptions.Builder()
-                .setLaunchSingleTop(true)
-                .setRestoreState(true)
-                .setPopUpTo(
-                    nc.graph.startDestinationId,
-                    inclusive = false,
-                    saveState = true
-                )
-                .build()
+              currentTabId = destId
 
-            try {
-                nc.navigate(destId, null, navOptions)
-            } catch (e: Exception) {
-                Log.e("MainActivity", "Navigation error: ${e.message}")
-            }
-            true
-        }
+              val navOptions = NavOptions.Builder()
+                  .setLaunchSingleTop(true)
+                  .setRestoreState(true)
+                  .setPopUpTo(
+                      nc.graph.startDestinationId,
+                      inclusive = false,
+                      saveState = true
+                  )
+                  .build()
 
-        binding.bottomNavigation.setOnItemReselectedListener {
-            try {
-                val currentDest = nc.currentDestination?.id
-                if (currentDest != currentTabId) {
-                    nc.popBackStack(currentTabId, false)
-                }
-            } catch (e: Exception) {
-                Log.e("MainActivity", "Reselect error: ${e.message}")
-            }
-        }
+              try {
+                  nc.navigate(destId, null, navOptions)
+              } catch (e: Exception) {
+                  Log.e("MainActivity", "Navigation error: ${e.message}")
+              }
+              true
+          }
 
-        nc.addOnDestinationChangedListener { _, destination, _ ->
-            try {
-                val tabIds = setOf(
-                    R.id.homeFragment, R.id.moviesFragment, R.id.searchFragment,
-                    R.id.downloadFragment, R.id.profileFragment
-                )
-                if (destination.id in tabIds) {
-                    currentTabId = destination.id
-                    binding.bottomNavigation.selectedItemId = destination.id
-                }
-            } catch (e: Exception) {
-                Log.e("MainActivity", "Destination changed error: ${e.message}")
-            }
-        }
-    }
+          binding.bottomNavigation.setOnItemReselectedListener {
+              try {
+                  val currentDest = nc.currentDestination?.id
+                  if (currentDest != null) nc.popBackStack(currentDest, false)
+              } catch (e: Exception) {
+                  Log.e("MainActivity", "Reselect error: ${e.message}")
+              }
+          }
+      }
 
-    override fun onSupportNavigateUp(): Boolean {
-        return navController?.navigateUp() ?: false || super.onSupportNavigateUp()
-    }
-}
+      private fun setupNavigationRail() {
+          val nc = navController ?: return
+          val rail = binding.navigationRail
+          if (rail == null || rail.visibility == View.GONE) {
+              setupBottomNav()
+              return
+          }
+
+          rail.visibility = View.VISIBLE
+
+          rail.setOnItemSelectedListener { item ->
+              val destId = item.itemId
+
+              if (destId == currentTabId) {
+                  nc.popBackStack(destId, false)
+                  return@setOnItemSelectedListener true
+              }
+
+              currentTabId = destId
+
+              val navOptions = NavOptions.Builder()
+                  .setLaunchSingleTop(true)
+                  .setRestoreState(true)
+                  .setPopUpTo(
+                      nc.graph.startDestinationId,
+                      inclusive = false,
+                      saveState = true
+                  )
+                  .build()
+
+              try {
+                  nc.navigate(destId, null, navOptions)
+              } catch (e: Exception) {
+                  Log.e("MainActivity", "Rail navigation error: ${e.message}")
+              }
+              true
+          }
+      }
+  }
+  
