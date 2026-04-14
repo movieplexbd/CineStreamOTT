@@ -322,7 +322,6 @@ package com.ottapp.moviestream.ui.player
               } else {
                   p.trackSelectionParameters = p.trackSelectionParameters
                       .buildUpon()
-                      .setIgnoredTextSelectionFlags(com.ottapp.moviestream.R.id.homeFragment.and(0))
                       .setDisabledTrackTypes(setOf(androidx.media3.common.C.TRACK_TYPE_TEXT))
                       .build()
               }
@@ -480,7 +479,7 @@ package com.ottapp.moviestream.ui.player
                   val position = pos.takeIf { it > 0L } ?: (player?.currentPosition ?: 0L)
                   prefs.edit().putLong(Constants.PREF_PLAYBACK_POSITION + movieId, position).apply()
                   if (position > 3000L && duration > 10_000L) {
-                      watchHistoryManager.addToHistory(Movie(id = movieId, title = movieTitle))
+                      watchHistoryManager.saveProgress(Movie(id = movieId, title = movieTitle), position, duration)
                   }
               }
           } catch (e: Exception) {
