@@ -57,7 +57,7 @@ class PlayerActivity : AppCompatActivity() {
     private var controlsVisible = true
 
     private val speedLabels = arrayOf("0.5x", "0.75x", "1.0x", "1.25x", "1.5x", "2.0x")
-    private val speedValues = floatArrayOf(0.5f, 0.75f, 1.25f, 1.25f, 1.5f, 2.0f)
+    private val speedValues = floatArrayOf(0.5f, 0.75f, 1.0f, 1.25f, 1.5f, 2.0f)
     private var speedIndex  = 2
 
     private val progressHandler = Handler(Looper.getMainLooper())
