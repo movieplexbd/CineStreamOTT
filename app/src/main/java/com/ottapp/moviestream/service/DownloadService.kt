@@ -13,6 +13,7 @@ import com.ottapp.moviestream.data.model.DownloadedMovie
 import com.ottapp.moviestream.data.repository.DownloadRepository
 import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.DownloadTracker
+import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.*
 import java.io.BufferedInputStream
 import java.io.FileOutputStream
@@ -104,7 +105,7 @@ class DownloadService : Service() {
             BufferedInputStream(conn.inputStream).use { inp ->
                 FileOutputStream(tempFile).use { out ->
                     val buf = ByteArray(8192)
-                    while (coroutineContext.isActive) {
+                    while (currentCoroutineContext().isActive) {
                         val n = inp.read(buf)
                         if (n < 0) break
                         out.write(buf, 0, n)
@@ -127,7 +128,7 @@ class DownloadService : Service() {
                 }
             }
 
-            if (!coroutineContext.isActive) {
+            if (!currentCoroutineContext().isActive) {
                 tempFile.delete()
                 return
             }

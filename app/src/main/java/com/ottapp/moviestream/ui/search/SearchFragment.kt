@@ -45,7 +45,7 @@ class SearchFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        adapter = MovieGridAdapter { openDetail(it) }
+        adapter = MovieGridAdapter(onClick = { openDetail(it) })
         binding.rvResults.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.rvResults.adapter = adapter
 
