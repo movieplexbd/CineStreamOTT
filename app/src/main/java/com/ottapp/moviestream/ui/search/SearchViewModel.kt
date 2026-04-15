@@ -38,45 +38,61 @@ class SearchViewModel : ViewModel() {
     private var searchJob: Job? = null
 
     init {
-        // Preload movies so search is instant
+        loadInitialData()
+    }
+
+    fun loadInitialData() {
         viewModelScope.launch {
+            _loading.value = true
             try {
                 allMovies = repo.getAllMovies()
                 loadTrendingRequests()
+                // If there's a pending query (e.g. from Reels), search it now
+                if (currentQuery.isNotEmpty()) {
+                    search(currentQuery)
+                }
             } catch (e: Exception) {
                 _error.value = e.message
                 allMovies = emptyList()
+            } finally {
+                _loading.value = false
             }
         }
     }
 
     private fun loadTrendingRequests() {
         viewModelScope.launch {
-            val requests = requestRepo.getAllRequests()
-            _trendingRequests.value = requests.filter { it.count >= 5 }.sortedByDescending { it.count }
+            try {
+                val requests = requestRepo.getAllRequests()
+                _trendingRequests.value = requests.filter { it.count >= 2 }.sortedByDescending { it.count }
+            } catch (e: Exception) { }
         }
     }
 
     fun search(query: String) {
         currentQuery = query
         searchJob?.cancel()
+        
         if (query.isBlank()) {
             _results.value = emptyList()
             _loading.value = false
             return
         }
+
         searchJob = viewModelScope.launch {
+            delay(300) // Debounce
             _loading.value = true
             try {
-                delay(300)
-                val q = query.lowercase()
+                val q = query.lowercase().trim()
                 
-                // Fuzzy matching: check if title contains query or query contains title
-                val filtered = allMovies.filter {
-                    val title = it.title.orEmpty().lowercase()
-                    title.contains(q) || q.contains(title) ||
-                    it.description.orEmpty().lowercase().contains(q) ||
-                    it.category.orEmpty().lowercase().contains(q)
+                // Search in title, description, and category
+                val filtered = allMovies.filter { movie ->
+                    val title = movie.title.lowercase()
+                    val desc = movie.description.lowercase()
+                    val cat = movie.category.lowercase()
+                    
+                    title.contains(q) || q.contains(title) || 
+                    desc.contains(q) || cat.contains(q)
                 }
                 applyFilter(filtered)
             } catch (e: Exception) {
@@ -88,6 +104,7 @@ class SearchViewModel : ViewModel() {
     }
 
     fun submitRequest(movieTitle: String) {
+        if (movieTitle.isBlank()) return
         viewModelScope.launch {
             _loading.value = true
             val success = requestRepo.submitRequest(movieTitle)
@@ -103,26 +120,25 @@ class SearchViewModel : ViewModel() {
 
     fun setFilter(cat: String) {
         _activeFilter.value = cat
-        val q = currentQuery.lowercase()
-        val base = if (currentQuery.isBlank()) allMovies else
-            allMovies.filter {
-                it.title.orEmpty().lowercase().contains(q) ||
-                it.description.orEmpty().lowercase().contains(q) ||
-                it.category.orEmpty().lowercase().contains(q)
-            }
-        applyFilter(base)
+        if (currentQuery.isEmpty()) {
+            applyFilter(allMovies)
+        } else {
+            search(currentQuery)
+        }
     }
 
     private fun applyFilter(list: List<Movie>) {
         val cat = _activeFilter.value ?: Constants.CAT_ALL
         _results.value = when (cat) {
-            Constants.CAT_ALL      -> list
+            Constants.CAT_ALL -> list
             Constants.CAT_TRENDING -> list.filter { it.trending }
-            else                   -> list.filter { movie ->
-                val c = movie.category.orEmpty().lowercase().trim()
-                val s = cat.lowercase().trim()
-                c == s || c.contains(s) || s.contains(c)
+            Constants.CAT_BANGLA -> list.filter { 
+                it.category.lowercase().contains("bangla") || it.category.contains("বাংলা") 
             }
+            Constants.CAT_HINDI -> list.filter { 
+                it.category.lowercase().contains("hindi") || it.category.contains("হিন্দি") 
+            }
+            else -> list.filter { it.category.equals(cat, ignoreCase = true) }
         }
     }
 }
