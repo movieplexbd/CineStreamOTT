@@ -127,7 +127,7 @@
                         android:textSize="17sp"
                         android:textStyle="bold"
                         android:textColor="@color/t1"
-                        android:fontFamily="serif"
+                        android:fontFamily="sans-serif-medium"
                         android:paddingLeft="14dp"
                         android:paddingRight="14dp"
                         android:paddingBottom="10dp" />
@@ -157,7 +157,7 @@
                         android:textSize="17sp"
                         android:textStyle="bold"
                         android:textColor="@color/t1"
-                        android:fontFamily="serif"
+                        android:fontFamily="sans-serif-medium"
                         android:paddingLeft="14dp"
                         android:paddingRight="14dp"
                         android:paddingBottom="10dp" />
@@ -187,7 +187,7 @@
                         android:textSize="17sp"
                         android:textStyle="bold"
                         android:textColor="@color/t1"
-                        android:fontFamily="serif"
+                        android:fontFamily="sans-serif-medium"
                         android:paddingLeft="14dp"
                         android:paddingRight="14dp"
                         android:paddingBottom="10dp" />
@@ -217,7 +217,7 @@
                         android:textSize="17sp"
                         android:textStyle="bold"
                         android:textColor="@color/t1"
-                        android:fontFamily="serif"
+                        android:fontFamily="sans-serif-medium"
                         android:paddingLeft="14dp"
                         android:paddingRight="14dp"
                         android:paddingBottom="10dp" />
@@ -286,11 +286,11 @@
             android:layout_gravity="top|end"
             android:layout_margin="10dp"
             android:src="@drawable/ic_search"
-            app:tint="@color/brand_primary"
             android:background="@drawable/bg_search_float"
-            android:contentDescription="Search"
+            android:contentDescription="@string/nav_search"
             android:padding="10dp"
-            android:elevation="8dp" />
+            android:elevation="8dp"
+            android:importantForAccessibility="yes" />
 
         <ImageButton
             android:id="@+id/btn_reels"
@@ -300,7 +300,6 @@
             android:layout_marginTop="62dp"
             android:layout_marginEnd="10dp"
             android:src="@drawable/ic_nav_reels"
-            app:tint="@color/brand_primary"
             android:background="@drawable/bg_search_float"
             android:contentDescription="@string/nav_reels"
             android:padding="10dp"

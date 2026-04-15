@@ -9,7 +9,9 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:background="@color/t1" />
+        android:background="@color/t1"
+        android:contentDescription="Banner image"
+        android:importantForAccessibility="yes" />
 
     <!-- Gradient overlay -->
     <View
@@ -50,7 +52,7 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/white"
-            android:fontFamily="serif"
+            android:fontFamily="sans-serif-medium"
             android:shadowColor="#66000000"
             android:shadowDx="0"
             android:shadowDy="2"

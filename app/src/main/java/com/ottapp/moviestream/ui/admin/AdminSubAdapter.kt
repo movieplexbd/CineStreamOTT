@@ -1,6 +1,7 @@
 package com.ottapp.moviestream.ui.admin
 
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -27,6 +28,9 @@ class AdminSubAdapter(
                 b.tvSubmittedAt.text = "Submitted At: Unknown"
             }
 
+            val isPending = sub.status.equals("PENDING", ignoreCase = true)
+            b.btnApprove.visibility = if (isPending) View.VISIBLE else View.GONE
+            b.btnReject.visibility = if (isPending) View.VISIBLE else View.GONE
             b.btnApprove.setOnClickListener { onApprove(sub) }
             b.btnReject.setOnClickListener { onReject(sub) }
         }

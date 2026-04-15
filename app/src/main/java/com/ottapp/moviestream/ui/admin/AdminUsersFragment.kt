@@ -1,5 +1,6 @@
 package com.ottapp.moviestream.ui.admin
 
+import android.content.Intent
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -25,6 +26,8 @@ class AdminUsersFragment : Fragment() {
     private val userRepo = UserRepository()
     private lateinit var adapter: AdminUserAdapter
     private var allUsers: List<User> = emptyList()
+    private var currentQuery = ""
+    private var currentFilter = UserFilter.ALL
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentAdminUsersBinding.inflate(inflater, container, false)
@@ -46,9 +49,15 @@ class AdminUsersFragment : Fragment() {
 
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
-            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) { filterUsers(s.toString()) }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                currentQuery = s.toString()
+                applyFilters()
+            }
             override fun afterTextChanged(s: Editable?) {}
         })
+        binding.btnRefreshUsers.setOnClickListener { loadUsers() }
+        binding.btnFilterUsers.setOnClickListener { showFilterDialog() }
+        binding.btnExportUsers.setOnClickListener { shareUserReport() }
 
         loadUsers()
     }
@@ -71,9 +80,9 @@ class AdminUsersFragment : Fragment() {
                         subscriptionExpiry = data["subscriptionExpiry"]?.toString()?.toLongOrNull() ?: 0L
                     ))
                 }
-                allUsers = users
-                adapter.submitList(allUsers)
-                binding.tvCount.text = "মোট ${allUsers.size} জন ইউজার"
+                allUsers = users.sortedBy { it.email.lowercase() }
+                updateDashboard()
+                applyFilters()
             } catch (e: Exception) {
                 requireContext().toast("লোড করতে সমস্যা: ${e.message}")
             } finally {
@@ -82,14 +91,65 @@ class AdminUsersFragment : Fragment() {
         }
     }
 
-    private fun filterUsers(query: String) {
-        val q = query.lowercase().trim()
-        val filtered = if (q.isEmpty()) allUsers
-        else allUsers.filter {
+    private fun applyFilters() {
+        if (_binding == null) return
+        val q = currentQuery.lowercase().trim()
+        val searched = if (q.isEmpty()) allUsers else allUsers.filter {
             it.displayName.lowercase().contains(q) || it.email.lowercase().contains(q)
+        }
+        val now = System.currentTimeMillis()
+        val filtered = searched.filter { user ->
+            when (currentFilter) {
+                UserFilter.ALL -> true
+                UserFilter.PREMIUM -> user.subscriptionStatus == Constants.SUB_PREMIUM
+                UserFilter.FREE -> user.subscriptionStatus == Constants.SUB_FREE
+                UserFilter.BLOCKED -> user.subscriptionStatus == Constants.SUB_BLOCKED
+                UserFilter.EXPIRED -> user.subscriptionStatus == Constants.SUB_PREMIUM && user.subscriptionExpiry in 1 until now
+            }
         }
         adapter.submitList(filtered)
         binding.tvCount.text = "মোট ${filtered.size} জন ইউজার"
+    }
+
+    private fun updateDashboard() {
+        if (_binding == null) return
+        val now = System.currentTimeMillis()
+        val premium = allUsers.count { it.subscriptionStatus == Constants.SUB_PREMIUM && it.subscriptionExpiry > now }
+        val blocked = allUsers.count { it.subscriptionStatus == Constants.SUB_BLOCKED }
+        val expired = allUsers.count { it.subscriptionStatus == Constants.SUB_PREMIUM && it.subscriptionExpiry in 1 until now }
+        binding.tvTotalUsers.text = allUsers.size.toString()
+        binding.tvPremiumUsers.text = premium.toString()
+        binding.tvRiskUsers.text = (blocked + expired).toString()
+    }
+
+    private fun showFilterDialog() {
+        val labels = arrayOf("সব", "Premium", "Free", "Blocked", "Expired")
+        AlertDialog.Builder(requireContext())
+            .setTitle("ইউজার ফিল্টার")
+            .setItems(labels) { _, which ->
+                currentFilter = UserFilter.values()[which]
+                binding.btnFilterUsers.text = "ফিল্টার: ${labels[which]}"
+                applyFilters()
+            }
+            .show()
+    }
+
+    private fun shareUserReport() {
+        val now = System.currentTimeMillis()
+        val report = buildString {
+            appendLine("CineStream User Report")
+            appendLine("Total Users: ${allUsers.size}")
+            appendLine("Premium Active: ${allUsers.count { it.subscriptionStatus == Constants.SUB_PREMIUM && it.subscriptionExpiry > now }}")
+            appendLine("Free Users: ${allUsers.count { it.subscriptionStatus == Constants.SUB_FREE }}")
+            appendLine("Blocked Users: ${allUsers.count { it.subscriptionStatus == Constants.SUB_BLOCKED }}")
+            appendLine("Expired Premium: ${allUsers.count { it.subscriptionStatus == Constants.SUB_PREMIUM && it.subscriptionExpiry in 1 until now }}")
+            appendLine("Pending Users: ${allUsers.count { it.subscriptionStatus == Constants.SUB_PENDING }}")
+        }
+        startActivity(Intent.createChooser(Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_SUBJECT, "CineStream User Report")
+            putExtra(Intent.EXTRA_TEXT, report)
+        }, "রিপোর্ট শেয়ার করুন"))
     }
 
     private fun confirmBlock(user: User) {
@@ -174,5 +234,13 @@ class AdminUsersFragment : Fragment() {
     override fun onDestroyView() {
         super.onDestroyView()
         _binding = null
+    }
+
+    private enum class UserFilter {
+        ALL,
+        PREMIUM,
+        FREE,
+        BLOCKED,
+        EXPIRED
     }
 }

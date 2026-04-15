@@ -57,6 +57,17 @@
         <item name="android:windowSoftInputMode">adjustResize</item>
     </style>
 
+    <!-- Bottom Nav Text Styles -->
+    <style name="BottomNavTextActive" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">11sp</item>
+        <item name="android:fontFamily">sans-serif-medium</item>
+    </style>
+
+    <style name="BottomNavTextInactive" parent="TextAppearance.MaterialComponents.Caption">
+        <item name="android:textSize">10sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
     <!-- Circular image shape for actor cards -->
     <style name="CircleImageStyle" parent="">
         <item name="cornerFamily">rounded</item>

@@ -7,6 +7,7 @@ import android.os.Build
 import android.util.Log
 import androidx.work.Configuration
 import com.google.firebase.FirebaseApp
+import com.google.firebase.crashlytics.FirebaseCrashlytics
 
 class OTTApplication : Application(), Configuration.Provider {
 
@@ -19,6 +20,7 @@ class OTTApplication : Application(), Configuration.Provider {
     override fun onCreate() {
         super.onCreate()
         initFirebaseSafely()
+        initCrashlytics()
         createNotificationChannels()
     }
 
@@ -31,6 +33,17 @@ class OTTApplication : Application(), Configuration.Provider {
         } catch (e: Exception) {
             Log.e("OTTApplication", "Firebase init failed: ${e.message}", e)
             firebaseReady = false
+        }
+    }
+
+    private fun initCrashlytics() {
+        try {
+            if (firebaseReady) {
+                val crashlytics = FirebaseCrashlytics.getInstance()
+                crashlytics.setCrashlyticsCollectionEnabled(true)
+            }
+        } catch (e: Exception) {
+            Log.e("OTTApplication", "Crashlytics init failed: ${e.message}", e)
         }
     }
 

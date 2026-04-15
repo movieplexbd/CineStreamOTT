@@ -18,12 +18,54 @@ object MovieCache {
     private const val KEY_MOVIES     = "all_movies_json"
     private const val KEY_MOVIE_TS   = "all_movies_ts"
     private const val KEY_MOVIE_PFX  = "movie_"
+    private const val KEY_BANNERS    = "all_banners_json"
+    private const val KEY_BANNER_TS  = "all_banners_ts"
     private const val CACHE_TTL_MS   = 6L * 60L * 60L * 1000L // 6 hours
 
     private fun prefs(ctx: Context): SharedPreferences =
         ctx.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
-    /* ── Save / load list ── */
+    /* ── Save / load banner list ── */
+
+    fun saveBanners(ctx: Context, banners: List<com.ottapp.moviestream.data.model.Banner>) {
+        val arr = JSONArray()
+        banners.forEach { b ->
+            arr.put(JSONObject().apply {
+                put("id", b.id)
+                put("imageUrl", b.imageUrl)
+                put("title", b.title)
+                put("category", b.category)
+                put("imdbRating", b.imdbRating)
+                put("testMovie", b.testMovie)
+                put("movieId", b.movieId)
+            })
+        }
+        prefs(ctx).edit()
+            .putString(KEY_BANNERS, arr.toString())
+            .putLong(KEY_BANNER_TS, System.currentTimeMillis())
+            .apply()
+    }
+
+    fun loadBanners(ctx: Context): List<com.ottapp.moviestream.data.model.Banner>? {
+        val json = prefs(ctx).getString(KEY_BANNERS, null) ?: return null
+        return try {
+            val arr = JSONArray(json)
+            (0 until arr.length()).mapNotNull { i ->
+                val j = arr.getJSONObject(i)
+                com.ottapp.moviestream.data.model.Banner(
+                    id         = j.optString("id"),
+                    imageUrl   = j.optString("imageUrl"),
+                    title      = j.optString("title"),
+                    category   = j.optString("category"),
+                    imdbRating = j.optDouble("imdbRating", 0.0),
+                    testMovie  = j.optBoolean("testMovie", false),
+                    movieId    = j.optString("movieId")
+                )
+            }
+        } catch (_: Exception) { null }
+    }
+
+    /* ── Save / load movie list ── */
 
     fun saveMovies(ctx: Context, movies: List<Movie>) {
         val arr = JSONArray()

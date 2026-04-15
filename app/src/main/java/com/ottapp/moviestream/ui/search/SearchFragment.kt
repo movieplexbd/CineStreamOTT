@@ -56,7 +56,6 @@ class SearchFragment : Fragment() {
         setupRequestButton()
         observeViewModel()
 
-        // Handle incoming search query from Reels or other fragments
         arguments?.getString("query")?.let { query ->
             if (query.isNotEmpty()) {
                 binding.etSearch.setText(query)
@@ -66,20 +65,24 @@ class SearchFragment : Fragment() {
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        viewModel.retryLoadMovies()
+    }
+
     private fun setupSearch() {
         binding.etSearch.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
-                val query = s.toString().trim()
-                viewModel.search(query)
-                binding.ivClear.visibility = if (query.isEmpty()) View.GONE else View.VISIBLE
+                viewModel.search(s.toString())
+                binding.ivClear.visibility = if (s.isNullOrEmpty()) View.GONE else View.VISIBLE
             }
             override fun afterTextChanged(s: Editable?) {}
         })
 
         binding.ivClear.setOnClickListener {
             binding.etSearch.setText("")
-            viewModel.search("")
+            adapter.submitList(emptyList())
         }
     }
 
@@ -101,12 +104,13 @@ class SearchFragment : Fragment() {
     }
 
     private fun setupVoiceSearch() {
-        binding.ivMic.setOnClickListener { startVoiceSearch() }
+        try {
+            binding.ivMic.setOnClickListener { startVoiceSearch() }
+        } catch (e: Exception) { }
     }
 
     private fun setupTrendingSearches() {
         val trending = listOf("Action", "Drama", "Thriller", "Comedy", "Bangla", "Hindi")
-        binding.cgTrendingSearches.removeAllViews()
         trending.forEach { query ->
             val chip = Chip(requireContext()).apply {
                 text = query
@@ -138,7 +142,10 @@ class SearchFragment : Fragment() {
             val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
                 putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
-                putExtra(RecognizerIntent.EXTRA_PROMPT, "মুভির নাম বলুন...")
+                putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "bn-BD")
+                putExtra(RecognizerIntent.EXTRA_ONLY_RETURN_LANGUAGE_PREFERENCE, false)
+                putExtra(RecognizerIntent.EXTRA_PROMPT, "বলুন মুভির নাম...")
+                putExtra(RecognizerIntent.EXTRA_MAX_RESULTS, 3)
             }
             startActivityForResult(intent, VOICE_REQUEST_CODE)
         } catch (e: Exception) {
@@ -146,6 +153,7 @@ class SearchFragment : Fragment() {
         }
     }
 
+    @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode == VOICE_REQUEST_CODE && resultCode == Activity.RESULT_OK) {
@@ -165,8 +173,7 @@ class SearchFragment : Fragment() {
         } else {
             chip.setBackgroundColor(ContextCompat.getColor(requireContext(), R.color.surface2))
             chip.setTextColor(ContextCompat.getColor(requireContext(), R.color.t2))
-            chip.strokeWidth = 1
-            chip.setStrokeColorResource(R.color.border)
+            chip.strokeWidth = 2
         }
     }
 
@@ -177,31 +184,30 @@ class SearchFragment : Fragment() {
 
         viewModel.results.observe(viewLifecycleOwner) { movies ->
             adapter.submitList(movies)
-            val query = binding.etSearch.text.toString().trim()
-            
-            if (query.isEmpty()) {
-                binding.layoutSearchHint.show()
-                binding.layoutEmpty.hide()
-                binding.rvResults.hide()
-            } else {
-                binding.layoutSearchHint.hide()
-                if (movies.isEmpty()) {
-                    binding.layoutEmpty.show()
-                    binding.rvResults.hide()
-                } else {
+            val query = binding.etSearch.text.toString()
+            when {
+                query.isBlank()  -> { 
                     binding.layoutEmpty.hide()
-                    binding.rvResults.show()
+                    binding.layoutSearchHint.show() 
+                }
+                movies.isEmpty() -> { 
+                    binding.layoutEmpty.show()
+                    binding.layoutSearchHint.hide() 
+                }
+                else             -> { 
+                    binding.layoutEmpty.hide()
+                    binding.layoutSearchHint.hide() 
                 }
             }
         }
 
         viewModel.requestStatus.observe(viewLifecycleOwner) { success ->
             if (success == true) {
-                Toast.makeText(requireContext(), "মুভি রিকোয়েস্ট পাঠানো হয়েছে!", Toast.LENGTH_LONG).show()
+                Toast.makeText(requireContext(), getString(R.string.request_sent_success), Toast.LENGTH_LONG).show()
                 binding.etSearch.setText("")
                 viewModel.resetRequestStatus()
             } else if (success == false) {
-                Toast.makeText(requireContext(), "রিকোয়েস্ট পাঠানো সম্ভব হয়নি", Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), "কিছু ভুল হয়েছে, আবার চেষ্টা করুন", Toast.LENGTH_SHORT).show()
                 viewModel.resetRequestStatus()
             }
         }
@@ -233,7 +239,7 @@ class SearchFragment : Fragment() {
     private fun openDetail(movie: Movie) {
         if (!isAdded || _binding == null) return
         try {
-            val bundle = Bundle().apply { putString(Constants.EXTRA_MOVIE_ID, movie.id) }
+            val bundle = android.os.Bundle().apply { putString(Constants.EXTRA_MOVIE_ID, movie.id) }
             findNavController().navigate(R.id.action_search_to_detail, bundle)
         } catch (e: Exception) { }
     }

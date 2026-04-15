@@ -5,9 +5,14 @@ import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
+import com.google.firebase.database.FirebaseDatabase
 import com.google.android.material.tabs.TabLayout
 import com.ottapp.moviestream.R
 import com.ottapp.moviestream.databinding.ActivityAdminBinding
+import com.ottapp.moviestream.util.Constants
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
 
 class AdminActivity : AppCompatActivity() {
 
@@ -60,6 +65,7 @@ class AdminActivity : AppCompatActivity() {
         if (savedInstanceState == null) {
             loadFragment(0)
         }
+        refreshTabBadges()
     }
 
     private fun loadFragment(index: Int) {
@@ -98,5 +104,44 @@ class AdminActivity : AppCompatActivity() {
     override fun onSupportNavigateUp(): Boolean {
         finish()
         return true
+    }
+
+    override fun onResume() {
+        super.onResume()
+        refreshTabBadges()
+    }
+
+    private fun refreshTabBadges() {
+        lifecycleScope.launch {
+            try {
+                val db = FirebaseDatabase
+                    .getInstance("https://movies-bee24-default-rtdb.firebaseio.com")
+                    .reference
+                val moviesCount = db.child(Constants.DB_MOVIES).get().await().childrenCount
+                val bannersCount = db.child(Constants.DB_BANNERS).get().await().childrenCount
+                val reelsCount = db.child(Constants.DB_REELS).get().await().childrenCount
+                val usersSnapshot = db.child(Constants.DB_USERS).get().await()
+                val premiumCount = usersSnapshot.children.count {
+                    val data = it.value as? Map<*, *> ?: return@count false
+                    data["subscriptionStatus"]?.toString() == Constants.SUB_PREMIUM
+                }
+                val pendingPayments = db.child(Constants.DB_SUBSCRIPTIONS).get().await().children.count {
+                    val data = it.value as? Map<*, *> ?: return@count false
+                    data["status"]?.toString()?.equals("PENDING", ignoreCase = true) == true
+                }
+
+                binding.adminTabLayout.getTabAt(0)?.text = "মুভি ($moviesCount)"
+                binding.adminTabLayout.getTabAt(1)?.text = "ব্যানার ($bannersCount)"
+                binding.adminTabLayout.getTabAt(2)?.text = "রিলস ($reelsCount)"
+                binding.adminTabLayout.getTabAt(3)?.text = "ইউজার (${usersSnapshot.childrenCount})"
+                binding.adminTabLayout.getTabAt(4)?.text = "পেমেন্ট ($pendingPayments)"
+                binding.adminTabLayout.getTabAt(5)?.text = "অভিনেতা"
+                if (premiumCount > 0) {
+                    supportActionBar?.subtitle = "Premium users: $premiumCount"
+                }
+            } catch (e: Exception) {
+                Log.w("AdminActivity", "Tab badge refresh failed: ${e.message}")
+            }
+        }
     }
 }

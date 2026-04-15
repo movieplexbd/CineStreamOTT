@@ -36,63 +36,81 @@ class SearchViewModel : ViewModel() {
     private var allMovies: List<Movie> = emptyList()
     private var currentQuery = ""
     private var searchJob: Job? = null
+    private var moviesLoaded = false
 
     init {
-        loadInitialData()
+        loadMovies()
     }
 
-    fun loadInitialData() {
+    private fun loadMovies() {
         viewModelScope.launch {
-            _loading.value = true
             try {
+                _loading.value = true
                 allMovies = repo.getAllMovies()
+                moviesLoaded = allMovies.isNotEmpty()
                 loadTrendingRequests()
-                // If there's a pending query (e.g. from Reels), search it now
-                if (currentQuery.isNotEmpty()) {
+                if (currentQuery.isNotBlank()) {
                     search(currentQuery)
                 }
             } catch (e: Exception) {
                 _error.value = e.message
                 allMovies = emptyList()
+                moviesLoaded = false
             } finally {
                 _loading.value = false
             }
         }
     }
 
+    fun retryLoadMovies() {
+        if (!moviesLoaded) {
+            loadMovies()
+        }
+    }
+
     private fun loadTrendingRequests() {
         viewModelScope.launch {
-            try {
-                val requests = requestRepo.getAllRequests()
-                _trendingRequests.value = requests.filter { it.count >= 2 }.sortedByDescending { it.count }
-            } catch (e: Exception) { }
+            val requests = requestRepo.getAllRequests()
+            _trendingRequests.value = requests.filter { it.count >= 5 }.sortedByDescending { it.count }
         }
     }
 
     fun search(query: String) {
         currentQuery = query
         searchJob?.cancel()
-        
         if (query.isBlank()) {
             _results.value = emptyList()
             _loading.value = false
             return
         }
 
+        if (allMovies.isEmpty() && !moviesLoaded) {
+            loadMovies()
+            return
+        }
+
         searchJob = viewModelScope.launch {
-            delay(300) // Debounce
             _loading.value = true
             try {
+                delay(300)
                 val q = query.lowercase().trim()
-                
-                // Search in title, description, and category
+
                 val filtered = allMovies.filter { movie ->
-                    val title = movie.title.lowercase()
-                    val desc = movie.description.lowercase()
-                    val cat = movie.category.lowercase()
-                    
-                    title.contains(q) || q.contains(title) || 
-                    desc.contains(q) || cat.contains(q)
+                    val title = movie.title.orEmpty().lowercase()
+                    val desc = movie.description.orEmpty().lowercase()
+                    val cat = movie.category.orEmpty().lowercase()
+
+                    if (title.isEmpty() && desc.isEmpty() && cat.isEmpty()) return@filter false
+
+                    val words = q.split("\\s+".toRegex()).filter { it.length >= 2 }
+                    val titleMatch = title.contains(q)
+                    val wordMatch = words.isNotEmpty() && words.all { w ->
+                        title.contains(w) || desc.contains(w) || cat.contains(w)
+                    }
+                    val descMatch = desc.contains(q)
+                    val catMatch = cat.contains(q)
+
+                    titleMatch || wordMatch || descMatch || catMatch
                 }
                 applyFilter(filtered)
             } catch (e: Exception) {
@@ -104,7 +122,6 @@ class SearchViewModel : ViewModel() {
     }
 
     fun submitRequest(movieTitle: String) {
-        if (movieTitle.isBlank()) return
         viewModelScope.launch {
             _loading.value = true
             val success = requestRepo.submitRequest(movieTitle)
@@ -120,25 +137,26 @@ class SearchViewModel : ViewModel() {
 
     fun setFilter(cat: String) {
         _activeFilter.value = cat
-        if (currentQuery.isEmpty()) {
-            applyFilter(allMovies)
-        } else {
-            search(currentQuery)
-        }
+        val q = currentQuery.lowercase()
+        val base = if (currentQuery.isBlank()) allMovies else
+            allMovies.filter {
+                it.title.orEmpty().lowercase().contains(q) ||
+                it.description.orEmpty().lowercase().contains(q) ||
+                it.category.orEmpty().lowercase().contains(q)
+            }
+        applyFilter(base)
     }
 
     private fun applyFilter(list: List<Movie>) {
         val cat = _activeFilter.value ?: Constants.CAT_ALL
         _results.value = when (cat) {
-            Constants.CAT_ALL -> list
+            Constants.CAT_ALL      -> list
             Constants.CAT_TRENDING -> list.filter { it.trending }
-            Constants.CAT_BANGLA -> list.filter { 
-                it.category.lowercase().contains("bangla") || it.category.contains("বাংলা") 
+            else                   -> list.filter { movie ->
+                val c = movie.category.orEmpty().lowercase().trim()
+                val s = cat.lowercase().trim()
+                c == s || c.contains(s) || s.contains(c)
             }
-            Constants.CAT_HINDI -> list.filter { 
-                it.category.lowercase().contains("hindi") || it.category.contains("হিন্দি") 
-            }
-            else -> list.filter { it.category.equals(cat, ignoreCase = true) }
         }
     }
 }

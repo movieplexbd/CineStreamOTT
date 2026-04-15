@@ -6,6 +6,8 @@ object Constants {
     const val DB_USERS         = "users"
     const val DB_SUBSCRIPTIONS = "subscriptions"
     const val DB_REQUESTS      = "movie_requests"
+    const val DB_BANNERS       = "banners"
+    const val DB_REELS         = "reels"
 
     // Intent extras
     const val EXTRA_MOVIE_ID    = "extra_movie_id"

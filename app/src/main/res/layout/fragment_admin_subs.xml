@@ -21,6 +21,50 @@
             android:textStyle="bold"
             android:background="@color/surface" />
 
+        <HorizontalScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/surface"
+            android:scrollbars="none">
+
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:paddingHorizontal="12dp"
+                android:paddingBottom="10dp">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_filter_subs"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="38dp"
+                    android:text="ফিল্টার: Pending"
+                    android:textSize="12sp"
+                    android:contentDescription="Filter payment requests" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_refresh_subs"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="38dp"
+                    android:layout_marginStart="8dp"
+                    android:text="রিফ্রেশ"
+                    android:textSize="12sp"
+                    android:contentDescription="Refresh payments" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_export_subs"
+                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="38dp"
+                    android:layout_marginStart="8dp"
+                    android:text="রিপোর্ট শেয়ার"
+                    android:textSize="12sp"
+                    android:contentDescription="Share payment report" />
+            </LinearLayout>
+        </HorizontalScrollView>
+
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rv_subs"
             android:layout_width="match_parent"

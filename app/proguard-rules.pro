@@ -136,6 +136,14 @@
 -keep class * implements android.os.Parcelable { *; }
 -keep class * implements java.io.Serializable { *; }
 
+# Room Database
+-keep class com.ottapp.moviestream.data.local.** { *; }
+-dontwarn androidx.room.**
+
+# Firebase Crashlytics
+-keep class com.google.firebase.crashlytics.** { *; }
+-dontwarn com.google.firebase.crashlytics.**
+
 # Remove debug logging in release
 -assumenosideeffects class android.util.Log {
     public static boolean isLoggable(java.lang.String, int);

@@ -65,38 +65,37 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
 
             // 1. Serve cache immediately if available (offline-first)
             val cachedMovies = MovieCache.loadMovies(ctx)
+            val cachedBanners = MovieCache.loadBanners(ctx)
+
             if (cachedMovies != null) {
                 applyMovieLists(cachedMovies)
             }
+            if (cachedBanners != null) {
+                _banners.value = cachedBanners
+            }
+
+            // Always load continue watching and user
+            _continueWatching.value = watchHistoryManager.getContinueWatching()
+            safeGetUser()
+
+            // If cache is fresh, skip network but still show cached banners
+            if (cachedMovies != null && cachedBanners != null && MovieCache.isFresh(ctx)) {
+                _loading.value = false
+                return@launch
+            }
 
             try {
-                // Always fetch continue watching
-                _continueWatching.value = watchHistoryManager.getContinueWatching()
-
-                // Fetch movies and update cache
                 val all = safeGetMovies()
                 if (all.isNotEmpty()) {
                     MovieCache.saveMovies(ctx, all)
                     applyMovieLists(all)
-                    
-                    // After loading full movie list, refresh continue watching to ensure banners are present
-                    val history = watchHistoryManager.getContinueWatching()
-                    val updatedHistory = history.map { entry ->
-                        if (entry.bannerUrl.isEmpty()) {
-                            val movie = all.find { it.id == entry.movieId }
-                            if (movie != null) {
-                                entry.copy(bannerUrl = movie.bannerImageUrl)
-                            } else entry
-                        } else entry
-                    }
-                    _continueWatching.value = updatedHistory
                 }
 
-                // Always fetch banners from database (no caching as requested)
                 val banners = bannerRepo.getAllBanners()
+                if (banners.isNotEmpty()) {
+                    MovieCache.saveBanners(ctx, banners)
+                }
                 _banners.value = banners
-
-                safeGetUser()
 
             } catch (e: Exception) {
                 Log.e(TAG, "loadData error: ${e.message}", e)
