@@ -17,7 +17,7 @@
             android:id="@+id/iv_splash_logo"
             android:layout_width="140dp"
             android:layout_height="140dp"
-            android:src="@drawable/app_logo"
+            android:src="@drawable/app_logo_new"
             android:scaleType="fitCenter"
             android:contentDescription="CineStream Logo" />
 

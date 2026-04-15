@@ -134,7 +134,7 @@ class MovieDetailFragment : Fragment() {
                 val user = try { userRepo.getCurrentUser() } catch (e: Exception) { null }
                 if (_binding == null) return@launch
 
-                if (movie.testMovie || user?.isPremium == true) {
+                if (movie.testMovie || user?.hasAccess == true) {
                     val url = if (dlRepo.isDownloaded(movie.id)) {
                         dlRepo.getLocalFilePath(movie.id)
                     } else {
@@ -223,7 +223,7 @@ class MovieDetailFragment : Fragment() {
             val user = try { userRepo.getCurrentUser() } catch (e: Exception) { null }
             if (_binding == null) return@launch
 
-            if (movie.testMovie || user?.isPremium == true) {
+            if (movie.testMovie || user?.hasAccess == true) {
                 startDownload(movie, downloadUrl)
                 // Navigate to download tab
                 try {

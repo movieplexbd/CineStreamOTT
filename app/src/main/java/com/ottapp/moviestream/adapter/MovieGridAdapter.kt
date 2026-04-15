@@ -35,7 +35,7 @@ class MovieGridAdapter(
             b.tvRating.text = "\u2605 ${movie.imdbRating}"
             b.tvCategory.text = movie.category
 
-            // Lock icon: hidden for premium users or free movies
+            // Lock icon: hidden for users with access or free movies
             val showLock = !isPremiumUser && !movie.testMovie
             b.ivLock.visibility = if (showLock) View.VISIBLE else View.GONE
 

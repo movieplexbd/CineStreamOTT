@@ -293,11 +293,11 @@ class HomeFragment : Fragment() {
                 b.tvSubscriptionBadge.show()
 
                 // Instantly remove/add lock icons across all movie grids without reload
-                val isPremium = user.isPremium
-                trendingAdapter?.setPremiumUser(isPremium)
-                banglaAdapter?.setPremiumUser(isPremium)
-                hindiAdapter?.setPremiumUser(isPremium)
-                allAdapter?.setPremiumUser(isPremium)
+                val hasAccess = user.hasAccess
+                trendingAdapter?.setPremiumUser(hasAccess)
+                banglaAdapter?.setPremiumUser(hasAccess)
+                hindiAdapter?.setPremiumUser(hasAccess)
+                allAdapter?.setPremiumUser(hasAccess)
             }
         }
     }
