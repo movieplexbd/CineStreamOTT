@@ -136,7 +136,7 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag_name }}
           name: "CineStream v${{ steps.version.outputs.version_name }} (${{ steps.version.outputs.build_date }})"
           body: |
-            ## CineStream OTT v${{ steps.version.outputs.version_name }} - White Theme Edition
+            ## CineStream OTT v${{ steps.version.outputs.version_name }} - UI Update
 
             **Version:** ${{ steps.version.outputs.version_name }}
             **Build:** ${{ steps.version.outputs.version_code }}
@@ -145,16 +145,11 @@ jobs:
 
             ---
 
-            ### v3.0.0 White Theme Edition
-            - Premium White Theme - Apple-style soft white background design
-            - Netflix-style Brand Colors - Primary Red + Warm Orange accent
-            - Card Shadows & Borders - Subtle shadows on white surfaces
-            - Light Status Bar - Dark icons on white status bar
-            - Dark Player Preserved - Player screen stays fully dark
-            - Premium Gold Badges - Gold gradient premium badge design
-            - New Search Box - EFEFEF background, 28dp rounded search box
-            - Shimmer Effects - Optimized shimmer loading for light theme
-            - All drawables redesigned for white theme consistency
+            ### UI Changes
+            - Removed shadow from login box for a cleaner look.
+            - Repositioned login box lower on the screen.
+            - Added movie-themed vector icon above the login box.
+            - Fixed GitHub Actions workflow for reliable APK generation.
 
             ---
 

@@ -56,21 +56,30 @@
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:orientation="vertical"
+            android:gravity="center_horizontal">
 
-            <!-- Space above card (title area) -->
+            <!-- Space above card (Increased to move login box down) -->
             <Space
                 android:layout_width="match_parent"
-                android:layout_height="148dp" />
+                android:layout_height="180dp" />
 
-            <!-- ── White card ── -->
+            <!-- Movie Vector Image above login box -->
+            <ImageView
+                android:layout_width="100dp"
+                android:layout_height="100dp"
+                android:layout_marginBottom="24dp"
+                android:src="@drawable/ic_login_movie"
+                android:contentDescription="Login Icon" />
+
+            <!-- ── White card (Shadow removed via elevation=0) ── -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="18dp"
                 android:layout_marginBottom="32dp"
                 app:cardCornerRadius="24dp"
-                app:cardElevation="10dp"
+                app:cardElevation="0dp"
                 app:cardBackgroundColor="@color/white">
 
                 <LinearLayout
@@ -243,47 +252,14 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:gravity="center"
-                        android:text="@string/toggle_to_signup"
-                        android:textSize="13sp"
-                        android:textColor="#FF4B6A"
                         android:padding="8dp"
-                        android:fontFamily="@font/notosansbengali_regular"
-                        android:textAllCaps="false" />
-
-                    <!-- OR divider -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:orientation="horizontal"
-                        android:gravity="center"
-                        android:layout_marginVertical="16dp">
-                        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" android:background="#E0E0E0" />
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" OR " android:textColor="#999999" android:textSize="12sp" android:fontFamily="@font/notosansbengali_regular" android:textAllCaps="false" />
-                        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" android:background="#E0E0E0" />
-                    </LinearLayout>
-
-                    <!-- Google Sign-In -->
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_google_signin"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:text="@string/btn_google_signin"
-                        android:textColor="#444444"
+                        android:text="@string/msg_no_account"
+                        android:textColor="#666666"
                         android:textSize="14sp"
-                        android:textAllCaps="false"
-                        app:cornerRadius="28dp"
-                        app:strokeColor="#E0E0E0"
-                        app:icon="@drawable/ic_nav_search"
-                        app:iconTint="@null"
-                        app:iconGravity="textStart"
                         android:fontFamily="@font/notosansbengali_regular" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
-
         </LinearLayout>
     </ScrollView>
-
 </FrameLayout>
