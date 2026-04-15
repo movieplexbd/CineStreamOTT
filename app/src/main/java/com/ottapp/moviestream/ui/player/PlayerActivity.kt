@@ -479,7 +479,8 @@ package com.ottapp.moviestream.ui.player
                   val position = pos.takeIf { it > 0L } ?: (player?.currentPosition ?: 0L)
                   prefs.edit().putLong(Constants.PREF_PLAYBACK_POSITION + movieId, position).apply()
                   if (position > 3000L && duration > 10_000L) {
-                      watchHistoryManager.saveProgress(Movie(id = movieId, title = movieTitle), position, duration)
+                      val bannerUrl = intent.getStringExtra(Constants.EXTRA_BANNER_URL) ?: ""
+                      watchHistoryManager.saveProgress(Movie(id = movieId, title = movieTitle, bannerImageUrl = bannerUrl), position, duration)
                   }
               }
           } catch (e: Exception) {
