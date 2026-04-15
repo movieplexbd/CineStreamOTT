@@ -1,15 +1,11 @@
-name: Build APK
+name: Build APK Manual
 
 on:
-  push:
-    branches: [ main, master, develop ]
-  pull_request:
-    branches: [ main, master ]
   workflow_dispatch:
 
 jobs:
   build:
-    name: Build Debug & Release APK
+    name: Build Debug APK
     runs-on: ubuntu-latest
 
     steps:
@@ -42,44 +38,9 @@ jobs:
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon
 
-      - name: Decode release keystore
-        if: ${{ secrets.RELEASE_KEYSTORE_BASE64 != '' }}
-        run: |
-          mkdir -p keystore
-          echo "${{ secrets.RELEASE_KEYSTORE_BASE64 }}" | base64 --decode > keystore/cinestream-release.jks
-
-      - name: Build Release APK
-        id: release_build
-        if: ${{ secrets.RELEASE_STORE_PASSWORD != '' && secrets.RELEASE_KEY_PASSWORD != '' }}
-        env:
-          KEYSTORE_PATH: ../keystore/cinestream-release.jks
-          RELEASE_STORE_PASSWORD: ${{ secrets.RELEASE_STORE_PASSWORD }}
-          RELEASE_KEY_ALIAS: ${{ secrets.RELEASE_KEY_ALIAS || 'cinestream_release' }}
-          RELEASE_KEY_PASSWORD: ${{ secrets.RELEASE_KEY_PASSWORD }}
-        run: ./gradlew assembleRelease --no-daemon
-        continue-on-error: true
-
       - name: Upload Debug APK
         uses: actions/upload-artifact@v4
         with:
           name: debug-apk
           path: app/build/outputs/apk/debug/*.apk
           retention-days: 30
-
-      - name: Upload Release APK
-        uses: actions/upload-artifact@v4
-        if: steps.release_build.outcome == 'success'
-        with:
-          name: release-apk
-          path: app/build/outputs/apk/release/*.apk
-          retention-days: 30
-
-      - name: Create Release (on tag)
-        if: startsWith(github.ref, 'refs/tags/')
-        uses: softprops/action-gh-release@v1
-        with:
-          files: |
-            app/build/outputs/apk/debug/*.apk
-            app/build/outputs/apk/release/*.apk
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
