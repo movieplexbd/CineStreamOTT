@@ -22,6 +22,7 @@ import com.ottapp.moviestream.databinding.FragmentHomeBinding
 import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.WatchHistoryEntry
 import com.ottapp.moviestream.adapter.ContinueWatchingAdapter
+import com.ottapp.moviestream.ui.subscription.SubscriptionDialog
 import com.ottapp.moviestream.util.hide
 import com.ottapp.moviestream.util.loadImage
 import com.ottapp.moviestream.util.show
@@ -101,13 +102,23 @@ class HomeFragment : Fragment() {
     // Setup
     // ─────────────────────────────────────────────────────────────────────────
 
+    private fun showSubscriptionDialog() {
+        try {
+            if (!isAdded || parentFragmentManager.isStateSaved) return
+            SubscriptionDialog.newInstance().show(parentFragmentManager, SubscriptionDialog.TAG)
+        } catch (e: Exception) {
+            log("subscription dialog error: ${e.message}")
+        }
+    }
+
     private fun initAdapters() {
         val onClick: (Movie) -> Unit = { goToDetail(it) }
+        val onLockedClick: (Movie) -> Unit = { showSubscriptionDialog() }
 
-        trendingAdapter = MovieGridAdapter(onClick)
-        banglaAdapter   = MovieGridAdapter(onClick)
-        hindiAdapter    = MovieGridAdapter(onClick)
-        allAdapter      = MovieGridAdapter(onClick)
+        trendingAdapter = MovieGridAdapter(onClick, onLockedClick)
+        banglaAdapter   = MovieGridAdapter(onClick, onLockedClick)
+        hindiAdapter    = MovieGridAdapter(onClick, onLockedClick)
+        allAdapter      = MovieGridAdapter(onClick, onLockedClick)
 
         _binding?.rvTrending?.apply {
             layoutManager = GridLayoutManager(requireContext(), 3)

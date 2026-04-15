@@ -13,6 +13,7 @@ import com.ottapp.moviestream.R
 import com.ottapp.moviestream.adapter.MovieGridAdapter
 import com.ottapp.moviestream.data.model.Movie
 import com.ottapp.moviestream.databinding.FragmentMoviesBinding
+import com.ottapp.moviestream.ui.subscription.SubscriptionDialog
 import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.hide
 import com.ottapp.moviestream.util.show
@@ -32,16 +33,23 @@ class MoviesFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Pass loadNextPage as onLoadMore for infinite scroll
         adapter = MovieGridAdapter(
-            onClick     = { movie -> openDetail(movie) },
-            onLoadMore  = { viewModel.loadNextPage() }
+            onClick       = { movie -> openDetail(movie) },
+            onLockedClick = { showSubscriptionDialog() },
+            onLoadMore    = { viewModel.loadNextPage() }
         )
         binding.rvMovies.layoutManager = GridLayoutManager(requireContext(), 3)
         binding.rvMovies.adapter = adapter
 
         setupCategoryTabs()
         observeViewModel()
+    }
+
+    private fun showSubscriptionDialog() {
+        try {
+            if (!isAdded || parentFragmentManager.isStateSaved) return
+            SubscriptionDialog.newInstance().show(parentFragmentManager, SubscriptionDialog.TAG)
+        } catch (e: Exception) { }
     }
 
     private fun setupCategoryTabs() {
@@ -73,6 +81,12 @@ class MoviesFragment : Fragment() {
                 binding.rvMovies.show()
             }
         }
+
+        viewModel.currentUser.observe(viewLifecycleOwner) { user ->
+            val hasAccess = user?.hasAccess == true
+            adapter.setPremiumUser(hasAccess)
+        }
+
         viewModel.filteredMovies.observe(viewLifecycleOwner) { movies ->
             adapter.submitList(movies)
             if (movies.isEmpty()) {

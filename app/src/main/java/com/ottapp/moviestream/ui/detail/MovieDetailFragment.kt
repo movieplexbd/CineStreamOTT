@@ -15,6 +15,7 @@ import com.ottapp.moviestream.R
 import com.ottapp.moviestream.data.model.Actor
 import com.ottapp.moviestream.data.model.Movie
 import com.ottapp.moviestream.data.model.DownloadQuality
+import com.ottapp.moviestream.data.model.User
 import com.ottapp.moviestream.data.repository.ActorRepository
 import com.ottapp.moviestream.data.repository.DownloadRepository
 import com.ottapp.moviestream.data.repository.MovieRepository
@@ -29,6 +30,7 @@ import com.ottapp.moviestream.util.loadImage
 import com.ottapp.moviestream.util.show
 import com.ottapp.moviestream.util.toast
 import com.ottapp.moviestream.util.WatchlistManager
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
 class MovieDetailFragment : Fragment() {
@@ -75,7 +77,14 @@ class MovieDetailFragment : Fragment() {
 
         lifecycleScope.launch {
             try {
-                val movie = movieRepo.getMovieById(movieId)
+                // Fetch movie and user in parallel for fastest load
+                val movieDeferred = async { movieRepo.getMovieById(movieId) }
+                val userDeferred  = async {
+                    try { userRepo.getCurrentUser() } catch (e: Exception) { null }
+                }
+
+                val movie = movieDeferred.await()
+                val user  = userDeferred.await()
                 if (_binding == null) return@launch
 
                 if (movie == null) {
@@ -85,7 +94,7 @@ class MovieDetailFragment : Fragment() {
                 }
                 currentMovie = movie
                 binding.progressCenter.hide()
-                populateUI(movie)
+                populateUI(movie, user)
                 binding.layoutContent.show()
 
             } catch (e: Exception) {
@@ -96,10 +105,12 @@ class MovieDetailFragment : Fragment() {
         }
     }
 
-    private fun populateUI(movie: Movie) {
+    private fun populateUI(movie: Movie, user: User?) {
         if (_binding == null) return
 
-        // Strictly use detailThumbnailUrl for the detail page hero image
+        val hasAccess = movie.testMovie || user?.hasAccess == true
+
+        // Hero image and title
         binding.ivBanner.loadImage(movie.detailThumbnailUrl)
         binding.tvTitleOverlay.text = movie.title.orEmpty()
 
@@ -118,37 +129,42 @@ class MovieDetailFragment : Fragment() {
             binding.tvDuration.show()
         }
 
-        // Load Actors
+        // Actors
         if (movie.actorIds.isNotEmpty()) {
             loadActors(movie.actorIds)
         } else {
             binding.layoutActors.hide()
         }
 
-        // SETUP DOWNLOAD BUTTONS
-        setupDownloadButtons(movie)
+        if (hasAccess) {
+            // ── PREMIUM / FREE CONTENT: Full access ─────────────────────────
+            binding.layoutLocked.hide()
+            setupDownloadButtons(movie)
 
-        // Watch button — opens player directly
-        binding.btnWatch.setOnClickListener {
-            lifecycleScope.launch {
-                val user = try { userRepo.getCurrentUser() } catch (e: Exception) { null }
-                if (_binding == null) return@launch
-
-                if (movie.testMovie || user?.hasAccess == true) {
-                    val url = if (dlRepo.isDownloaded(movie.id)) {
-                        dlRepo.getLocalFilePath(movie.id)
-                    } else {
-                        movie.videoStreamUrl
-                    }
-                    openPlayer(movie, url)
+            binding.btnWatch.setOnClickListener {
+                val url = if (dlRepo.isDownloaded(movie.id)) {
+                    dlRepo.getLocalFilePath(movie.id)
                 } else {
-                    binding.layoutLocked.show()
-                    binding.btnSubscribe.setOnClickListener { openSubscriptionDialog() }
+                    movie.videoStreamUrl
                 }
+                openPlayer(movie, url)
             }
+        } else {
+            // ── FREE USER ON PREMIUM CONTENT: Block immediately ──────────────
+            // Hide download section — premium only
+            binding.layoutDownloads.hide()
+
+            // Watch button taps → open subscription dialog (not player)
+            binding.btnWatch.setOnClickListener {
+                openSubscriptionDialog()
+            }
+
+            // Show locked panel right away without waiting for any button click
+            binding.layoutLocked.show()
+            binding.btnSubscribe.setOnClickListener { openSubscriptionDialog() }
         }
 
-        // Watchlist button
+        // Watchlist button (always available — free users can still save to list)
         try {
             val wlBtn = binding.btnWatchlist
             if (wlBtn != null) {
@@ -156,7 +172,7 @@ class MovieDetailFragment : Fragment() {
                 wlBtn.text = if (inList) "ওয়াচলিস্টে আছে ✓" else "ওয়াচলিস্টে যোগ করুন"
                 wlBtn.setOnClickListener {
                     val added = watchlistManager.toggleWatchlist(movie)
-                    wlBtn.text = if (added) "ওয়াচলিস্টে আছে ✓" else "ওয়াচলিস্টে যোগ করুন"
+                    wlBtn.text = if (added) "ওয়াচলিস্টে আছে ✓" else "ওয়াচলিস্ট থেকে সরানো হয়েছে"
                     requireContext().toast(if (added) "ওয়াচলিস্টে যোগ হয়েছে!" else "ওয়াচলিস্ট থেকে সরানো হয়েছে")
                 }
             }
@@ -165,9 +181,8 @@ class MovieDetailFragment : Fragment() {
 
     private fun setupDownloadButtons(movie: Movie) {
         binding.layoutDownloads.removeAllViews()
-        
+
         val qualities = movie.downloads.ifEmpty {
-            // Fallback to legacy downloadUrl if downloads list is empty
             if (movie.downloadUrl.isNotEmpty()) {
                 listOf(DownloadQuality("Download", movie.downloadUrl, ""))
             } else {
@@ -181,14 +196,13 @@ class MovieDetailFragment : Fragment() {
         }
 
         binding.layoutDownloads.show()
-        
+
         qualities.forEach { quality ->
             val btn = MaterialButton(requireContext(), null, com.google.android.material.R.attr.materialButtonOutlinedStyle)
             val params = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1.0f)
             params.setMargins(8, 0, 8, 0)
             btn.layoutParams = params
-            
-            // Text with quality and size
+
             val btnText = if (quality.size.isNotEmpty()) {
                 "⬇ ${quality.quality}\n(${quality.size})"
             } else {
@@ -198,12 +212,12 @@ class MovieDetailFragment : Fragment() {
             btn.textSize = 12f
             btn.setPadding(0, 20, 0, 20)
             btn.setLineSpacing(0f, 0.8f)
-            
+
             btn.setTextColor(ContextCompat.getColor(requireContext(), R.color.red))
             btn.setStrokeColorResource(R.color.red)
             btn.strokeWidth = 3
             btn.cornerRadius = 20
-            
+
             if (dlRepo.isDownloaded(movie.id)) {
                 btn.alpha = 0.5f
                 btn.isEnabled = false
@@ -213,28 +227,18 @@ class MovieDetailFragment : Fragment() {
                     handleDownloadClick(movie, quality.url)
                 }
             }
-            
+
             binding.layoutDownloads.addView(btn)
         }
     }
 
     private fun handleDownloadClick(movie: Movie, downloadUrl: String) {
-        lifecycleScope.launch {
-            val user = try { userRepo.getCurrentUser() } catch (e: Exception) { null }
-            if (_binding == null) return@launch
-
-            if (movie.testMovie || user?.hasAccess == true) {
-                startDownload(movie, downloadUrl)
-                // Navigate to download tab
-                try {
-                    findNavController().navigate(R.id.action_global_to_download)
-                } catch (e: Exception) {
-                    requireContext().toast("ডাউনলোড শুরু হয়েছে")
-                }
-            } else {
-                binding.layoutLocked.show()
-                binding.btnSubscribe.setOnClickListener { openSubscriptionDialog() }
-            }
+        // User already verified to have access before download buttons are shown
+        startDownload(movie, downloadUrl)
+        try {
+            findNavController().navigate(R.id.action_global_to_download)
+        } catch (e: Exception) {
+            requireContext().toast("ডাউনলোড শুরু হয়েছে")
         }
     }
 
@@ -279,7 +283,7 @@ class MovieDetailFragment : Fragment() {
             try {
                 val actors = actorRepo.getActorsByIds(actorIds)
                 if (_binding == null) return@launch
-                
+
                 if (actors.isNotEmpty()) {
                     binding.layoutActors.show()
                     val adapter = MovieActorAdapter { actor ->

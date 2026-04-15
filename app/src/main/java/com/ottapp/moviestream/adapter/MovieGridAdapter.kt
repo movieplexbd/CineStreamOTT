@@ -14,6 +14,7 @@ import com.ottapp.moviestream.util.loadImage
 
 class MovieGridAdapter(
     private val onClick: (Movie) -> Unit,
+    private val onLockedClick: ((Movie) -> Unit)? = null,
     private val onLoadMore: (() -> Unit)? = null
 ) : ListAdapter<Movie, MovieGridAdapter.VH>(Diff()) {
 
@@ -35,15 +36,22 @@ class MovieGridAdapter(
             b.tvRating.text = "\u2605 ${movie.imdbRating}"
             b.tvCategory.text = movie.category
 
-            // Lock icon: hidden for users with access or free movies
-            val showLock = !isPremiumUser && !movie.testMovie
-            b.ivLock.visibility = if (showLock) View.VISIBLE else View.GONE
+            // Lock icon: show only for non-premium users on premium (non-free) content
+            val isLocked = !isPremiumUser && !movie.testMovie
+            b.ivLock.visibility = if (isLocked) View.VISIBLE else View.GONE
 
             b.ivThumb.transitionName = "movie_poster_${movie.id}"
             b.root.contentDescription = "${movie.title}, rated ${movie.imdbRating}"
             b.ivThumb.contentDescription = "${movie.title} poster"
 
-            b.root.setOnClickListener { onClick(movie) }
+            b.root.setOnClickListener {
+                if (isLocked && onLockedClick != null) {
+                    // Free user clicking premium content → show subscription
+                    onLockedClick.invoke(movie)
+                } else {
+                    onClick(movie)
+                }
+            }
         }
     }
 

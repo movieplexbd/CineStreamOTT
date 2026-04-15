@@ -1,19 +1,23 @@
 package com.ottapp.moviestream.ui.movies
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.*
 import com.ottapp.moviestream.data.model.Movie
+import com.ottapp.moviestream.data.model.User
 import com.ottapp.moviestream.data.repository.MovieRepository
+import com.ottapp.moviestream.data.repository.UserRepository
 import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.MovieCache
 import kotlinx.coroutines.launch
 
 class MoviesViewModel(private val app: Application) : AndroidViewModel(app) {
 
-    private val repo = MovieRepository()
-    private val ctx  = app.applicationContext
+    private val repo     = MovieRepository()
+    private val userRepo = UserRepository()
+    private val ctx      = app.applicationContext
 
-    private val allMovies     = mutableListOf<Movie>()
+    private val allMovies       = mutableListOf<Movie>()
     private val displayedMovies = mutableListOf<Movie>()
 
     private val _filteredMovies = MutableLiveData<List<Movie>>(emptyList())
@@ -25,20 +29,31 @@ class MoviesViewModel(private val app: Application) : AndroidViewModel(app) {
     private val _error = MutableLiveData<String?>()
     val error: LiveData<String?> = _error
 
+    private val _currentUser = MutableLiveData<User?>(null)
+    val currentUser: LiveData<User?> = _currentUser
+
     private var selectedCategory = Constants.CAT_ALL
 
     // Pagination
-    private val pageSize = 24
-    private var pageOffset = 0
+    private val pageSize    = 24
+    private var pageOffset  = 0
     private var isLoadingMore = false
-    private var hasMore = true
+    private var hasMore     = true
 
     init { loadMovies() }
 
     fun loadMovies() {
         viewModelScope.launch {
             _loading.value = true
-            _error.value = null
+            _error.value   = null
+
+            // Load user first so lock icons are correct from the start
+            try {
+                _currentUser.value = userRepo.getCurrentUser()
+            } catch (e: Exception) {
+                Log.e("MoviesViewModel", "getUser error: ${e.message}")
+                _currentUser.value = null
+            }
 
             // Show cache immediately
             val cached = MovieCache.loadMovies(ctx)
