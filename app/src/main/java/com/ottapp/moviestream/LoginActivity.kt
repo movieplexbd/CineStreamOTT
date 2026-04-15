@@ -32,8 +32,6 @@ class LoginActivity : AppCompatActivity() {
             Log.e("LoginActivity", "AuthRepository init failed: ${e.message}", e)
         }
 
-        binding.btnGoogleSignIn.hide()
-
         setupClickListeners()
     }
 
