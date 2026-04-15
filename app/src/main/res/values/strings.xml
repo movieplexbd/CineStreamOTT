@@ -73,6 +73,9 @@
     <string name="sub_price">৳১০/এককালীন</string>
     <string name="sub_success_title">সাবমিট সফল হয়েছে!</string>
 
+    <!-- Login toggle -->
+    <string name="msg_no_account">অ্যাকাউন্ট নেই? এখানে তৈরি করুন</string>
+
     <!-- Smart Request System -->
     <string name="search_or_request">মুভি খুঁজুন বা রিকোয়েস্ট করুন...</string>
     <string name="request_this_movie">এই মুভিটি রিকোয়েস্ট করুন</string>
