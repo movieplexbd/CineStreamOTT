@@ -5,13 +5,13 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <!-- ââ Gradient background ââ -->
+    <!-- ── Gradient background ── -->
     <View
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:background="@drawable/bg_login_gradient" />
 
-    <!-- ââ Top-left blob ââ -->
+    <!-- ── Top-left blob ── -->
     <View
         android:layout_width="260dp"
         android:layout_height="260dp"
@@ -20,7 +20,7 @@
         android:translationY="-90dp"
         android:background="@drawable/bg_login_blob" />
 
-    <!-- ââ Bottom-right blob ââ -->
+    <!-- ── Bottom-right blob ── -->
     <View
         android:layout_width="220dp"
         android:layout_height="220dp"
@@ -29,7 +29,7 @@
         android:translationY="80dp"
         android:background="@drawable/bg_login_blob" />
 
-    <!-- ââ Auth Title (top-right, fixed) ââ -->
+    <!-- ── Auth Title (top-right, fixed) ── -->
     <TextView
         android:id="@+id/tv_auth_title"
         android:layout_width="wrap_content"
@@ -41,9 +41,11 @@
         android:textColor="@color/white"
         android:textSize="32sp"
         android:textStyle="bold"
-        android:letterSpacing="0.02" />
+        android:letterSpacing="0.02"
+        android:fontFamily="@font/notosansbengali_regular"
+        android:textAllCaps="false" />
 
-    <!-- ââ Scrollable form ââ -->
+    <!-- ── Scrollable form ── -->
     <ScrollView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -61,7 +63,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="148dp" />
 
-            <!-- ââ White card ââ -->
+            <!-- ── White card ── -->
             <androidx.cardview.widget.CardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -103,7 +105,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textPersonName"
-                            android:imeOptions="actionNext" />
+                            android:imeOptions="actionNext"
+                            android:fontFamily="@font/notosansbengali_regular" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Email field -->
@@ -129,7 +132,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textEmailAddress"
-                            android:imeOptions="actionNext" />
+                            android:imeOptions="actionNext"
+                            android:fontFamily="@font/notosansbengali_regular" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Password field -->
@@ -157,7 +161,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textPassword"
-                            android:imeOptions="actionDone" />
+                            android:imeOptions="actionDone"
+                            android:fontFamily="@font/notosansbengali_regular" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Confirm Password field (signup only) -->
@@ -186,7 +191,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textPassword"
-                            android:imeOptions="actionDone" />
+                            android:imeOptions="actionDone"
+                            android:fontFamily="@font/notosansbengali_regular" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Forgot password -->
@@ -198,7 +204,9 @@
                         android:textColor="#FF4B6A"
                         android:layout_marginBottom="20dp"
                         android:paddingTop="4dp"
-                        android:paddingStart="4dp" />
+                        android:paddingStart="4dp"
+                        android:fontFamily="@font/notosansbengali_regular"
+                        android:textAllCaps="false" />
 
                     <!-- Login button with gradient + ProgressBar -->
                     <FrameLayout
@@ -213,11 +221,12 @@
                             android:text="@string/btn_signin"
                             android:textSize="15sp"
                             android:textColor="@color/white"
-                            android:textAllCaps="true"
+                            android:textAllCaps="false"
                             android:letterSpacing="0.08"
                             app:backgroundTint="@null"
                             android:background="@drawable/bg_login_button"
-                            app:cornerRadius="28dp" />
+                            app:cornerRadius="28dp"
+                            android:fontFamily="@font/notosansbengali_regular" />
 
                         <ProgressBar
                             android:id="@+id/progress_bar"
@@ -238,42 +247,38 @@
                         android:text="@string/toggle_to_signup"
                         android:textSize="13sp"
                         android:textColor="#FF4B6A"
-                        android:padding="8dp" />
+                        android:padding="8dp"
+                        android:fontFamily="@font/notosansbengali_regular"
+                        android:textAllCaps="false" />
 
                     <!-- OR divider -->
                     <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:orientation="horizontal"
-                        android:gravity="center_vertical"
-                        android:layout_marginTop="4dp"
-                        android:layout_marginBottom="12dp">
-                        <View android:layout_width="0dp" android:layout_height="1dp"
-                            android:layout_weight="1" android:background="#E0DEDE" />
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="  à¦à¦¥à¦¬à¦¾  "
-                            android:textSize="12sp"
-                            android:textColor="#AAAAAA" />
-                        <View android:layout_width="0dp" android:layout_height="1dp"
-                            android:layout_weight="1" android:background="#E0DEDE" />
+                        android:gravity="center"
+                        android:layout_marginVertical="16dp">
+                        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" android:background="#E0E0E0" />
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text=" OR " android:textColor="#999999" android:textSize="12sp" android:fontFamily="@font/notosansbengali_regular" android:textAllCaps="false" />
+                        <View android:layout_width="0dp" android:layout_height="1dp" android:layout_weight="1" android:background="#E0E0E0" />
                     </LinearLayout>
 
-                    <!-- Google Sign-In (hidden by code) -->
+                    <!-- Google Sign-In -->
                     <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btn_google_sign_in"
+                        android:id="@+id/btn_google_signin"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
                         android:layout_width="match_parent"
                         android:layout_height="52dp"
                         android:text="@string/btn_google_signin"
+                        android:textColor="#444444"
                         android:textSize="14sp"
-                        android:textColor="#333333"
-                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                        app:strokeColor="#E0DEDE"
-                        app:strokeWidth="1.5dp"
+                        android:textAllCaps="false"
                         app:cornerRadius="28dp"
-                        android:backgroundTint="@color/white"
-                        android:visibility="gone" />
+                        app:strokeColor="#E0E0E0"
+                        app:icon="@drawable/ic_nav_search"
+                        app:iconTint="@null"
+                        app:iconGravity="textStart"
+                        android:fontFamily="@font/notosansbengali_regular" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

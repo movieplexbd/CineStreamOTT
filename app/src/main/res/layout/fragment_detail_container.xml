@@ -71,7 +71,9 @@
                     android:paddingLeft="10dp" android:paddingRight="10dp"
                     android:paddingTop="4dp" android:paddingBottom="4dp"
                     android:background="@drawable/bg_badge_free"
-                    android:visibility="gone" />
+                    android:visibility="gone"
+                    android:fontFamily="@font/notosansbengali_regular"
+                    android:textAllCaps="false" />
 
                 <!-- Title at bottom -->
                 <LinearLayout
@@ -89,7 +91,8 @@
                         android:textSize="22sp"
                         android:textStyle="bold"
                         android:textColor="@color/white"
-                        android:fontFamily="serif"
+                        android:fontFamily="@font/notosansbengali_regular"
+                        android:textAllCaps="false"
                         android:maxLines="2"
                         android:ellipsize="end"
                         android:shadowColor="#44000000"
@@ -147,7 +150,9 @@
                         android:background="@drawable/bg_rating"
                         android:paddingLeft="8dp" android:paddingRight="8dp"
                         android:paddingTop="3dp" android:paddingBottom="3dp"
-                        android:layout_marginEnd="8dp" />
+                        android:layout_marginEnd="8dp"
+                        android:fontFamily="@font/notosansbengali_regular"
+                        android:textAllCaps="false" />
 
                     <TextView
                         android:id="@+id/tv_year"
@@ -159,7 +164,9 @@
                         android:paddingLeft="8dp" android:paddingRight="8dp"
                         android:paddingTop="3dp" android:paddingBottom="3dp"
                         android:layout_marginEnd="8dp"
-                        android:visibility="gone" />
+                        android:visibility="gone"
+                        android:fontFamily="@font/notosansbengali_regular"
+                        android:textAllCaps="false" />
 
                     <TextView
                         android:id="@+id/tv_duration"
@@ -171,7 +178,9 @@
                         android:paddingLeft="8dp" android:paddingRight="8dp"
                         android:paddingTop="3dp" android:paddingBottom="3dp"
                         android:layout_marginEnd="8dp"
-                        android:visibility="gone" />
+                        android:visibility="gone"
+                        android:fontFamily="@font/notosansbengali_regular"
+                        android:textAllCaps="false" />
 
                     <TextView
                         android:id="@+id/tv_category"
@@ -181,7 +190,9 @@
                         android:textColor="@color/red"
                         android:background="@drawable/bg_tag"
                         android:paddingLeft="8dp" android:paddingRight="8dp"
-                        android:paddingTop="3dp" android:paddingBottom="3dp" />
+                        android:paddingTop="3dp" android:paddingBottom="3dp"
+                        android:fontFamily="@font/notosansbengali_regular"
+                        android:textAllCaps="false" />
 
                 </LinearLayout>
 
@@ -208,7 +219,9 @@
                         app:icon="@drawable/ic_download_notif"
                         app:iconGravity="start"
                         app:iconPadding="8dp"
-                        app:iconTint="@color/white" />
+                        app:iconTint="@color/white"
+                        android:fontFamily="@font/notosansbengali_regular"
+                        android:textAllCaps="false" />
                 </LinearLayout>
 
                 <!-- Actors / Cast Section -->
@@ -228,7 +241,9 @@
                         android:textStyle="bold"
                         android:textColor="@color/t1"
                         android:layout_marginStart="16dp"
-                        android:layout_marginBottom="12dp" />
+                        android:layout_marginBottom="12dp"
+                        android:fontFamily="@font/notosansbengali_regular"
+                        android:textAllCaps="false" />
 
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/rv_actors"
@@ -242,55 +257,44 @@
                         android:overScrollMode="never" />
                 </LinearLayout>
 
-                <!-- WATCHLIST BUTTON -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btn_watchlist"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginBottom="16dp"
-                    android:text="ওয়াচলিস্টে যোগ করুন"
-                    android:textSize="14sp"
-                    android:textStyle="bold"
-                    android:textColor="@color/red"
-                    style="@style/Widget.MaterialComponents.Button.OutlinedButton"
-                    app:strokeColor="@color/red"
-                    app:strokeWidth="1.5dp"
-                    app:cornerRadius="12dp"
-                    app:backgroundTint="@color/transparent"
-                    app:icon="@drawable/ic_watchlist_star"
-                    app:iconGravity="start"
-                    app:iconPadding="8dp"
-                    app:iconTint="@color/red" />
-
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="1dp"
-                    android:background="@color/surface"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginBottom="16dp" />
-
                 <!-- Description -->
                 <TextView
                     android:id="@+id/tv_description"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginHorizontal="16dp"
-                    android:layout_marginBottom="24dp"
                     android:textSize="14sp"
                     android:textColor="@color/t2"
-                    android:lineSpacingExtra="4dp" />
+                    android:lineSpacingExtra="6dp"
+                    android:paddingHorizontal="16dp"
+                    android:layout_marginBottom="24dp"
+                    android:fontFamily="@font/notosansbengali_regular"
+                    android:textAllCaps="false" />
 
-                <!-- Locked panel (subscription required) -->
+                <!-- Watchlist button -->
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_watchlist"
+                    style="@style/Widget.MaterialComponents.Button.TextButton"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ওয়াচলিস্টে যোগ করুন"
+                    android:textColor="@color/red"
+                    android:textSize="14sp"
+                    android:layout_gravity="center"
+                    android:layout_marginBottom="24dp"
+                    android:fontFamily="@font/notosansbengali_regular"
+                    android:textAllCaps="false" />
+
+                <!-- Locked subscription panel -->
                 <LinearLayout
                     android:id="@+id/layout_locked"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:background="@drawable/bg_locked_panel"
-                    android:layout_margin="16dp"
-                    android:padding="20dp"
                     android:gravity="center"
+                    android:padding="24dp"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginBottom="32dp"
+                    android:background="@drawable/bg_locked_panel"
                     android:visibility="gone">
 
                     <ImageView
@@ -298,7 +302,7 @@
                         android:layout_height="48dp"
                         android:src="@drawable/ic_lock"
                         app:tint="@color/red"
-                        android:layout_marginBottom="12dp" />
+                        android:layout_marginBottom="16dp" />
 
                     <TextView
                         android:layout_width="wrap_content"
@@ -307,44 +311,49 @@
                         android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="@color/t1"
-                        android:layout_marginBottom="6dp" />
+                        android:layout_marginBottom="8dp"
+                        android:fontFamily="@font/notosansbengali_regular"
+                        android:textAllCaps="false" />
 
                     <TextView
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:text="@string/locked_sub"
                         android:textSize="13sp"
-                        android:textColor="@color/t3"
+                        android:textColor="@color/t2"
                         android:gravity="center"
-                        android:layout_marginBottom="20dp" />
+                        android:layout_marginBottom="20dp"
+                        android:fontFamily="@font/notosansbengali_regular"
+                        android:textAllCaps="false" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btn_subscribe"
                         android:layout_width="match_parent"
-                        android:layout_height="50dp"
+                        android:layout_height="52dp"
                         android:text="@string/btn_subscribe"
-                        android:textSize="14sp"
                         android:textColor="@color/white"
+                        android:textSize="14sp"
+                        app:cornerRadius="12dp"
                         app:backgroundTint="@color/red"
-                        app:cornerRadius="12dp" />
+                        android:fontFamily="@font/notosansbengali_regular"
+                        android:textAllCaps="false" />
                 </LinearLayout>
 
-                <View
-                    android:layout_width="match_parent"
-                    android:layout_height="80dp" />
+                <View android:layout_width="match_parent" android:layout_height="40dp" />
 
             </LinearLayout>
 
+            <!-- Loading indicator -->
+            <ProgressBar
+                android:id="@+id/progress_center"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:layout_marginTop="100dp"
+                android:indeterminateTint="@color/red"
+                android:visibility="gone" />
+
         </LinearLayout>
     </androidx.core.widget.NestedScrollView>
-
-    <!-- Center Progress -->
-    <ProgressBar
-        android:id="@+id/progress_center"
-        android:layout_width="40dp"
-        android:layout_height="40dp"
-        android:layout_gravity="center"
-        android:indeterminateTint="@color/red"
-        android:visibility="gone" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
