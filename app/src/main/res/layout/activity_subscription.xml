@@ -17,7 +17,7 @@
         <!-- Header -->
         <FrameLayout
             android:layout_width="match_parent"
-            android:layout_height="200dp"
+            android:layout_height="220dp"
             android:background="@drawable/bg_sub_header">
 
             <ImageButton
@@ -106,7 +106,7 @@
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="সদ্য মুক্তি পাওয়া নতুন সকল মুভি গুলোর বাংলা ডাবিং পেয়ে যান মাত্র ১০ টাকায় এক মাসের অ্যাক্সেস। মাত্র একটি চায়ের দামে! 🔥"
+                    android:text="সদ্য মুক্তি পাওয়া নতুন সকল মুভি গুলোর বাংলা ডাবিং পেয়ে যান মাত্র ১০ টাকায় এক মাসের অ্যাক্সেস। মাত্র একটি চায়ের দামে! 🔥"
                     android:textColor="@color/t2"
                     android:textSize="14sp"
                     android:lineSpacingMultiplier="1.6" />
@@ -148,7 +148,7 @@
                     android:textColor="@color/t2" android:textSize="13sp"
                     android:lineSpacingMultiplier="1.5" android:paddingVertical="5dp" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="✔  অনলাইন প্লে সাপোর্ট (ডাউনলোড ছাড়াই সরাসরি মুভি দেখুন)"
+                    android:text="✔  অনলাইন প্লে সাপোর্ট (ডাউনলোড ছাড়াই সরাসরি মুভি দেখুন)"
                     android:textColor="@color/t2" android:textSize="13sp"
                     android:lineSpacingMultiplier="1.5" android:paddingVertical="5dp" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
@@ -164,14 +164,14 @@
                     android:textColor="@color/t2" android:textSize="13sp"
                     android:lineSpacingMultiplier="1.5" android:paddingVertical="5dp" />
                 <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="✔  Animal, বাহুবালি, Spiderman, Avengers টাইপ সকল ইন্ডিয়ান, হলিউড ও কোরিয়ান মুভির বাংলা ডাবিং পাবেন"
+                    android:text="✔  Animal, বাহুবালি, Spiderman, Avengers টাইপ সকল ইন্ডিয়ান, হলিউড ও কোরিয়ান মুভির বাংলা ডাবিং পাবেন"
                     android:textColor="@color/t2" android:textSize="13sp"
                     android:lineSpacingMultiplier="1.5" android:paddingVertical="5dp" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
 
-        <!-- Details Card -->
+        <!-- Pricing Options Card -->
         <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -190,27 +190,80 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="এই প্যাকে আপনি যা যা পাচ্ছেন"
+                    android:text="প্যাকেজ বেছে নিন"
                     android:textColor="@color/t1"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="14dp" />
 
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="🔥  স্পেশালি বাংলা ডাবিং এর জন্য সেরা সাইট"
-                    android:textColor="@color/t2" android:textSize="13sp" android:paddingVertical="5dp" />
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="📥  সকল মুভি ডাউনলোড সুবিধা"
-                    android:textColor="@color/t2" android:textSize="13sp" android:paddingVertical="5dp" />
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="🔥  নতুন রিলিজ দ্রুত পাওয়া যাবে"
-                    android:textColor="@color/t2" android:textSize="13sp" android:paddingVertical="5dp" />
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="🎬  এক্সক্লুসিভ কন্টেন্ট লাইব্রেরি"
-                    android:textColor="@color/t2" android:textSize="13sp" android:paddingVertical="5dp" />
-                <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                    android:text="✅  কোনো হিডেন চার্জ নেই"
-                    android:textColor="@color/t2" android:textSize="13sp" android:paddingVertical="5dp" />
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gap="12dp">
+
+                    <!-- Monthly Plan -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp"
+                        android:background="@drawable/bg_plan_selected"
+                        android:gravity="center">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="১ মাস"
+                            android:textColor="@color/t1"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="৳১০"
+                            android:textColor="@color/red"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+
+                    <!-- Yearly Plan -->
+                    <LinearLayout
+                        android:layout_width="0dp"
+                        android:layout_weight="1"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="16dp"
+                        android:background="@drawable/bg_plan_unselected"
+                        android:gravity="center">
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="১ বছর (অফার)"
+                            android:textColor="@color/t1"
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="৳৫০"
+                            android:textColor="@color/red"
+                            android:textSize="22sp"
+                            android:textStyle="bold"
+                            android:layout_marginTop="4dp" />
+                    </LinearLayout>
+                </LinearLayout>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="আপনার এন্টারটেইনমেন্ট এর কাছে ১০ টাকা বা ৫০ টাকা খুবই কম যেটা আপনি প্রতিদিন এমনিই খরচ করেন। তাই আজই সাবস্ক্রাইব করুন!"
+                    android:textColor="@color/t2"
+                    android:textSize="12sp"
+                    android:layout_marginTop="16dp"
+                    android:fontStyle="italic"
+                    android:gravity="center" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
@@ -235,201 +288,124 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="💳 পেমেন্ট করুন"
+                    android:text="পেমেন্ট করুন"
                     android:textColor="@color/t1"
-                    android:textSize="17sp"
+                    android:textSize="16sp"
                     android:textStyle="bold"
-                    android:layout_marginBottom="16dp" />
+                    android:layout_marginBottom="14dp" />
 
-                <!-- Plan Info -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:background="@drawable/bg_plan_info"
-                    android:padding="14dp"
-                    android:layout_marginBottom="16dp">
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="আপনার নির্বাচিত প্ল্যান: এক্সক্লুসিভ প্যাক"
-                        android:textColor="@color/t2"
-                        android:textSize="13sp"
-                        android:layout_marginBottom="4dp" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="প্ল্যানের মূল্য: ৳১০ টাকা"
-                        android:textColor="@color/red"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                </LinearLayout>
-
-                <!-- Instruction -->
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:text="অনুগ্রহ করে নিচের বিকাশ/নগদ নম্বরে ১০ টাকা Send Money করুন:"
-                    android:textColor="@color/t2"
-                    android:textSize="13sp"
-                    android:lineSpacingMultiplier="1.5"
-                    android:layout_marginBottom="10dp" />
-
-                <!-- Payment Number + Copy -->
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
                     android:gravity="center_vertical"
                     android:background="@drawable/bg_number_box"
-                    android:padding="12dp"
-                    android:layout_marginBottom="20dp">
+                    android:padding="12dp">
 
                     <TextView
+                        android:id="@+id/tv_payment_number"
                         android:layout_width="0dp"
-                        android:layout_height="wrap_content"
                         android:layout_weight="1"
+                        android:layout_height="wrap_content"
                         android:text="01913305107"
                         android:textColor="@color/t1"
-                        android:textSize="20sp"
-                        android:textStyle="bold"
-                        android:letterSpacing="0.05" />
+                        android:textSize="18sp"
+                        android:textStyle="bold" />
 
-                    <com.google.android.material.button.MaterialButton
+                    <Button
                         android:id="@+id/btn_copy"
                         android:layout_width="wrap_content"
                         android:layout_height="36dp"
-                        android:text="📋 কপি করুন"
+                        android:text="কপি"
                         android:textSize="12sp"
-                        android:textColor="@color/white"
-                        app:cornerRadius="8dp"
-                        app:backgroundTint="@color/red"
-                        app:icon="@null" />
-
+                        style="@style/Widget.MaterialComponents.Button.TextButton"
+                        android:textColor="@color/red" />
                 </LinearLayout>
 
-                <!-- Transaction ID Label -->
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Transaction ID (ট্রানজেকশন আইডি)"
-                    android:textColor="@color/t2"
-                    android:textSize="13sp"
-                    android:layout_marginBottom="8dp" />
+                    android:text="উপরের নম্বরে বিকাশ (bKash) সেন্ড মানি করুন"
+                    android:textColor="@color/t3"
+                    android:textSize="11sp"
+                    android:layout_marginTop="6dp"
+                    android:layout_marginBottom="16dp" />
 
-                <!-- Transaction ID Input -->
-                <com.google.android.material.textfield.TextInputLayout
+                <EditText
+                    android:id="@+id/et_transaction_id"
                     android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-                    app:boxStrokeColor="@color/red"
-                    app:hintTextColor="@color/t3"
-                    app:boxBackgroundColor="@color/surface"
-                    android:hint="যেমন: 9A3B2C1D0E"
-                    android:layout_marginBottom="20dp">
+                    android:layout_height="54dp"
+                    android:hint="ট্রানজেকশন আইডি (TrxID)"
+                    android:inputType="textCapCharacters"
+                    android:background="@drawable/bg_input_field"
+                    android:paddingHorizontal="16dp"
+                    android:textSize="15sp" />
 
-                    <com.google.android.material.textfield.TextInputEditText
-                        android:id="@+id/et_transaction_id"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:textColor="@color/t1"
-                        android:textSize="14sp"
-                        android:inputType="text"
-                        android:maxLines="1"
-                        android:imeOptions="actionDone" />
-
-                </com.google.android.material.textfield.TextInputLayout>
-
-                <!-- Submit Button -->
-                <com.google.android.material.button.MaterialButton
+                <Button
                     android:id="@+id/btn_submit"
                     android:layout_width="match_parent"
-                    android:layout_height="52dp"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="20dp"
                     android:text="সাবমিট করুন"
                     android:textSize="16sp"
                     android:textStyle="bold"
-                    android:textColor="@color/white"
                     app:cornerRadius="12dp"
-                    app:backgroundTint="@color/red"
-                    app:icon="@null" />
+                    android:backgroundTint="@color/red" />
 
                 <ProgressBar
                     android:id="@+id/progress_bar"
-                    android:layout_width="36dp"
-                    android:layout_height="36dp"
-                    android:layout_gravity="center_horizontal"
-                    android:indeterminateTint="@color/red"
-                    android:layout_marginTop="12dp"
+                    android:layout_width="32dp"
+                    android:layout_height="32dp"
+                    android:layout_gravity="center"
+                    android:layout_marginTop="16dp"
                     android:visibility="gone" />
 
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/layout_success"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:gravity="center"
+                android:padding="40dp"
+                android:visibility="gone">
+
+                <ImageView
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:src="@drawable/ic_check_circle"
+                    app:tint="@color/green" />
+
                 <TextView
-                    android:layout_width="match_parent"
+                    android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="⏳ পেমেন্ট যাচাই করার পর ৬ ঘণ্টার মধ্যে অ্যাক্সেস সক্রিয় হবে।"
-                    android:textColor="@color/t3"
-                    android:textSize="12sp"
-                    android:lineSpacingMultiplier="1.5"
+                    android:text="সাবমিট সফল হয়েছে!"
+                    android:textColor="@color/t1"
+                    android:textSize="20sp"
+                    android:textStyle="bold"
+                    android:layout_marginTop="20dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="আপনার পেমেন্ট রিভিউ করা হচ্ছে। কিছুক্ষণের মধ্যেই প্রিমিয়াম অ্যাক্সেস পেয়ে যাবেন।"
+                    android:textColor="@color/t2"
+                    android:textSize="14sp"
                     android:gravity="center"
-                    android:layout_marginTop="12dp" />
+                    android:layout_marginTop="10dp" />
+
+                <Button
+                    android:id="@+id/btn_done"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="30dp"
+                    android:text="ঠিক আছে"
+                    app:cornerRadius="12dp"
+                    android:backgroundTint="@color/red" />
 
             </LinearLayout>
         </androidx.cardview.widget.CardView>
-
-        <!-- Success Card -->
-        <LinearLayout
-            android:id="@+id/layout_success"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="center"
-            android:padding="32dp"
-            android:layout_marginHorizontal="16dp"
-            android:layout_marginTop="12dp"
-            android:background="@drawable/bg_success_card"
-            android:visibility="gone">
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="✅"
-                android:textSize="56sp"
-                android:layout_marginBottom="16dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="সাবমিট সফল হয়েছে!"
-                android:textColor="@color/t1"
-                android:textSize="20sp"
-                android:textStyle="bold"
-                android:layout_marginBottom="8dp" />
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="আপনার পেমেন্ট রিভিউ করা হচ্ছে। ইতিমধ্যে আপনি ৬ ঘণ্টার জন্য অ্যাপটি ব্যবহার করতে পারবেন। অ্যাডমিন অ্যাপ্রুভ করলে ৩০ দিনের পূর্ণ অ্যাক্সেস পাবেন।"
-                android:textColor="@color/t2"
-                android:textSize="14sp"
-                android:gravity="center"
-                android:lineSpacingMultiplier="1.6"
-                android:layout_marginBottom="24dp" />
-
-            <com.google.android.material.button.MaterialButton
-                android:id="@+id/btn_done"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:text="মুভি দেখুন →"
-                android:textSize="15sp"
-                android:textStyle="bold"
-                android:textColor="@color/white"
-                app:cornerRadius="12dp"
-                app:backgroundTint="@color/red"
-                app:icon="@null" />
-
-        </LinearLayout>
 
     </LinearLayout>
 </androidx.core.widget.NestedScrollView>

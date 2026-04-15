@@ -23,7 +23,7 @@ class SubscriptionDialog : BottomSheetDialogFragment() {
 
         private const val BKASH_NUMBER = "01913305107"
         private const val MONTHLY_PRICE = "১০"
-        private const val YEARLY_PRICE = "১০০"
+        private const val YEARLY_PRICE = "৫০"
         private const val DB_URL = "https://movies-bee24-default-rtdb.firebaseio.com"
 
         fun newInstance() = SubscriptionDialog()
@@ -48,6 +48,8 @@ class SubscriptionDialog : BottomSheetDialogFragment() {
         }
 
         binding.tvBkashNumber.text = BKASH_NUMBER
+        binding.tvMonthlyPrice.text = "৳ ১০"
+        binding.tvYearlyPrice.text = "৳ ৫০"
 
         setupPlanSelection()
         setupCopyNumber()
@@ -76,7 +78,7 @@ class SubscriptionDialog : BottomSheetDialogFragment() {
                 val cm = requireContext().getSystemService(android.content.Context.CLIPBOARD_SERVICE) as android.content.ClipboardManager
                 val clip = android.content.ClipData.newPlainText("bKash", BKASH_NUMBER)
                 cm.setPrimaryClip(clip)
-                requireContext().toast("নম্বর কপি হয়েছে!")
+                requireContext().toast("নম্বর কপি হয়েছে!")
             } catch (e: Exception) { /* ignore */ }
         }
     }
@@ -120,19 +122,19 @@ class SubscriptionDialog : BottomSheetDialogFragment() {
                 .push()
                 .setValue(data)
                 .addOnSuccessListener {
-                    requireContext().toast("সাবমিট সফল! ২৪ ঘন্টার মধ্যে অ্যাকাউন্ট সক্রিয় হবে")
+                    requireContext().toast("সাবমিট সফল! ২৪ ঘন্টার মধ্যে অ্যাকাউন্ট সক্রিয় হবে")
                     lifecycleScope.launch {
                         delay(1500)
                         dismiss()
                     }
                 }
                 .addOnFailureListener { e ->
-                    requireContext().toast("সমস্যা হয়েছে: ${e.message}")
+                    requireContext().toast("সমস্যা হয়েছে: ${e.message}")
                     binding.btnSubmit.isEnabled = true
                     binding.btnSubmit.text = "সাবমিট করুন"
                 }
         } catch (e: Exception) {
-            requireContext().toast("সমস্যা হয়েছে")
+            requireContext().toast("সমস্যা হয়েছে")
             binding.btnSubmit.isEnabled = true
             binding.btnSubmit.text = "সাবমিট করুন"
         }
