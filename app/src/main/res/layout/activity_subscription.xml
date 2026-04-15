@@ -206,11 +206,11 @@
                         android:layout_width="0dp"
                         android:layout_weight="1"
                         android:layout_height="wrap_content"
-                        android:layout_marginEnd="6dp"
                         android:orientation="vertical"
                         android:padding="16dp"
                         android:background="@drawable/bg_plan_selected"
-                        android:gravity="center">
+                        android:gravity="center"
+                        android:layout_marginEnd="6dp">
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
@@ -236,7 +236,8 @@
                         android:orientation="vertical"
                         android:padding="16dp"
                         android:background="@drawable/bg_plan_unselected"
-                        android:gravity="center">
+                        android:gravity="center"
+                        android:layout_marginStart="6dp">
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
