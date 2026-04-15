@@ -63,7 +63,12 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
         viewModelScope.launch {
             _loading.value = true
 
-            // 1. Serve cache immediately if available (offline-first)
+            // 1. Load user FIRST so premium status is known before movies render
+            //    This prevents lock icons showing for premium users even briefly
+            _continueWatching.value = watchHistoryManager.getContinueWatching()
+            safeGetUser()
+
+            // 2. Serve cache immediately if available (offline-first)
             val cachedMovies = MovieCache.loadMovies(ctx)
             val cachedBanners = MovieCache.loadBanners(ctx)
 
@@ -74,11 +79,7 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                 _banners.value = cachedBanners
             }
 
-            // Always load continue watching and user
-            _continueWatching.value = watchHistoryManager.getContinueWatching()
-            safeGetUser()
-
-            // If cache is fresh, skip network but still show cached banners
+            // If cache is fresh, skip network
             if (cachedMovies != null && cachedBanners != null && MovieCache.isFresh(ctx)) {
                 _loading.value = false
                 return@launch
