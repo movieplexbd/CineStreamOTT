@@ -7,6 +7,8 @@ import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
 import com.ottapp.moviestream.data.model.User
+import com.ottapp.moviestream.data.model.UserDevice
+import com.ottapp.moviestream.data.model.UserActivity
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
@@ -85,5 +87,19 @@ class UserRepository {
         db.child("users").child(uid).updateChildren(
             mapOf("trialUsed" to true, "trialExpiry" to expiry)
         ).await()
+    }
+
+    suspend fun logActivity(uid: String, activity: UserActivity) {
+        val key = db.child("users").child(uid).child("activityLogs").push().key ?: return
+        activity.id = key
+        db.child("users").child(uid).child("activityLogs").child(key).setValue(activity).await()
+    }
+
+    suspend fun updateDevice(uid: String, device: UserDevice) {
+        db.child("users").child(uid).child("devices").child(device.deviceId).setValue(device).await()
+    }
+
+    suspend fun logoutDevice(uid: String, deviceId: String) {
+        db.child("users").child(uid).child("devices").child(deviceId).child("isActive").setValue(false).await()
     }
 }

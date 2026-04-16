@@ -31,9 +31,13 @@ package com.ottapp.moviestream.ui.player
   import com.ottapp.moviestream.util.show
   import com.ottapp.moviestream.util.toast
   import com.ottapp.moviestream.util.toFormattedTime
-  import com.ottapp.moviestream.util.WatchHistoryManager
-  import com.ottapp.moviestream.data.model.Movie
-  import kotlin.math.abs
+import com.ottapp.moviestream.util.WatchHistoryManager
+import com.ottapp.moviestream.data.model.Movie
+import com.ottapp.moviestream.data.model.UserActivity
+import com.ottapp.moviestream.data.repository.UserRepository
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
+import kotlin.math.abs
 
   @OptIn(UnstableApi::class)
   class PlayerActivity : AppCompatActivity() {
@@ -46,8 +50,8 @@ package com.ottapp.moviestream.ui.player
       private lateinit var binding: ActivityPlayerBinding
       private var player: ExoPlayer? = null
       private lateinit var prefs: SharedPreferences
-      private lateinit var watchHistoryManager: WatchHistoryManager
-
+       private lateinit var watchHistoryManager: WatchHistoryManager
+      private val userRepo = UserRepository()
       private var movieId    = ""
       private var movieTitle = ""
       private var videoUrl   = ""
@@ -480,6 +484,22 @@ package com.ottapp.moviestream.ui.player
                   prefs.edit().putLong(Constants.PREF_PLAYBACK_POSITION + movieId, position).apply()
                   if (position > 3000L && duration > 10_000L) {
                       watchHistoryManager.saveProgress(Movie(id = movieId, title = movieTitle), position, duration)
+                      
+                      // Log to server
+                      lifecycleScope.launch {
+                          try {
+                              val user = userRepo.getCurrentUser()
+                              if (user != null) {
+                                  userRepo.logActivity(user.uid, UserActivity(
+                                      movieId = movieId,
+                                      movieTitle = movieTitle,
+                                      timestamp = System.currentTimeMillis(),
+                                      durationWatched = position,
+                                      action = "watch"
+                                  ))
+                              }
+                          } catch (e: Exception) { /* ignore */ }
+                      }
                   }
               }
           } catch (e: Exception) {

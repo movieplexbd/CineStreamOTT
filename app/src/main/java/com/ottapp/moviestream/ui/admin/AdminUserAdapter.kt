@@ -18,7 +18,9 @@ class AdminUserAdapter(
     private val onMakePremium: (User) -> Unit,
     private val onRemovePremium: (User) -> Unit,
     private val onExtend: (User) -> Unit,
-    private val onResetPassword: (User) -> Unit
+    private val onResetPassword: (User) -> Unit,
+    private val onManageDevices: (User) -> Unit,
+    private val onViewActivity: (User) -> Unit
 ) : ListAdapter<User, AdminUserAdapter.VH>(Diff()) {
 
     inner class VH(private val b: ItemAdminUserBinding) : RecyclerView.ViewHolder(b.root) {
@@ -58,6 +60,10 @@ class AdminUserAdapter(
             b.btnExtend.visibility = if (isPremium) View.VISIBLE else View.GONE
             b.btnExtend.setOnClickListener { onExtend(user) }
             b.btnResetPassword.setOnClickListener { onResetPassword(user) }
+            
+            // New buttons for device and activity
+            b.root.findViewById<View>(R.id.btn_manage_devices)?.setOnClickListener { onManageDevices(user) }
+            b.root.findViewById<View>(R.id.btn_view_activity)?.setOnClickListener { onViewActivity(user) }
         }
     }
 

@@ -12,7 +12,11 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.auth.FirebaseAuth
 import com.ottapp.moviestream.data.model.User
+import com.ottapp.moviestream.data.model.UserDevice
+import com.ottapp.moviestream.data.model.UserActivity
 import com.ottapp.moviestream.data.repository.UserRepository
+import java.text.SimpleDateFormat
+import java.util.*
 import com.ottapp.moviestream.databinding.FragmentAdminUsersBinding
 import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.toast
@@ -42,7 +46,9 @@ class AdminUsersFragment : Fragment() {
             onMakePremium = { user -> confirmPremium(user) },
             onRemovePremium = { user -> confirmRemovePremium(user) },
             onExtend = { user -> showExtendDialog(user) },
-            onResetPassword = { user -> confirmResetPassword(user) }
+            onResetPassword = { user -> confirmResetPassword(user) },
+            onManageDevices = { user -> showDeviceManagement(user) },
+            onViewActivity = { user -> showUserActivity(user) }
         )
         binding.rvUsers.layoutManager = LinearLayoutManager(requireContext())
         binding.rvUsers.adapter = adapter
@@ -77,7 +83,27 @@ class AdminUsersFragment : Fragment() {
                         displayName = data["displayName"]?.toString() ?: "",
                         photoUrl = data["photoUrl"]?.toString() ?: "",
                         subscriptionStatus = data["subscriptionStatus"]?.toString() ?: User.PLAN_FREE,
-                        subscriptionExpiry = data["subscriptionExpiry"]?.toString()?.toLongOrNull() ?: 0L
+                        subscriptionExpiry = data["subscriptionExpiry"]?.toString()?.toLongOrNull() ?: 0L,
+                        devices = (data["devices"] as? Map<String, Any>)?.mapValues { entry ->
+                            val d = entry.value as Map<*, *>
+                            UserDevice(
+                                deviceId = d["deviceId"]?.toString() ?: "",
+                                deviceName = d["deviceName"]?.toString() ?: "",
+                                lastLogin = d["lastLogin"]?.toString()?.toLongOrNull() ?: 0L,
+                                isActive = d["isActive"]?.toString()?.toBoolean() ?: true
+                            )
+                        } ?: emptyMap(),
+                        activityLogs = (data["activityLogs"] as? Map<String, Any>)?.mapValues { entry ->
+                            val a = entry.value as Map<*, *>
+                            UserActivity(
+                                id = entry.key,
+                                movieId = a["movieId"]?.toString() ?: "",
+                                movieTitle = a["movieTitle"]?.toString() ?: "",
+                                timestamp = a["timestamp"]?.toString()?.toLongOrNull() ?: 0L,
+                                durationWatched = a["durationWatched"]?.toString()?.toLongOrNull() ?: 0L,
+                                action = a["action"]?.toString() ?: "watch"
+                            )
+                        } ?: emptyMap()
                     ))
                 }
                 allUsers = users.sortedBy { it.email.lowercase() }
@@ -216,6 +242,67 @@ class AdminUsersFragment : Fragment() {
                     }
             }
             .setNegativeButton("বাতিল", null)
+            .show()
+    }
+
+    private fun showDeviceManagement(user: User) {
+        if (user.devices.isEmpty()) {
+            requireContext().toast("কোনো ডিভাইস লগইন নেই")
+            return
+        }
+
+        val deviceList = user.devices.values.toList()
+        val deviceNames = deviceList.map { "${it.deviceName} (${if (it.isActive) "Active" else "Logged Out"})" }.toTypedArray()
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("ডিভাইস ম্যানেজমেন্ট")
+            .setItems(deviceNames) { _, which ->
+                val device = deviceList[which]
+                if (device.isActive) {
+                    confirmLogoutDevice(user.uid, device)
+                } else {
+                    requireContext().toast("এই ডিভাইসটি অলরেডি লগআউট করা")
+                }
+            }
+            .setNegativeButton("বন্ধ করুন", null)
+            .show()
+    }
+
+    private fun confirmLogoutDevice(uid: String, device: UserDevice) {
+        AlertDialog.Builder(requireContext())
+            .setTitle("লগআউট করবেন?")
+            .setMessage("${device.deviceName} থেকে ইউজারকে লগআউট করে দেওয়া হবে।")
+            .setPositiveButton("হ্যাঁ") { _, _ ->
+                lifecycleScope.launch {
+                    try {
+                        userRepo.logoutDevice(uid, device.deviceId)
+                        requireContext().toast("লগআউট সফল হয়েছে")
+                        loadUsers()
+                    } catch (e: Exception) {
+                        requireContext().toast("ব্যর্থ: ${e.message}")
+                    }
+                }
+            }
+            .setNegativeButton("না", null)
+            .show()
+    }
+
+    private fun showUserActivity(user: User) {
+        if (user.activityLogs.isEmpty()) {
+            requireContext().toast("কোনো অ্যাক্টিভিটি নেই")
+            return
+        }
+
+        val logs = user.activityLogs.values.sortedByDescending { it.timestamp }
+        val sdf = SimpleDateFormat("dd MMM, hh:mm a", Locale.getDefault())
+        val logStrings = logs.map { 
+            "${it.movieTitle}\n${sdf.format(Date(it.timestamp))} | ${it.durationWatched / 1000 / 60} min"
+        }.toTypedArray()
+
+        AlertDialog.Builder(requireContext())
+            .setTitle("${user.displayName} এর অ্যাক্টিভিটি")
+            .setItems(logStrings, null)
+            .setPositiveButton("ঠিক আছে", null)
             .show()
     }
 

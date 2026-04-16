@@ -14,6 +14,8 @@ import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.databinding.ActivityAddEditMovieBinding
 import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.toast
+import com.ottapp.moviestream.data.remote.TmdbService
+import com.ottapp.moviestream.data.remote.TmdbMovie
 import kotlinx.coroutines.launch
 
 class AddEditMovieActivity : AppCompatActivity() {
@@ -21,6 +23,7 @@ class AddEditMovieActivity : AppCompatActivity() {
     private lateinit var binding: ActivityAddEditMovieBinding
     private val repo = MovieRepository()
     private val actorRepo = ActorRepository()
+    private val tmdbService = TmdbService()
     private var movieId: String? = null
     private var allActors = listOf<Actor>()
     private var selectedActorIds = mutableListOf<String>()
@@ -50,6 +53,7 @@ class AddEditMovieActivity : AppCompatActivity() {
 
         binding.btnSave.setOnClickListener { saveMovie() }
         binding.btnSelectActors.setOnClickListener { showActorSelectionDialog() }
+        binding.btnFetch_metadata.setOnClickListener { fetchMetadata() }
         loadAllActors()
 
         // Show hint about test movie limit
@@ -153,6 +157,59 @@ class AddEditMovieActivity : AppCompatActivity() {
         } else {
             val names = allActors.filter { selectedActorIds.contains(it.id) }.map { it.name }
             binding.tvSelectedActors.text = if (names.isEmpty()) "সিলেক্ট করা হয়েছে (${selectedActorIds.size})" else names.joinToString(", ")
+        }
+    }
+
+    private fun fetchMetadata() {
+        val title = binding.etTitle.text.toString().trim()
+        if (title.isEmpty()) {
+            binding.etTitle.error = "আগে মুভির নাম লিখুন"
+            return
+        }
+
+        binding.progressBar.visibility = View.VISIBLE
+        binding.btnFetch_metadata.isEnabled = false
+
+        lifecycleScope.launch {
+            try {
+                val tmdbMovie = tmdbService.searchMovie(title)
+                if (tmdbMovie != null) {
+                    applyMetadata(tmdbMovie)
+                    toast("মেটাডাটা লোড হয়েছে ✓")
+                } else {
+                    toast("মুভি খুঁজে পাওয়া যায়নি")
+                }
+            } catch (e: Exception) {
+                toast("ত্রুটি: ${e.message}")
+            } finally {
+                binding.progressBar.visibility = View.GONE
+                binding.btnFetch_metadata.isEnabled = true
+            }
+        }
+    }
+
+    private fun applyMetadata(tmdb: TmdbMovie) {
+        binding.etTitle.setText(tmdb.title)
+        binding.etDescription.setText(tmdb.description)
+        binding.etBannerUrl.setText(tmdb.posterUrl)
+        binding.etDetailThumbnailUrl.setText(tmdb.backdropUrl)
+        binding.etYear.setText(tmdb.year.toString())
+        binding.etRating.setText(tmdb.rating.toString())
+        binding.etDuration.setText(tmdb.duration)
+        
+        // Auto-add actors if they exist in our database
+        if (tmdb.cast.isNotEmpty()) {
+            val newActorIds = mutableListOf<String>()
+            tmdb.cast.forEach { castMember ->
+                val existingActor = allActors.find { it.name.equals(castMember.name, ignoreCase = true) }
+                if (existingActor != null) {
+                    newActorIds.add(existingActor.id)
+                }
+            }
+            if (newActorIds.isNotEmpty()) {
+                selectedActorIds = newActorIds
+                updateSelectedActorsText()
+            }
         }
     }
 

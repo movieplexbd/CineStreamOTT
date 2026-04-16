@@ -45,12 +45,24 @@
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"
                 android:text="মুভির শিরোনাম *" android:textSize="13sp"
                 android:textColor="@color/t2" android:layout_marginBottom="4dp"/>
-            <EditText android:id="@+id/et_title"
-                android:layout_width="match_parent" android:layout_height="50dp"
-                android:background="@color/surface" android:padding="12dp"
-                android:textColor="@color/t1" android:textSize="14sp"
-                android:hint="মুভির নাম লিখুন" android:textColorHint="@color/t3"
-                android:inputType="textCapWords" android:layout_marginBottom="12dp"/>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content"
+                android:orientation="horizontal" android:layout_marginBottom="12dp">
+                <EditText android:id="@+id/et_title"
+                    android:layout_width="0dp" android:layout_height="50dp"
+                    android:layout_weight="1"
+                    android:background="@color/surface" android:padding="12dp"
+                    android:textColor="@color/t1" android:textSize="14sp"
+                    android:hint="মুভির নাম লিখুন" android:textColorHint="@color/t3"
+                    android:inputType="textCapWords"/>
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btn_fetch_metadata"
+                    android:layout_width="wrap_content" android:layout_height="50dp"
+                    android:layout_marginStart="8dp"
+                    android:text="Fetch"
+                    android:textSize="12sp"
+                    app:cornerRadius="4dp"
+                    android:backgroundTint="@color/red"/>
+            </LinearLayout>
 
             <!-- Description -->
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content"

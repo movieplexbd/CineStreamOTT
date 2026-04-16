@@ -12,12 +12,17 @@ import com.ottapp.moviestream.util.AccessManager
 import com.ottapp.moviestream.util.hide
 import com.ottapp.moviestream.util.show
 import com.ottapp.moviestream.util.toast
+import com.ottapp.moviestream.data.model.UserDevice
+import com.ottapp.moviestream.data.repository.UserRepository
+import android.provider.Settings
+import android.os.Build
 import kotlinx.coroutines.launch
 
 class LoginActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityLoginBinding
     private var authRepository: AuthRepository? = null
+    private val userRepo = UserRepository()
 
     private var isSignUpMode = false
 
@@ -115,9 +120,22 @@ class LoginActivity : AppCompatActivity() {
     private fun goToMain() {
         lifecycleScope.launch {
             try {
+                // Register device
+                val deviceId = Settings.Secure.getString(contentResolver, Settings.Secure.ANDROID_ID)
+                val deviceName = "${Build.MANUFACTURER} ${Build.MODEL}"
+                val user = userRepo.getCurrentUser()
+                if (user != null) {
+                    userRepo.updateDevice(user.uid, UserDevice(
+                        deviceId = deviceId,
+                        deviceName = deviceName,
+                        lastLogin = System.currentTimeMillis(),
+                        isActive = true
+                    ))
+                }
+                
                 AccessManager(this@LoginActivity).checkAccess()
             } catch (e: Exception) {
-                Log.e("LoginActivity", "Trial activation error: ${e.message}")
+                Log.e("LoginActivity", "Login success post-processing error: ${e.message}")
             }
             startActivity(Intent(this@LoginActivity, MainActivity::class.java))
             finish()

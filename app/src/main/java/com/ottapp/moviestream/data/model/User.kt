@@ -8,9 +8,11 @@ data class User(
     var subscriptionStatus: String = PLAN_FREE,
     var subscriptionExpiry: Long = 0L,
     var trialUsed: Boolean = false,
-    var trialExpiry: Long = 0L
+    var trialExpiry: Long = 0L,
+    var devices: Map<String, UserDevice> = emptyMap(),
+    var activityLogs: Map<String, UserActivity> = emptyMap()
 ) {
-    constructor() : this("", "", "", "", PLAN_FREE, 0L, false, 0L)
+    constructor() : this("", "", "", "", PLAN_FREE, 0L, false, 0L, emptyMap(), emptyMap())
 
     val isPremium: Boolean
         get() = (subscriptionStatus == PLAN_PREMIUM || subscriptionStatus == PLAN_PENDING) &&
@@ -32,3 +34,19 @@ data class User(
         const val PLAN_BLOCKED = "blocked"
     }
 }
+
+data class UserDevice(
+    var deviceId: String = "",
+    var deviceName: String = "",
+    var lastLogin: Long = 0L,
+    var isActive: Boolean = true
+)
+
+data class UserActivity(
+    var id: String = "",
+    var movieId: String = "",
+    var movieTitle: String = "",
+    var timestamp: Long = 0L,
+    var durationWatched: Long = 0L,
+    var action: String = "watch" // "watch", "search", "login"
+)

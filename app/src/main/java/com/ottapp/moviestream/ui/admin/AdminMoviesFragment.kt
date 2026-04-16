@@ -11,6 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.firebase.database.FirebaseDatabase
 import com.ottapp.moviestream.data.model.Movie
+import com.ottapp.moviestream.data.model.User
+import com.ottapp.moviestream.data.model.UserActivity
 import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.databinding.FragmentAdminMoviesBinding
 import com.ottapp.moviestream.util.Constants
@@ -114,12 +116,77 @@ class AdminMoviesFragment : Fragment() {
 
     private fun updateDashboard() {
         if (_binding == null) return
-        binding.tvTotalMovies.text = allMovies.size.toString()
-        val free = allMovies.count { it.testMovie }
-        val premium = allMovies.size - free
-        val trendingMovie = allMovies.maxByOrNull { it.imdbRating }?.title ?: "N/A"
-        binding.tvTrendingMovie.text = trendingMovie
-        binding.tvCount.text = "মোট ${allMovies.size}টি মুভি • Free $free • Premium $premium"
+        
+        lifecycleScope.launch {
+            try {
+                val db = FirebaseDatabase.getInstance("https://movies-bee24-default-rtdb.firebaseio.com").reference
+                
+                // 1. Total Movies
+                binding.tvTotalMovies.text = allMovies.size.toString()
+                
+                // 2. Revenue (Approximate from approved subscriptions)
+                val subsSnapshot = db.child(Constants.DB_SUBSCRIPTIONS).get().await()
+                var totalRevenue = 0
+                for (child in subsSnapshot.children) {
+                    val data = child.value as? Map<*, *> ?: continue
+                    if (data["status"]?.toString()?.equals("APPROVED", true) == true) {
+                        totalRevenue += 100 // Assuming 100 BDT per sub
+                    }
+                }
+                binding.tvActiveUsers.text = "৳$totalRevenue"
+                // Note: tv_active_users is used for revenue now
+
+                // 3. Trending Content (Based on activity logs)
+                val usersSnapshot = db.child(Constants.DB_USERS).get().await()
+                val movieViews = mutableMapOf<String, Int>()
+                for (userChild in usersSnapshot.children) {
+                    val userData = userChild.value as? Map<*, *> ?: continue
+                    val logs = userData["activityLogs"] as? Map<*, *> ?: continue
+                    for (logEntry in logs.values) {
+                        val log = logEntry as? Map<*, *> ?: continue
+                        val title = log["movieTitle"]?.toString() ?: continue
+                        movieViews[title] = movieViews.getOrDefault(title, 0) + 1
+                    }
+                }
+                val topMovie = movieViews.maxByOrNull { it.value }?.key ?: allMovies.maxByOrNull { it.imdbRating }?.title ?: "N/A"
+                binding.tvTrendingMovie.text = topMovie
+
+                // 4. Search Insights (Missing Content)
+                binding.btnHealth.text = "সার্চ ইনসাইট"
+                binding.btnHealth.setOnClickListener { showSearchInsights() }
+
+            } catch (e: Exception) {
+                android.util.Log.e("AdminMovies", "Dashboard error: ${e.message}")
+            }
+        }
+    }
+
+    private fun showSearchInsights() {
+        lifecycleScope.launch {
+            try {
+                val db = FirebaseDatabase.getInstance("https://movies-bee24-default-rtdb.firebaseio.com").reference
+                val requestsSnapshot = db.child(Constants.DB_REQUESTS).get().await()
+                val requests = mutableListOf<String>()
+                for (child in requestsSnapshot.children) {
+                    val title = child.child("title").value?.toString() ?: continue
+                    val count = child.child("count").value?.toString()?.toIntOrNull() ?: 1
+                    requests.add("$title (Requested $count times)")
+                }
+
+                if (requests.isEmpty()) {
+                    requireContext().toast("কোনো সার্চ ডাটা নেই")
+                    return@launch
+                }
+
+                AlertDialog.Builder(requireContext())
+                    .setTitle("ইউজাররা যা খুঁজছে (Search Insights)")
+                    .setItems(requests.toTypedArray(), null)
+                    .setPositiveButton("ঠিক আছে", null)
+                    .show()
+            } catch (e: Exception) {
+                requireContext().toast("ত্রুটি: ${e.message}")
+            }
+        }
     }
 
     private fun showSortDialog() {
