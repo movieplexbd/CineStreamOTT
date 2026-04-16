@@ -27,7 +27,8 @@ class AdminActivity : AppCompatActivity() {
         TabInfo(2, "রিলস",      R.drawable.ic_nav_reels,   2),
         TabInfo(3, "ইউজার",     R.drawable.ic_nav_profile, 3),
         TabInfo(4, "পেমেন্ট",  R.drawable.ic_nav_download,4),
-        TabInfo(5, "অভিনেতা",  R.drawable.ic_nav_profile, 5)
+        TabInfo(5, "অভিনেতা",  R.drawable.ic_nav_profile, 5),
+        TabInfo(6, "আপডেট",    R.drawable.ic_nav_home,    6)
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,6 +78,7 @@ class AdminActivity : AppCompatActivity() {
                 3 -> AdminUsersFragment()
                 4 -> AdminSubsFragment()
                 5 -> AdminActorsFragment()
+                6 -> AdminUpdateFragment()
                 else -> AdminMoviesFragment()
             }
         }

@@ -71,37 +71,30 @@ package com.ottapp.moviestream
       }
 
       private suspend fun checkUpdate() {
-          val dbUrl = "https://movies-bee24-default-rtdb.firebaseio.com"
-          val snapshot = FirebaseDatabase.getInstance(dbUrl).getReference("app_update").get().await()
-          if (snapshot.exists()) {
-              val latestVersion = snapshot.child("version_code").getValue(Int::class.java) ?: 0
-              val currentVersion = packageManager.getPackageInfo(packageName, 0).versionCode
+          val repository = com.ottapp.moviestream.data.repository.UpdateRepository()
+          val config = repository.getUpdateConfig()
+          
+          if (config != null && config.isEnabled) {
+              val currentVersionCode = packageManager.getPackageInfo(packageName, 0).versionCode
+              val currentVersionName = packageManager.getPackageInfo(packageName, 0).versionName
 
-              if (latestVersion > currentVersion) {
-                  val downloadUrl = snapshot.child("download_url").getValue(String::class.java) ?: ""
-                  val message = snapshot.child("message").getValue(String::class.java)
-                      ?: "নতুন আপডেট পাওয়া গেছে। এখনই আপডেট করুন।"
-                  val force = snapshot.child("force_update").getValue(Boolean::class.java) ?: false
-
+              if (config.latestVersionCode > currentVersionCode) {
                   runOnUiThread {
-                      AlertDialog.Builder(this@SplashActivity)
-                          .setTitle("আপডেট পাওয়া গেছে 🎬")
-                          .setMessage(message)
-                          .setCancelable(!force)
-                          .setPositiveButton("আপডেট করুন") { _, _ ->
-                              try {
-                                  startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(downloadUrl)))
-                                  if (force) finish()
-                              } catch (e: Exception) {
-                                  if (!force) navigate()
-                              }
-                          }
-                          .apply {
-                              if (!force) {
-                                  setNegativeButton("পরে করব") { _, _ -> navigate() }
-                              }
-                          }
-                          .show()
+                      val intent = Intent(this@SplashActivity, com.ottapp.moviestream.ui.update.UpdateActivity::class.java).apply {
+                          putExtra("title", config.updateTitle)
+                          putExtra("message", config.updateMessage)
+                          putStringArrayListExtra("changelog", ArrayList(config.changelog))
+                          putExtra("downloadLink", config.downloadLink)
+                          putExtra("updateType", config.updateType)
+                          putExtra("currentVersion", currentVersionName)
+                          putExtra("latestVersion", config.latestVersionName)
+                      }
+                      startActivity(intent)
+                      if (config.updateType == "FORCE") {
+                          finish()
+                      } else {
+                          proceedAfterDelay()
+                      }
                   }
               } else {
                   proceedAfterDelay()

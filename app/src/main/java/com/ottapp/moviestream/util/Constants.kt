@@ -8,6 +8,8 @@ object Constants {
     const val DB_REQUESTS      = "movie_requests"
     const val DB_BANNERS       = "banners"
     const val DB_REELS         = "reels"
+    const val DB_UPDATE_CONFIG = "app_update_config"
+    const val DB_URL           = "https://movies-bee24-default-rtdb.firebaseio.com"
 
     // Intent extras
     const val EXTRA_MOVIE_ID    = "extra_movie_id"
