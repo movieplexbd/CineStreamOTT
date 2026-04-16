@@ -28,12 +28,12 @@ class UpdateActivity : AppCompatActivity() {
         val currentVersion = intent.getStringExtra("currentVersion") ?: ""
         val latestVersion = intent.getStringExtra("latestVersion") ?: ""
 
-        binding.tv_update_title.text = title
-        binding.tv_update_subtitle.text = message
-        binding.tv_version_info.text = "Current Version: $currentVersion | Latest Version: $latestVersion"
+        binding.tvUpdateTitle.text = title
+        binding.tvUpdateSubtitle.text = message
+        binding.tvVersionInfo.text = "Current Version: $currentVersion | Latest Version: $latestVersion"
 
         if (changelog.isNotEmpty()) {
-            binding.cv_changelog.visibility = View.VISIBLE
+            binding.cvChangelog.visibility = View.VISIBLE
             changelog.forEach { item ->
                 val textView = TextView(this).apply {
                     text = "✔ $item"
@@ -41,27 +41,27 @@ class UpdateActivity : AppCompatActivity() {
                     textSize = 14f
                     setPadding(0, 4, 0, 4)
                 }
-                binding.ll_changelog_container.addView(textView)
+                binding.llChangelogContainer.addView(textView)
             }
         } else {
-            binding.cv_changelog.visibility = View.GONE
+            binding.cvChangelog.visibility = View.GONE
         }
 
         if (updateType == "FORCE") {
-            binding.btn_later.visibility = View.GONE
+            binding.btnLater.visibility = View.GONE
             onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
                 override fun handleOnBackPressed() {
                     // Do nothing, back button disabled for force update
                 }
             })
         } else {
-            binding.btn_later.visibility = View.VISIBLE
-            binding.btn_later.setOnClickListener {
+            binding.btnLater.visibility = View.VISIBLE
+            binding.btnLater.setOnClickListener {
                 finish()
             }
         }
 
-        binding.btn_update_now.setOnClickListener {
+        binding.btnUpdateNow.setOnClickListener {
             try {
                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(downloadLink))
                 startActivity(intent)

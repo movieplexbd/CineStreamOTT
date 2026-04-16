@@ -53,7 +53,7 @@ class AddEditMovieActivity : AppCompatActivity() {
 
         binding.btnSave.setOnClickListener { saveMovie() }
         binding.btnSelectActors.setOnClickListener { showActorSelectionDialog() }
-        binding.btnFetch_metadata.setOnClickListener { fetchMetadata() }
+        binding.btnFetchMetadata.setOnClickListener { fetchMetadata() }
         loadAllActors()
 
         // Show hint about test movie limit
@@ -168,7 +168,7 @@ class AddEditMovieActivity : AppCompatActivity() {
         }
 
         binding.progressBar.visibility = View.VISIBLE
-        binding.btnFetch_metadata.isEnabled = false
+        binding.btnFetchMetadata.isEnabled = false
 
         lifecycleScope.launch {
             try {
@@ -183,7 +183,7 @@ class AddEditMovieActivity : AppCompatActivity() {
                 toast("ত্রুটি: ${e.message}")
             } finally {
                 binding.progressBar.visibility = View.GONE
-                binding.btnFetch_metadata.isEnabled = true
+                binding.btnFetchMetadata.isEnabled = true
             }
         }
     }
