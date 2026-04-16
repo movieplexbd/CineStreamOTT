@@ -20,11 +20,10 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="à¦®à§à¦­à¦¿"
+            android:text="@string/nav_movies"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="@color/t1"
-            android:fontFamily="serif" />
+            android:textColor="@color/t1" />
     </LinearLayout>
 
     <!-- Category Tab Bar - Professional look -->
@@ -48,28 +47,28 @@
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_marginEnd="8dp"
-                android:text="à¦¸à¦¬ à¦®à§à¦­à¦¿" />
+                android:text="সব মুভি" />
 
             <Button android:id="@+id/tab_trending"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_marginEnd="8dp"
-                android:text="ð¥ à¦à§à¦°à§à¦¨à§à¦¡à¦¿à¦" />
+                android:text="🔥 ট্রেন্ডিং" />
 
             <Button android:id="@+id/tab_bangla"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_marginEnd="8dp"
-                android:text="ð§ð© à¦¬à¦¾à¦à¦²à¦¾" />
+                android:text="🇧🇩 বাংলা" />
 
             <Button android:id="@+id/tab_hindi"
                 style="@style/Widget.Material3.Chip.Filter"
                 android:layout_width="wrap_content"
                 android:layout_height="36dp"
                 android:layout_marginEnd="8dp"
-                android:text="ð¬ à¦¹à¦¿à¦¨à§à¦¦à¦¿" />
+                android:text="🎬 হিন্দি" />
 
         </LinearLayout>
     </HorizontalScrollView>
@@ -136,7 +135,7 @@
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="à¦à¦ à¦à§à¦¯à¦¾à¦à¦¾à¦à¦°à¦¿à¦¤à§ à¦à§à¦¨à§ à¦®à§à¦­à¦¿ à¦¨à§à¦"
+            android:text="এই ক্যাটাগরিতে কোনো মুভি নেই"
             android:textSize="14sp"
             android:textColor="@color/t3"
             android:layout_marginTop="12dp"

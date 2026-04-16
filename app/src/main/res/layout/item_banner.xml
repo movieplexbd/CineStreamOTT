@@ -52,7 +52,6 @@
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="@color/white"
-            android:fontFamily="sans-serif-medium"
             android:shadowColor="#66000000"
             android:shadowDx="0"
             android:shadowDy="2"
