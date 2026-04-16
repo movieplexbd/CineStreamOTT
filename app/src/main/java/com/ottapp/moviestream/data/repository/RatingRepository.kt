@@ -26,7 +26,7 @@ class RatingRepository {
         val uid = auth.currentUser?.uid ?: return false
         val userName = auth.currentUser?.displayName ?: auth.currentUser?.email ?: "ব্যবহারকারী"
         return try {
-            val ratingId = "$movieId\_$uid"
+            val ratingId = "${movieId}_${uid}"
             val ratingObj = MovieRating(
                 id = ratingId,
                 movieId = movieId,
