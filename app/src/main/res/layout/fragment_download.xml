@@ -23,7 +23,7 @@
             android:text="ডাউনলোড"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="@color/t1"
+            android:textColor="@color/t1" />
     </LinearLayout>
 
     <!-- Storage info card - detailed -->

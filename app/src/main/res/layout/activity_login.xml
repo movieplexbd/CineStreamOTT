@@ -228,7 +228,7 @@
                             android:letterSpacing="0.08"
                             app:backgroundTint="@null"
                             android:background="@drawable/bg_login_button"
-                            app:cornerRadius="28dp"
+                            app:cornerRadius="28dp" />
 
                         <ProgressBar
                             android:id="@+id/progress_bar"
@@ -248,7 +248,7 @@
                         android:padding="8dp"
                         android:text="@string/msg_no_account"
                         android:textColor="#666666"
-                        android:textSize="14sp"
+                        android:textSize="14sp" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>
