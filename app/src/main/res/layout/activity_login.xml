@@ -113,7 +113,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textPersonName"
-                            android:imeOptions="actionNext"
+                            android:imeOptions="actionNext" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Email field -->
@@ -139,7 +139,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textEmailAddress"
-                            android:imeOptions="actionNext"
+                            android:imeOptions="actionNext" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Password field -->
@@ -167,7 +167,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textPassword"
-                            android:imeOptions="actionDone"
+                            android:imeOptions="actionDone" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Confirm Password field (signup only) -->
@@ -196,7 +196,7 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:inputType="textPassword"
-                            android:imeOptions="actionDone"
+                            android:imeOptions="actionDone" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Forgot password -->
