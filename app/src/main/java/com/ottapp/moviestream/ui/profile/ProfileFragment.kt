@@ -21,6 +21,8 @@ package com.ottapp.moviestream.ui.profile
   import com.ottapp.moviestream.adapter.ContinueWatchingAdapter
   import com.ottapp.moviestream.ui.player.PlayerActivity
   import com.ottapp.moviestream.util.*
+import com.ottapp.moviestream.util.ThemeManager
+import com.ottapp.moviestream.util.NewContentNotificationManager
   import java.text.SimpleDateFormat
   import java.util.*
 
@@ -46,6 +48,30 @@ package com.ottapp.moviestream.ui.profile
 
           watchHistoryManager = WatchHistoryManager(requireContext())
           setupContinueWatching()
+
+          // Dark mode toggle setup
+          try {
+              val swDarkMode = view.findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.sw_dark_mode)
+              swDarkMode?.isChecked = ThemeManager.isDarkMode(requireContext())
+              swDarkMode?.setOnCheckedChangeListener { _, isChecked ->
+                  ThemeManager.setDarkMode(requireContext(), isChecked)
+                  requireActivity().recreate()
+              }
+          } catch (e: Exception) { }
+
+          // Notification toggle setup
+          try {
+              val swNotif = view.findViewById<com.google.android.material.switchmaterial.SwitchMaterial>(R.id.sw_notifications)
+              swNotif?.isChecked = NewContentNotificationManager.isNotificationsEnabled(requireContext())
+              swNotif?.setOnCheckedChangeListener { _, isChecked ->
+                  NewContentNotificationManager.setNotificationsEnabled(requireContext(), isChecked)
+                  if (isChecked) {
+                      android.widget.Toast.makeText(requireContext(), "নোটিফিকেশন চালু হয়েছে", android.widget.Toast.LENGTH_SHORT).show()
+                  } else {
+                      android.widget.Toast.makeText(requireContext(), "নোটিফিকেশন বন্ধ করা হয়েছে", android.widget.Toast.LENGTH_SHORT).show()
+                  }
+              }
+          } catch (e: Exception) { }
 
           val authEmail = FirebaseAuth.getInstance().currentUser?.email
           if (authEmail == ADMIN_EMAIL) {

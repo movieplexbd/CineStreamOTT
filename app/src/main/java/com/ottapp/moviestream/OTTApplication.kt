@@ -9,6 +9,8 @@ import androidx.work.Configuration
 import dagger.hilt.android.HiltAndroidApp
 import com.google.firebase.FirebaseApp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
+import com.ottapp.moviestream.util.NewContentNotificationManager
+import com.ottapp.moviestream.util.ThemeManager
 
 @HiltAndroidApp
 class OTTApplication : Application(), Configuration.Provider {
@@ -21,9 +23,11 @@ class OTTApplication : Application(), Configuration.Provider {
 
     override fun onCreate() {
         super.onCreate()
+        ThemeManager.applySavedTheme(this)
         initFirebaseSafely()
         initCrashlytics()
         createNotificationChannels()
+        NewContentNotificationManager.createNotificationChannel(this)
     }
 
     private fun initFirebaseSafely() {

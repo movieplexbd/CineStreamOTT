@@ -14,7 +14,7 @@ jobs:
   build:
     name: Build Debug and Release APK
     runs-on: ubuntu-latest
-    timeout-minutes: 45
+    timeout-minutes: 60
 
     steps:
       - name: Checkout repository
@@ -27,8 +27,15 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v3
+      - name: Cache Gradle packages
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            ${{ runner.os }}-gradle-
 
       - name: Create local.properties
         run: echo "sdk.dir=$ANDROID_SDK_ROOT" > local.properties
@@ -37,8 +44,9 @@ jobs:
         run: |
           if [ -n "$GOOGLE_SERVICES_JSON" ]; then
             echo "$GOOGLE_SERVICES_JSON" | base64 --decode > app/google-services.json
+            echo "Firebase config restored from secret."
           else
-            echo "Warning: GOOGLE_SERVICES_JSON secret is missing. Using existing file if available."
+            echo "Using existing google-services.json from repo."
           fi
         env:
           GOOGLE_SERVICES_JSON: ${{ secrets.GOOGLE_SERVICES_JSON }}
@@ -51,7 +59,9 @@ jobs:
           mkdir -p ~/.android
           if [ -f "keystore/debug.keystore" ]; then
             cp keystore/debug.keystore ~/.android/debug.keystore
+            echo "Using repo debug keystore."
           else
+            echo "Generating debug keystore..."
             keytool -genkey -v \
               -keystore ~/.android/debug.keystore \
               -alias androiddebugkey \
@@ -66,8 +76,9 @@ jobs:
           mkdir -p keystore
           if [ -n "$RELEASE_KEYSTORE_B64" ]; then
             echo "$RELEASE_KEYSTORE_B64" | base64 --decode > keystore/cinestream-release.jks
+            echo "Release keystore restored from secret."
           else
-            echo "Generating a temporary release keystore as secret is missing..."
+            echo "Generating temporary release keystore..."
             keytool -genkey -v \
               -keystore keystore/cinestream-release.jks \
               -alias cinestream_release \
@@ -81,6 +92,8 @@ jobs:
 
       - name: Build Debug APK
         run: ./gradlew assembleDebug --no-daemon --stacktrace
+        env:
+          GRADLE_OPTS: "-Xmx4g -Dfile.encoding=UTF-8"
 
       - name: Build Signed Release APK
         run: ./gradlew assembleRelease --no-daemon --stacktrace
@@ -89,6 +102,7 @@ jobs:
           RELEASE_STORE_PASSWORD: CineStream@2024SecureBD
           RELEASE_KEY_ALIAS: cinestream_release
           RELEASE_KEY_PASSWORD: CineStream@2024SecureBD
+          GRADLE_OPTS: "-Xmx4g -Dfile.encoding=UTF-8"
 
       - name: Get version info
         id: version
@@ -97,29 +111,33 @@ jobs:
           VERSION_CODE=$(grep -m 1 "versionCode" app/build.gradle | sed 's/.*versionCode\s*//')
           BUILD_DATE=$(date +'%Y-%m-%d')
           SHORT_SHA=$(echo "${{ github.sha }}" | cut -c1-7)
-          echo "version_name=$VERSION_NAME" >> $GITHUB_OUTPUT
-          echo "version_code=$VERSION_CODE" >> $GITHUB_OUTPUT
-          echo "build_date=$BUILD_DATE" >> $GITHUB_OUTPUT
-          echo "short_sha=$SHORT_SHA" >> $GITHUB_OUTPUT
+          echo "version_name=${VERSION_NAME}" >> $GITHUB_OUTPUT
+          echo "version_code=${VERSION_CODE}" >> $GITHUB_OUTPUT
+          echo "build_date=${BUILD_DATE}" >> $GITHUB_OUTPUT
+          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
           echo "tag_name=v${VERSION_NAME}-build${VERSION_CODE}-${SHORT_SHA}-run${{ github.run_number }}" >> $GITHUB_OUTPUT
 
       - name: Rename APKs for release
         run: |
           mkdir -p dist
-          DEBUG_APK=$(find app/build/outputs/apk/debug -name "*.apk" | head -1)
-          RELEASE_APK=$(find app/build/outputs/apk/release -name "*.apk" | head -1)
-          if [ -f "$DEBUG_APK" ]; then
-            cp "$DEBUG_APK" dist/CineStream-v${{ steps.version.outputs.version_name }}-debug.apk
+          DEBUG_APK=$(find app/build/outputs/apk/debug -name "*.apk" 2>/dev/null | head -1)
+          RELEASE_APK=$(find app/build/outputs/apk/release -name "*.apk" 2>/dev/null | head -1)
+          if [ -n "$DEBUG_APK" ] && [ -f "$DEBUG_APK" ]; then
+            cp "$DEBUG_APK" "dist/CineStream-v${{ steps.version.outputs.version_name }}-debug.apk"
+            echo "Debug APK copied."
           fi
-          if [ -f "$RELEASE_APK" ]; then
-            cp "$RELEASE_APK" dist/CineStreamOTT-release.apk
+          if [ -n "$RELEASE_APK" ] && [ -f "$RELEASE_APK" ]; then
+            cp "$RELEASE_APK" "dist/CineStreamOTT-release.apk"
+            echo "Release APK copied."
           fi
+          ls -lh dist/
 
       - name: Upload Debug APK as artifact
         uses: actions/upload-artifact@v4
         with:
           name: CineStream-Debug-Build${{ github.run_number }}
           path: dist/CineStream-v${{ steps.version.outputs.version_name }}-debug.apk
+          if-no-files-found: warn
           retention-days: 90
 
       - name: Upload Release APK as artifact
@@ -127,6 +145,7 @@ jobs:
         with:
           name: CineStream-Release-Build${{ github.run_number }}
           path: dist/CineStreamOTT-release.apk
+          if-no-files-found: warn
           retention-days: 90
 
       - name: Create GitHub Release with APK download link
@@ -136,7 +155,7 @@ jobs:
           tag_name: ${{ steps.version.outputs.tag_name }}
           name: "CineStream v${{ steps.version.outputs.version_name }} (${{ steps.version.outputs.build_date }})"
           body: |
-            ## CineStream OTT v${{ steps.version.outputs.version_name }} - UI Update
+            ## CineStream OTT v${{ steps.version.outputs.version_name }}
 
             **Version:** ${{ steps.version.outputs.version_name }}
             **Build:** ${{ steps.version.outputs.version_code }}
@@ -145,18 +164,18 @@ jobs:
 
             ---
 
-            ### UI Changes
-            - Removed shadow from login box for a cleaner look.
-            - Repositioned login box lower on the screen.
-            - Added movie-themed vector icon above the login box.
-            - Fixed GitHub Actions workflow for reliable APK generation.
+            ### New Features in This Build
+            - **Dark Mode Toggle** — Profile > অ্যাপ সেটিংস থেকে ডার্ক/লাইট থিম পরিবর্তন করুন
+            - **Movie Rating & Review** — মুভি ডিটেইল পেজ থেকে ★ রেটিং ও রিভিউ দিন (Firebase-backed)
+            - **New Movie Notifications** — নতুন মুভি আসলে অটো নোটিফিকেশন পাবেন (settings থেকে on/off করা যাবে)
 
             ---
 
             ### APK Download
-            Download `CineStreamOTT-release.apk` from the Assets section below.
+            Download **CineStreamOTT-release.apk** from the Assets section below.
           files: dist/CineStreamOTT-release.apk
           draft: false
           prerelease: false
+          fail_on_unmatched_files: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

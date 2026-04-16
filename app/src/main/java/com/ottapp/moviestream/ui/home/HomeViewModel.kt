@@ -18,6 +18,7 @@ import com.ottapp.moviestream.data.repository.MovieRepository
 import com.ottapp.moviestream.data.repository.UserRepository
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import com.ottapp.moviestream.util.NewContentNotificationManager
 
 class HomeViewModel(app: Application) : AndroidViewModel(app) {
     private val watchHistoryManager = WatchHistoryManager(app.applicationContext)
@@ -90,6 +91,11 @@ class HomeViewModel(app: Application) : AndroidViewModel(app) {
                 if (all.isNotEmpty()) {
                     MovieCache.saveMovies(ctx, all)
                     applyMovieLists(all)
+                    // Check for new content and notify user
+                    try {
+                        val latestTitle = all.maxByOrNull { it.id }?.title ?: ""
+                        NewContentNotificationManager.checkAndNotifyNewContent(ctx, all.size, latestTitle)
+                    } catch (_: Exception) {}
                 }
 
                 val banners = bannerRepo.getAllBanners()

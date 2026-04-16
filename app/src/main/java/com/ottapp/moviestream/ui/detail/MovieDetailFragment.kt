@@ -30,6 +30,7 @@ import com.ottapp.moviestream.util.loadImage
 import com.ottapp.moviestream.util.show
 import com.ottapp.moviestream.util.toast
 import com.ottapp.moviestream.util.WatchlistManager
+import com.ottapp.moviestream.ui.detail.RatingDialog
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 
@@ -189,6 +190,15 @@ class MovieDetailFragment : Fragment() {
                     wlBtn.text = if (added) "In Watchlist ✓" else "Removed from Watchlist"
                     requireContext().toast(if (added) "Added to Watchlist!" else "Removed from Watchlist")
                 }
+            }
+        } catch (e: Exception) { }
+
+        // Rate this Movie button
+        try {
+            binding.root.findViewById<com.google.android.material.button.MaterialButton>(R.id.btn_rate_movie)?.setOnClickListener {
+                if (!isAdded || parentFragmentManager.isStateSaved) return@setOnClickListener
+                RatingDialog.newInstance(movie.id, movie.title)
+                    .show(parentFragmentManager, RatingDialog.TAG)
             }
         } catch (e: Exception) { }
     }
