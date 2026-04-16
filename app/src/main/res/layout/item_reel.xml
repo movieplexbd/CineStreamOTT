@@ -12,12 +12,13 @@
         android:layout_height="match_parent"
         android:visibility="gone" />
 
-    <VideoView
-        android:id="@+id/videoview_reel"
+    <androidx.media3.ui.PlayerView
+        android:id="@+id/player_view_reel"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:layout_gravity="center"
-        android:visibility="gone" />
+        android:visibility="gone"
+        app:resize_mode="fill"
+        app:use_controller="false" />
 
     <!-- Loading State -->
     <ProgressBar
@@ -107,6 +108,28 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:text="মুভি দেখুন"
+            android:textColor="@color/white"
+            android:textSize="10sp"
+            android:shadowColor="#80000000"
+            android:shadowDx="0"
+            android:shadowDy="1"
+            android:shadowRadius="2" />
+
+        <ImageButton
+            android:id="@+id/btn_share_reel"
+            android:layout_width="45dp"
+            android:layout_height="45dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_search_float"
+            android:padding="10dp"
+            android:src="@android:drawable/ic_menu_share"
+            app:tint="@color/white" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:text="শেয়ার"
             android:textColor="@color/white"
             android:textSize="10sp"
             android:shadowColor="#80000000"

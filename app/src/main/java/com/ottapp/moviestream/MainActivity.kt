@@ -7,6 +7,7 @@ package com.ottapp.moviestream
   import android.util.Log
   import android.view.View
   import androidx.appcompat.app.AppCompatActivity
+import dagger.hilt.android.AndroidEntryPoint
   import androidx.core.app.ActivityCompat
   import androidx.core.content.ContextCompat
   import androidx.navigation.NavController
@@ -14,7 +15,8 @@ package com.ottapp.moviestream
   import androidx.navigation.fragment.NavHostFragment
   import com.ottapp.moviestream.databinding.ActivityMainBinding
 
-  class MainActivity : AppCompatActivity() {
+  @AndroidEntryPoint
+class MainActivity : AppCompatActivity() {
 
       private lateinit var binding: ActivityMainBinding
       private var navController: NavController? = null

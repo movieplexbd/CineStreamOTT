@@ -1,19 +1,19 @@
 package com.ottapp.moviestream.data.repository
 
 import android.util.Log
-import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.DatabaseReference
 import com.ottapp.moviestream.data.model.Reel
 import kotlinx.coroutines.tasks.await
+import javax.inject.Inject
+import javax.inject.Singleton
 
-class ReelRepository {
+@Singleton
+class ReelRepository @Inject constructor(
+    private val db: DatabaseReference
+) {
 
     companion object {
         private const val TAG = "ReelRepository"
-        private const val DB_URL = "https://movies-bee24-default-rtdb.firebaseio.com"
-    }
-
-    private val db by lazy {
-        FirebaseDatabase.getInstance(DB_URL).reference
     }
 
     private val reelsRef by lazy {

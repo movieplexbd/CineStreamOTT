@@ -244,6 +244,56 @@
                         android:overScrollMode="never" />
                 </LinearLayout>
 
+                <!-- ACTION BUTTONS (Share & Watch Party) -->
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_marginHorizontal="16dp"
+                    android:layout_marginBottom="16dp"
+                    android:weightSum="2">
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_share_movie"
+                        android:layout_width="0dp"
+                        android:layout_height="52dp"
+                        android:layout_weight="1"
+                        android:layout_marginEnd="8dp"
+                        android:text="শেয়ার"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/t1"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        app:strokeColor="@color/surface2"
+                        app:strokeWidth="1.5dp"
+                        app:cornerRadius="12dp"
+                        app:backgroundTint="@color/transparent"
+                        app:icon="@android:drawable/ic_menu_share"
+                        app:iconGravity="start"
+                        app:iconPadding="8dp"
+                        app:iconTint="@color/t1" />
+
+                    <com.google.android.material.button.MaterialButton
+                        android:id="@+id/btn_watch_party"
+                        android:layout_width="0dp"
+                        android:layout_height="52dp"
+                        android:layout_weight="1"
+                        android:layout_marginStart="8dp"
+                        android:text="ওয়াচ পার্টি"
+                        android:textSize="14sp"
+                        android:textStyle="bold"
+                        android:textColor="@color/amber"
+                        style="@style/Widget.MaterialComponents.Button.OutlinedButton"
+                        app:strokeColor="@color/amber"
+                        app:strokeWidth="1.5dp"
+                        app:cornerRadius="12dp"
+                        app:backgroundTint="@color/transparent"
+                        app:icon="@drawable/ic_play_circle"
+                        app:iconGravity="start"
+                        app:iconPadding="8dp"
+                        app:iconTint="@color/amber" />
+                </LinearLayout>
+
                 <!-- WATCHLIST BUTTON -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btn_watchlist"

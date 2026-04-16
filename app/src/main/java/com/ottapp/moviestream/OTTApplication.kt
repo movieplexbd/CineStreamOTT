@@ -6,9 +6,11 @@ import android.app.NotificationManager
 import android.os.Build
 import android.util.Log
 import androidx.work.Configuration
+import com.google.dagger.hilt.android.HiltAndroidApp
 import com.google.firebase.FirebaseApp
 import com.google.firebase.crashlytics.FirebaseCrashlytics
 
+@HiltAndroidApp
 class OTTApplication : Application(), Configuration.Provider {
 
     companion object {

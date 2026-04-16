@@ -164,6 +164,20 @@ class MovieDetailFragment : Fragment() {
             binding.btnSubscribe.setOnClickListener { openSubscriptionDialog() }
         }
 
+        // Share & Watch Party
+        binding.btnShareMovie.setOnClickListener {
+            val shareText = "Watch ${movie.title} on CineStream OTT!\n${movie.videoStreamUrl}"
+            val intent = Intent(Intent.ACTION_SEND).apply {
+                type = "text/plain"
+                putExtra(Intent.EXTRA_TEXT, shareText)
+            }
+            startActivity(Intent.createChooser(intent, "Share Movie via"))
+        }
+
+        binding.btnWatchParty.setOnClickListener {
+            requireContext().toast("Watch Party feature coming soon in next update!")
+        }
+
         // Watchlist button (always available — free users can still save to list)
         try {
             val wlBtn = binding.btnWatchlist

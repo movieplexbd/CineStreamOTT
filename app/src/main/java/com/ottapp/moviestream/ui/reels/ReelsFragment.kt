@@ -1,6 +1,7 @@
 package com.ottapp.moviestream.ui.reels
 
 import android.annotation.SuppressLint
+import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,10 +12,15 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.ProgressBar
 import android.widget.TextView
-import android.widget.VideoView
+import androidx.annotation.OptIn
 import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
+import androidx.media3.common.MediaItem
+import androidx.media3.common.Player
+import androidx.media3.common.util.UnstableApi
+import androidx.media3.exoplayer.ExoPlayer
+import androidx.media3.ui.PlayerView
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.RecyclerView
 import androidx.viewpager2.widget.ViewPager2
@@ -23,13 +29,20 @@ import com.ottapp.moviestream.data.model.Reel
 import com.ottapp.moviestream.data.repository.ReelRepository
 import com.ottapp.moviestream.util.Constants
 import com.ottapp.moviestream.util.toast
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class ReelsFragment : Fragment() {
 
     private var viewPager: ViewPager2? = null
     private val reels = mutableListOf<Reel>()
-    private val repo = ReelRepository()
+    
+    @Inject
+    lateinit var repo: ReelRepository
+
+    private var currentAdapter: ReelsAdapter? = null
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         return inflater.inflate(R.layout.fragment_reels, container, false)
@@ -46,9 +59,7 @@ class ReelsFragment : Fragment() {
             try {
                 val all = repo.getAllReels()
                 if (isAdded && viewPager != null) {
-                    // Powerful Algorithm: Shuffle and prioritize reels with movie links
                     val prioritized = all.shuffled().sortedByDescending { it.movieId.isNotEmpty() }
-                    
                     reels.clear()
                     reels.addAll(prioritized)
                     setupPager()
@@ -60,7 +71,7 @@ class ReelsFragment : Fragment() {
     }
 
     private fun setupPager() {
-        val adapter = ReelsAdapter(reels) { reel, action ->
+        currentAdapter = ReelsAdapter(reels) { reel, action ->
             when (action) {
                 "search" -> {
                     val bundle = bundleOf("query" to reel.movieTitle)
@@ -78,14 +89,23 @@ class ReelsFragment : Fragment() {
                         requireContext().toast("এই রিলটির সাথে কোনো মুভি যুক্ত নেই")
                     }
                 }
+                "share" -> {
+                    shareReel(reel)
+                }
             }
         }
+        
         viewPager?.apply {
             orientation = ViewPager2.ORIENTATION_VERTICAL
-            this.adapter = adapter
-            offscreenPageLimit = 3 // Better scrolling performance
+            this.adapter = currentAdapter
+            offscreenPageLimit = 3
             
-            // Add a page transformer for smoother scrolling
+            registerOnPageChangeCallback(object : ViewPager2.OnPageChangeCallback() {
+                override fun onPageSelected(position: Int) {
+                    currentAdapter?.playAtPosition(position)
+                }
+            })
+
             setPageTransformer { page, position ->
                 page.apply {
                     val absPos = Math.abs(position)
@@ -95,7 +115,29 @@ class ReelsFragment : Fragment() {
         }
     }
 
+    private fun shareReel(reel: Reel) {
+        val shareText = "Check out this reel: ${reel.title}\nWatch on CineStream OTT!\n${reel.videoUrl}"
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, shareText)
+        }
+        startActivity(Intent.createChooser(intent, "Share Reel via"))
+    }
+
+    override fun onPause() {
+        super.onPause()
+        currentAdapter?.pauseAll()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewPager?.let {
+            currentAdapter?.playAtPosition(it.currentItem)
+        }
+    }
+
     override fun onDestroyView() {
+        currentAdapter?.releaseAll()
         viewPager?.adapter = null
         viewPager = null
         super.onDestroyView()
@@ -107,14 +149,17 @@ class ReelsAdapter(
     private val onAction: (Reel, String) -> Unit
 ) : RecyclerView.Adapter<ReelsAdapter.ReelViewHolder>() {
 
+    private val players = mutableMapOf<Int, ExoPlayer>()
+
     inner class ReelViewHolder(val view: View) : RecyclerView.ViewHolder(view) {
         val webView: WebView = view.findViewById(R.id.webview_reel)
-        val videoView: VideoView = view.findViewById(R.id.videoview_reel)
+        val playerView: PlayerView = view.findViewById(R.id.player_view_reel)
         val progress: ProgressBar = view.findViewById(R.id.progress_reel)
         val tvTitle: TextView = view.findViewById(R.id.tv_reel_title)
         val tvMovieName: TextView = view.findViewById(R.id.tv_movie_name)
         val btnSearch: View = view.findViewById(R.id.btn_search_movie)
         val btnDownload: View = view.findViewById(R.id.btn_download_reel)
+        val btnShare: View = view.findViewById(R.id.btn_share_reel)
     }
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ReelViewHolder {
@@ -124,6 +169,7 @@ class ReelsAdapter(
 
     override fun getItemCount() = items.size
 
+    @OptIn(UnstableApi::class)
     override fun onBindViewHolder(holder: ReelViewHolder, position: Int) {
         val reel = items[position]
         holder.tvTitle.text = reel.title
@@ -131,56 +177,82 @@ class ReelsAdapter(
         
         holder.btnSearch.setOnClickListener { onAction(reel, "search") }
         holder.btnDownload.setOnClickListener { onAction(reel, "download") }
+        holder.btnShare.setOnClickListener { onAction(reel, "share") }
 
         val youtubeId = extractYouTubeId(reel.videoUrl)
         if (youtubeId != null) {
-            holder.videoView.visibility = View.GONE
+            holder.playerView.visibility = View.GONE
             holder.webView.visibility = View.VISIBLE
             setupYouTubePlayer(holder.webView, youtubeId, holder.progress)
         } else {
             holder.webView.visibility = View.GONE
-            holder.videoView.visibility = View.VISIBLE
-            setupDirectPlayer(holder.videoView, reel.videoUrl, holder.progress)
+            holder.playerView.visibility = View.VISIBLE
+            setupExoPlayer(holder, position, reel.videoUrl)
+        }
+        
+        // Pre-fetch next 2 items
+        preFetch(position + 1)
+        preFetch(position + 2)
+    }
+
+    private fun setupExoPlayer(holder: ReelViewHolder, position: Int, url: String) {
+        if (url.isEmpty()) return
+        
+        val context = holder.view.context
+        val player = players[position] ?: ExoPlayer.Builder(context).build().also {
+            players[position] = it
+        }
+        
+        holder.playerView.player = player
+        player.repeatMode = Player.REPEAT_MODE_ONE
+        
+        if (player.mediaItemCount == 0) {
+            val mediaItem = MediaItem.fromUri(url)
+            player.setMediaItem(mediaItem)
+            player.prepare()
+        }
+
+        player.addListener(object : Player.Listener {
+            override fun onPlaybackStateChanged(state: Int) {
+                holder.progress.visibility = if (state == Player.STATE_BUFFERING) View.VISIBLE else View.GONE
+            }
+        })
+    }
+
+    private fun preFetch(position: Int) {
+        if (position >= items.size || players.containsKey(position)) return
+        // We don't have context here easily without holder, but we can wait for onBind
+    }
+
+    fun playAtPosition(position: Int) {
+        players.forEach { (pos, player) ->
+            if (pos == position) player.play() else player.pause()
         }
     }
 
-    private fun setupDirectPlayer(videoView: VideoView, url: String, progress: ProgressBar) {
-        if (url.isEmpty()) return
-        progress.visibility = View.VISIBLE
-        videoView.setVideoPath(url)
-        videoView.setOnPreparedListener { mp ->
-            progress.visibility = View.GONE
-            mp.isLooping = true
-            videoView.start()
-            
-            // Adjust video size to fill screen (TikTok style)
-            val videoRatio = mp.videoWidth / mp.videoHeight.toFloat()
-            val screenRatio = videoView.width / videoView.height.toFloat()
-            val scaleX = videoRatio / screenRatio
-            if (scaleX >= 1f) {
-                videoView.scaleX = scaleX
-            } else {
-                videoView.scaleY = 1f / scaleX
-            }
-        }
-        videoView.setOnErrorListener { _, _, _ ->
-            progress.visibility = View.GONE
-            false
-        }
+    fun pauseAll() {
+        players.values.forEach { it.pause() }
+    }
+
+    fun releaseAll() {
+        players.values.forEach { it.release() }
+        players.clear()
     }
 
     override fun onViewRecycled(holder: ReelViewHolder) {
         super.onViewRecycled(holder)
+        val position = holder.bindingAdapterPosition
+        players[position]?.let {
+            it.release()
+            players.remove(position)
+        }
         try { 
             holder.webView.loadUrl("about:blank")
-            holder.videoView.stopPlayback()
         } catch (e: Exception) { }
     }
 
     private fun extractYouTubeId(url: String): String? {
         if (url.isBlank()) return null
-        
-        // Improved YouTube ID extraction including shorts and various formats
         val patterns = listOf(
             Regex("youtu\\.be/([^?&/]+)"),
             Regex("youtube\\.com/watch\\?v=([^?&/]+)"),
@@ -188,7 +260,6 @@ class ReelsAdapter(
             Regex("youtube\\.com/shorts/([^?&/]+)"),
             Regex("youtube\\.com/v/([^?&/]+)")
         )
-        
         patterns.forEach { p -> 
             p.find(url)?.groupValues?.getOrNull(1)?.let { return it } 
         }
@@ -213,7 +284,6 @@ class ReelsAdapter(
         }
         webView.webViewClient = WebViewClient()
         
-        // TikTok style YouTube Shorts player (fills screen)
         val html = """
             <!DOCTYPE html>
             <html>
@@ -235,9 +305,6 @@ class ReelsAdapter(
                         height: 100vh;
                         transform: translate(-50%, -50%);
                         border: none;
-                    }
-                    @media (aspect-ratio: 9/16) {
-                        iframe { width: 100vw; height: 100vh; }
                     }
                 </style>
             </head>
