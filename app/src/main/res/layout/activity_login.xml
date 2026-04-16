@@ -42,7 +42,7 @@
         android:textSize="32sp"
         android:textStyle="bold"
         android:letterSpacing="0.02"
-        android:fontFamily="@font/notosansbengali_regular"
+        android:fontFamily="sans-serif"
         android:textAllCaps="false" />
 
     <!-- ── Scrollable form ── -->
@@ -115,7 +115,7 @@
                             android:layout_height="wrap_content"
                             android:inputType="textPersonName"
                             android:imeOptions="actionNext"
-                            android:fontFamily="@font/notosansbengali_regular" />
+                            android:fontFamily="sans-serif" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Email field -->
@@ -142,7 +142,7 @@
                             android:layout_height="wrap_content"
                             android:inputType="textEmailAddress"
                             android:imeOptions="actionNext"
-                            android:fontFamily="@font/notosansbengali_regular" />
+                            android:fontFamily="sans-serif" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Password field -->
@@ -171,7 +171,7 @@
                             android:layout_height="wrap_content"
                             android:inputType="textPassword"
                             android:imeOptions="actionDone"
-                            android:fontFamily="@font/notosansbengali_regular" />
+                            android:fontFamily="sans-serif" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Confirm Password field (signup only) -->
@@ -201,7 +201,7 @@
                             android:layout_height="wrap_content"
                             android:inputType="textPassword"
                             android:imeOptions="actionDone"
-                            android:fontFamily="@font/notosansbengali_regular" />
+                            android:fontFamily="sans-serif" />
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <!-- Forgot password -->
@@ -214,7 +214,7 @@
                         android:layout_marginBottom="20dp"
                         android:paddingTop="4dp"
                         android:paddingStart="4dp"
-                        android:fontFamily="@font/notosansbengali_regular"
+                        android:fontFamily="sans-serif"
                         android:textAllCaps="false" />
 
                     <!-- Login button with gradient + ProgressBar -->
@@ -235,7 +235,7 @@
                             app:backgroundTint="@null"
                             android:background="@drawable/bg_login_button"
                             app:cornerRadius="28dp"
-                            android:fontFamily="@font/notosansbengali_regular" />
+                            android:fontFamily="sans-serif" />
 
                         <ProgressBar
                             android:id="@+id/progress_bar"
@@ -256,7 +256,7 @@
                         android:text="@string/msg_no_account"
                         android:textColor="#666666"
                         android:textSize="14sp"
-                        android:fontFamily="@font/notosansbengali_regular" />
+                        android:fontFamily="sans-serif" />
 
                 </LinearLayout>
             </androidx.cardview.widget.CardView>

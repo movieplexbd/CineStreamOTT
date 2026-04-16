@@ -52,6 +52,7 @@ class AddEditReelActivity : AppCompatActivity() {
         binding.etReelTitle.setText(reel.title)
         binding.etReelVideoUrl.setText(reel.videoUrl)
         binding.etReelMovieTitle.setText(reel.movieTitle)
+        // Note: We'll add movieId field to layout in next step, but for now we can use movieTitle as a fallback or handle it via code
     }
 
     private fun saveReel() {
@@ -60,17 +61,28 @@ class AddEditReelActivity : AppCompatActivity() {
             binding.etReelTitle.error = "শিরোনাম দিন"
             return
         }
-        val videoUrl = binding.etReelVideoUrl.text.toString().trim()
+        var videoUrl = binding.etReelVideoUrl.text.toString().trim()
         if (videoUrl.isEmpty()) {
             binding.etReelVideoUrl.error = "ভিডিও URL দিন"
             return
+        }
+
+        // Normalize YouTube Shorts link if needed
+        if (videoUrl.contains("youtube.com/shorts/")) {
+            // Ensure it's a clean link
+            val regex = Regex("youtube\\.com/shorts/([^?&/]+)")
+            val match = regex.find(videoUrl)
+            match?.groupValues?.getOrNull(1)?.let { id ->
+                videoUrl = "https://www.youtube.com/shorts/$id"
+            }
         }
 
         val reel = Reel(
             id         = reelId ?: "",
             title      = title,
             videoUrl   = videoUrl,
-            movieTitle = binding.etReelMovieTitle.text.toString().trim()
+            movieTitle = binding.etReelMovieTitle.text.toString().trim(),
+            movieId    = "" // This will be linked manually in DB or we can add a field
         )
 
         binding.btnSaveReel.isEnabled = false

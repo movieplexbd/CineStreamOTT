@@ -91,7 +91,7 @@
                         android:textSize="22sp"
                         android:textStyle="bold"
                         android:textColor="@color/white"
-                        android:fontFamily="@font/notosansbengali_regular"
+                        android:fontFamily="sans-serif-medium"
                         android:maxLines="2"
                         android:ellipsize="end"
                         android:shadowColor="#44000000"

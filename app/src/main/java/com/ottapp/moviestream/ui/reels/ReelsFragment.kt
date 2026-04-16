@@ -1,8 +1,6 @@
 package com.ottapp.moviestream.ui.reels
 
 import android.annotation.SuppressLint
-import android.content.Intent
-import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -11,7 +9,6 @@ import android.webkit.WebChromeClient
 import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
-import android.widget.ImageButton
 import android.widget.ProgressBar
 import android.widget.TextView
 import android.widget.VideoView
@@ -49,8 +46,11 @@ class ReelsFragment : Fragment() {
             try {
                 val all = repo.getAllReels()
                 if (isAdded && viewPager != null) {
+                    // Powerful Algorithm: Shuffle and prioritize reels with movie links
+                    val prioritized = all.shuffled().sortedByDescending { it.movieId.isNotEmpty() }
+                    
                     reels.clear()
-                    reels.addAll(all)
+                    reels.addAll(prioritized)
                     setupPager()
                 }
             } catch (e: Exception) {
@@ -67,11 +67,15 @@ class ReelsFragment : Fragment() {
                     findNavController().navigate(R.id.searchFragment, bundle)
                 }
                 "download" -> {
-                    if (reel.videoUrl.isNotEmpty() && !reel.videoUrl.contains("youtube.com") && !reel.videoUrl.contains("youtu.be")) {
-                        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(reel.videoUrl))
-                        startActivity(intent)
+                    if (reel.movieId.isNotEmpty()) {
+                        val bundle = bundleOf(Constants.EXTRA_MOVIE_ID to reel.movieId)
+                        findNavController().navigate(R.id.movieDetailFragment, bundle)
+                    } else if (reel.movieTitle.isNotEmpty()) {
+                        val bundle = bundleOf("query" to reel.movieTitle)
+                        findNavController().navigate(R.id.searchFragment, bundle)
+                        requireContext().toast("সরাসরি মুভি পাওয়া যায়নি, সার্চ করা হচ্ছে")
                     } else {
-                        requireContext().toast("এই ভিডিওটি ডাউনলোড করা সম্ভব নয়")
+                        requireContext().toast("এই রিলটির সাথে কোনো মুভি যুক্ত নেই")
                     }
                 }
             }
@@ -79,7 +83,15 @@ class ReelsFragment : Fragment() {
         viewPager?.apply {
             orientation = ViewPager2.ORIENTATION_VERTICAL
             this.adapter = adapter
-            offscreenPageLimit = 1
+            offscreenPageLimit = 3 // Better scrolling performance
+            
+            // Add a page transformer for smoother scrolling
+            setPageTransformer { page, position ->
+                page.apply {
+                    val absPos = Math.abs(position)
+                    alpha = 1f - absPos * 0.5f
+                }
+            }
         }
     }
 
@@ -167,12 +179,19 @@ class ReelsAdapter(
 
     private fun extractYouTubeId(url: String): String? {
         if (url.isBlank()) return null
-        listOf(
-            Regex("youtu\\.be/([\\w-]+)"),
-            Regex("youtube\\.com/watch\\?v=([\\w-]+)"),
-            Regex("youtube\\.com/embed/([\\w-]+)"),
-            Regex("youtube\\.com/shorts/([\\w-]+)")
-        ).forEach { p -> p.find(url)?.groupValues?.getOrNull(1)?.let { return it } }
+        
+        // Improved YouTube ID extraction including shorts and various formats
+        val patterns = listOf(
+            Regex("youtu\\.be/([^?&/]+)"),
+            Regex("youtube\\.com/watch\\?v=([^?&/]+)"),
+            Regex("youtube\\.com/embed/([^?&/]+)"),
+            Regex("youtube\\.com/shorts/([^?&/]+)"),
+            Regex("youtube\\.com/v/([^?&/]+)")
+        )
+        
+        patterns.forEach { p -> 
+            p.find(url)?.groupValues?.getOrNull(1)?.let { return it } 
+        }
         return null
     }
 
@@ -193,12 +212,43 @@ class ReelsAdapter(
             }
         }
         webView.webViewClient = WebViewClient()
-        val html = """<!DOCTYPE html><html><head>
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<style>*{margin:0;padding:0;background:#000;}body{width:100vw;height:100vh;display:flex;align-items:center;justify-content:center;}iframe{width:100%;height:100%;border:none;}</style>
-</head><body>
-<iframe src="https://www.youtube.com/embed/$videoId?autoplay=1&mute=0&loop=1&playlist=$videoId&controls=0&showinfo=0&rel=0&modestbranding=1" allow="autoplay;fullscreen" allowfullscreen></iframe>
-</body></html>""".trimIndent()
+        
+        // TikTok style YouTube Shorts player (fills screen)
+        val html = """
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+                <style>
+                    * { margin: 0; padding: 0; background: #000; overflow: hidden; }
+                    body, html { width: 100%; height: 100%; }
+                    .video-container {
+                        position: relative;
+                        width: 100vw;
+                        height: 100vh;
+                    }
+                    iframe {
+                        position: absolute;
+                        top: 50%;
+                        left: 50%;
+                        width: 100vw;
+                        height: 100vh;
+                        transform: translate(-50%, -50%);
+                        border: none;
+                    }
+                    @media (aspect-ratio: 9/16) {
+                        iframe { width: 100vw; height: 100vh; }
+                    }
+                </style>
+            </head>
+            <body>
+                <div class="video-container">
+                    <iframe src="https://www.youtube.com/embed/$videoId?autoplay=1&mute=0&loop=1&playlist=$videoId&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0" 
+                            allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                </div>
+            </body>
+            </html>
+        """.trimIndent()
         webView.loadDataWithBaseURL("https://www.youtube.com", html, "text/html", "UTF-8", null)
     }
 }

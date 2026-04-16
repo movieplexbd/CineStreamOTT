@@ -95,7 +95,7 @@
                 android:textSize="20sp"
                 android:textStyle="bold"
                 android:textColor="@color/t1"
-                android:fontFamily="serif"
+                android:fontFamily="sans-serif-medium"
                 android:layout_marginTop="6dp" />
 
             <!-- Meta row -->
@@ -229,7 +229,7 @@
                     android:textSize="15sp"
                     android:textStyle="bold"
                     android:textColor="@color/t1"
-                    android:fontFamily="serif"
+                    android:fontFamily="sans-serif-medium"
                     android:layout_marginTop="10dp" />
 
                 <TextView
