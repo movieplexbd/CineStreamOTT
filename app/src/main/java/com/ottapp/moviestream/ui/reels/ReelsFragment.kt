@@ -179,16 +179,10 @@ class ReelsAdapter(
         holder.btnDownload.setOnClickListener { onAction(reel, "download") }
         holder.btnShare.setOnClickListener { onAction(reel, "share") }
 
-        val youtubeId = extractYouTubeId(reel.videoUrl)
-        if (youtubeId != null) {
-            holder.playerView.visibility = View.GONE
-            holder.webView.visibility = View.VISIBLE
-            setupYouTubePlayer(holder.webView, youtubeId, holder.progress)
-        } else {
-            holder.webView.visibility = View.GONE
-            holder.playerView.visibility = View.VISIBLE
-            setupExoPlayer(holder, position, reel.videoUrl)
-        }
+        // Use WebView for all reel URLs to support Cloudinary and other embeds
+        holder.playerView.visibility = View.GONE
+        holder.webView.visibility = View.VISIBLE
+        setupEmbeddedPlayer(holder.webView, reel.videoUrl, holder.progress)
         
         // Pre-fetch next 2 items
         preFetch(position + 1)
@@ -267,7 +261,7 @@ class ReelsAdapter(
     }
 
     @SuppressLint("SetJavaScriptEnabled")
-    private fun setupYouTubePlayer(webView: WebView, videoId: String, progress: ProgressBar) {
+    private fun setupEmbeddedPlayer(webView: WebView, videoUrl: String, progress: ProgressBar) {
         progress.visibility = View.VISIBLE
         webView.settings.apply {
             javaScriptEnabled = true
@@ -310,12 +304,13 @@ class ReelsAdapter(
             </head>
             <body>
                 <div class="video-container">
-                    <iframe src="https://www.youtube.com/embed/$videoId?autoplay=1&mute=0&loop=1&playlist=$videoId&controls=0&showinfo=0&rel=0&modestbranding=1&iv_load_policy=3&fs=0" 
-                            allow="autoplay; encrypted-media" allowfullscreen></iframe>
+                    <iframe src="$videoUrl" 
+                            allow="autoplay; fullscreen; encrypted-media; picture-in-picture" 
+                            allowfullscreen></iframe>
                 </div>
             </body>
             </html>
         """.trimIndent()
-        webView.loadDataWithBaseURL("https://www.youtube.com", html, "text/html", "UTF-8", null)
+        webView.loadDataWithBaseURL(null, html, "text/html", "UTF-8", null)
     }
 }

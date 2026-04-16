@@ -28,7 +28,6 @@
             android:textColor="@color/brand_primary"
             android:textSize="32sp"
             android:textStyle="bold"
-            android:fontFamily="serif"
             android:layout_marginTop="16dp" />
 
         <TextView

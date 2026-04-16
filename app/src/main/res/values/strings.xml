@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">CineStream</string>
+    <string name="app_name">MovieplexBD</string>
     <string name="appbar_scrolling_view_behavior">com.google.android.material.appbar.AppBarLayout$ScrollingViewBehavior</string>
 
     <!-- Bottom Nav -->

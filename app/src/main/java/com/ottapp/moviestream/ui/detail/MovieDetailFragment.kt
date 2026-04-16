@@ -183,11 +183,11 @@ class MovieDetailFragment : Fragment() {
             val wlBtn = binding.btnWatchlist
             if (wlBtn != null) {
                 val inList = watchlistManager.isInWatchlist(movie.id)
-                wlBtn.text = if (inList) "ওয়াচলিস্টে আছে ✓" else "ওয়াচলিস্টে যোগ করুন"
+                wlBtn.text = if (inList) "In Watchlist ✓" else "Add to Watchlist"
                 wlBtn.setOnClickListener {
                     val added = watchlistManager.toggleWatchlist(movie)
-                    wlBtn.text = if (added) "ওয়াচলিস্টে আছে ✓" else "ওয়াচলিস্ট থেকে সরানো হয়েছে"
-                    requireContext().toast(if (added) "ওয়াচলিস্টে যোগ হয়েছে!" else "ওয়াচলিস্ট থেকে সরানো হয়েছে")
+                    wlBtn.text = if (added) "In Watchlist ✓" else "Removed from Watchlist"
+                    requireContext().toast(if (added) "Added to Watchlist!" else "Removed from Watchlist")
                 }
             }
         } catch (e: Exception) { }
@@ -235,7 +235,7 @@ class MovieDetailFragment : Fragment() {
             if (dlRepo.isDownloaded(movie.id)) {
                 btn.alpha = 0.5f
                 btn.isEnabled = false
-                btn.text = "ডাউনলোড\nহয়েছে ✓"
+                btn.text = "Downloaded ✓"
             } else {
                 btn.setOnClickListener {
                     handleDownloadClick(movie, quality.url)
