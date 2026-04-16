@@ -7,6 +7,7 @@ import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.google.firebase.database.FirebaseDatabase
 import com.ottapp.moviestream.data.model.Reel
 import com.ottapp.moviestream.data.repository.ReelRepository
 import com.ottapp.moviestream.databinding.FragmentAdminReelsBinding
@@ -17,8 +18,12 @@ class AdminReelsFragment : Fragment() {
 
     private var _binding: FragmentAdminReelsBinding? = null
     private val binding get() = _binding!!
-    private val repo = ReelRepository()
+    private val repo = ReelRepository(FirebaseDatabase.getInstance(DB_URL).reference)
     private lateinit var adapter: AdminReelAdapter
+
+    companion object {
+        private const val DB_URL = "https://movies-bee24-default-rtdb.firebaseio.com"
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View {
         _binding = FragmentAdminReelsBinding.inflate(inflater, container, false)

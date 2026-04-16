@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.firebase.database.FirebaseDatabase
 import com.ottapp.moviestream.data.model.Reel
 import com.ottapp.moviestream.data.repository.ReelRepository
 import com.ottapp.moviestream.databinding.ActivityAddEditReelBinding
@@ -13,8 +14,12 @@ import kotlinx.coroutines.launch
 class AddEditReelActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityAddEditReelBinding
-    private val repo = ReelRepository()
+    private val repo = ReelRepository(FirebaseDatabase.getInstance(DB_URL).reference)
     private var reelId: String? = null
+
+    companion object {
+        private const val DB_URL = "https://movies-bee24-default-rtdb.firebaseio.com"
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

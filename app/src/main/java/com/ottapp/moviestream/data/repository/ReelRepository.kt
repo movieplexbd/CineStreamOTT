@@ -2,7 +2,6 @@ package com.ottapp.moviestream.data.repository
 
 import android.util.Log
 import com.google.firebase.database.DatabaseReference
-import com.google.firebase.database.FirebaseDatabase
 import com.ottapp.moviestream.data.model.Reel
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
@@ -10,9 +9,7 @@ import javax.inject.Singleton
 
 @Singleton
 class ReelRepository @Inject constructor(
-    private val db: DatabaseReference = FirebaseDatabase
-        .getInstance("https://movies-bee24-default-rtdb.firebaseio.com")
-        .reference
+    private val db: DatabaseReference
 ) {
 
     companion object {
